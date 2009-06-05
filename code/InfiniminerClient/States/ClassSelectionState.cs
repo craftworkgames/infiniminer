@@ -18,7 +18,7 @@ namespace Infiniminer.States
 {
     public class ClassSelectionState : State
     {
-        Texture2D texMenuRed, texMenuBlue;
+        Texture2D texMenuA, texMenuB;
         Rectangle drawRect;
         string nextState = null;
 
@@ -33,8 +33,8 @@ namespace Infiniminer.States
         {
             _SM.IsMouseVisible = true;
 
-            texMenuRed = _SM.Content.Load<Texture2D>("menus/tex_menu_class_red");
-            texMenuBlue = _SM.Content.Load<Texture2D>("menus/tex_menu_class_blue");
+            texMenuA = _SM.Content.Load<Texture2D>("menus/tex_menu_class_A");
+            texMenuB = _SM.Content.Load<Texture2D>("menus/tex_menu_class_B");
 
             drawRect = new Rectangle(_SM.GraphicsDevice.Viewport.Width / 2 - 1024 / 2,
                                      _SM.GraphicsDevice.Viewport.Height / 2 - 768 / 2,
@@ -71,7 +71,7 @@ namespace Infiniminer.States
         {
             SpriteBatch spriteBatch = new SpriteBatch(graphicsDevice);
             spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Deferred, SaveStateMode.SaveState);
-            spriteBatch.Draw((_P.playerTeam == PlayerTeam.Red)?texMenuRed:texMenuBlue, drawRect, Color.White);
+            spriteBatch.Draw((_P.playerTeam == PlayerTeam.A)?texMenuA:texMenuB, drawRect, Color.White);
             spriteBatch.End();
         }
 

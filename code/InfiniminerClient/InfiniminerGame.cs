@@ -20,11 +20,238 @@ namespace Infiniminer
 {
     public class InfiniminerGame : StateMasher.StateMachine
     {
+        private const string config_filename = "marvulous_mod.client.config.txt";
+
+        private void configure()
+        {
+            bool fullscreen = false;
+            int width = 1024;
+            int height = 768;
+
+            DatafileLoader dataFile = new DatafileLoader(InfiniminerGame.configFilename());
+            try
+            {
+                configHelper.ushortTernaryConfig(ref _connectionPort, "networkport", dataFile, InfiniminerGame.connectionPort(), (ushort)(InfiniminerGame.connectionPort() + 100));
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.stringTernaryConfig(ref playerHandle, "handle", dataFile);
+            }
+            catch (Exception) { }
+            /*
+            try
+            {
+                configHelper.stringTernaryConfig(ref _teamNameA, "team_a", dataFile);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.colorTernaryConfig(ref _teamColorA, "color_a", dataFile);
+            }
+            catch (Exception) { }
+
+            try
+            {
+                configHelper.stringTernaryConfig(ref _teamNameB, "team_b", dataFile);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.colorTernaryConfig(ref _teamColorB, "color_b", dataFile);
+            }
+            catch (Exception) { }*/
+
+            try
+            {
+                configHelper.intTernaryConfig(ref width, "width", dataFile, minScreenWidth, maxScreenWidth);
+                graphicsDeviceManager.PreferredBackBufferWidth = width;
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.intTernaryConfig(ref height, "height", dataFile, minScreenHeight, maxScreenHeight);
+                graphicsDeviceManager.PreferredBackBufferHeight = height;
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.boolTernaryConfig(ref fullscreen, "fullscreen", dataFile);
+                graphicsDeviceManager.IsFullScreen = fullscreen;
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.boolTernaryConfig(ref RenderPretty, "pretty", dataFile);
+            }
+            catch (Exception) { }
+
+            try
+            {
+                configHelper.boolTernaryConfig(ref DrawFrameRate, "showfps", dataFile);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.boolTernaryConfig(ref InvertMouseYAxis, "yinvert", dataFile);
+            }
+            catch (Exception) { }
+
+            try
+            {
+                configHelper.floatTernaryConfig(ref volumeLevel, "volume", dataFile, 0, 1);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.boolTernaryConfig(ref noSong, "nosong", dataFile);
+            }
+            catch (Exception) { }
+            if (volumeLevel == 0.0) // no point in checking noSound if volumeLevel is already set to zero
+            {
+                NoSound = true;
+            }
+            else
+            {
+                try
+                {
+                    configHelper.boolTernaryConfig(ref NoSound, "nosound", dataFile);
+                }
+                catch (Exception) { }
+            }
+
+            // stuff previlously defined in MainGameState.cs
+            try
+            {
+                configHelper.floatTernaryConfig(ref MOVESPEED, "move", dataFile, minMOVESPEED, maxMOVESPEED);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.floatTernaryConfig(ref GRAVITY, "gravity", dataFile, minGRAVITY, maxGRAVITY);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.floatTernaryConfig(ref JUMPVELOCITY, "jump", dataFile, minJUMPVELOCITY, maxJUMPVELOCITY);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.floatTernaryConfig(ref CLIMBVELOCITY, "climb", dataFile, minCLIMBVELOCITY, maxCLIMBVELOCITY);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.floatTernaryConfig(ref DIEVELOCITY, "gosplat", dataFile, minDIEVELOCITY, maxDIEVELOCITY);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.stringTernaryConfig(ref SPLATMSG, "msg_splat", dataFile);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.stringTernaryConfig(ref LAVAMSG, "msg_lava", dataFile);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.stringTernaryConfig(ref SHOCKMSG, "msg_shock", dataFile);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.stringTernaryConfig(ref THEEARTHISFLAT, "msg_misadventure", dataFile);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.stringTernaryConfig(ref DONTBEATNTDICK, "msg_explosion", dataFile);
+            }
+            catch (Exception) { }
+        }
+
+        private static ushort _connectionPort = 5565;
+        public static ushort connectionPort()
+        {
+            return _connectionPort;
+        }
+
+        private const string song_filename = "song_title";
+        private static bool noSong = false;
+
+        private static string _teamNameA  = "RED";
+        private static Color _teamColorA = new Color(222, 24, 24);
+        private static Color _teamBloodA = Color.Red;
+
+        private static string _teamNameB = "BLUE";
+        private static Color _teamColorB = new Color(80, 150, 255);
+        private static Color _teamBloodB = Color.Blue;
+
+        public static string teamNameA()
+        {
+            return _teamNameA;
+        }
+        public static Color teamColorA()
+        {
+            return _teamColorA;
+        }
+        public static Color teamBloodA()
+        {
+            return _teamBloodA;
+        }
+
+        public static string teamNameB()
+        {
+            return _teamNameB;
+        }
+        public static Color teamColorB()
+        {
+            return _teamColorB;
+        }
+        public static Color teamBloodB()
+        {
+            return _teamBloodB;
+        }
+
+        public static float MOVESPEED = 3.5f;
+            private const float minMOVESPEED = 1.0f; // any slower and things are going to be too slow to be useful
+            private const float maxMOVESPEED = 50.0f; // any slower and things are going to be too slow to be useful
+
+        public static float GRAVITY = -8.0f;
+            private const float minGRAVITY = -20.0f;
+            private const float maxGRAVITY = -0.5f;
+
+        public static float JUMPVELOCITY = 4.0f;
+            private const float minJUMPVELOCITY = 0.5f;
+            private const float maxJUMPVELOCITY = 20f;
+
+        public static float CLIMBVELOCITY = 2.5f;
+            private const float minCLIMBVELOCITY = 0.5f;
+            private const float maxCLIMBVELOCITY = 20.0f;
+
+        public static float DIEVELOCITY = 15.0f;
+            private const float minDIEVELOCITY = 0.5f;
+            private const float maxDIEVELOCITY = 50.0f;
+
+        public static string SPLATMSG = "WAS KILLED BY GRAVITY!";
+        public static string LAVAMSG  = "WAS INCINERATED BY LAVA!";
+        public static string SHOCKMSG = "WAS ELECTROCUTED!";
+        public static string THEEARTHISFLAT = "WAS KILLED BY MISADVENTURE!";
+        public static string DONTBEATNTDICK = "WAS KILLED IN AN EXPLOSION!";
+
         double timeSinceLastUpdate = 0;
-        string playerHandle = "Player";
+        string playerHandle = "I NEED TO RENAME MYSELF";
         float volumeLevel = 1.0f;
         NetBuffer msgBuffer = null;
         Song songTitle = null;
+
+        private static int minScreenWidth  = 320;
+        private static int maxScreenWidth  = 1440;
+        private static int minScreenHeight = 240;
+        private static int maxScreenHeight = 1080;
 
         public bool RenderPretty = true;
         public bool DrawFrameRate = false;
@@ -33,11 +260,13 @@ namespace Infiniminer
 
         public const string INFINIMINER_VERSION = "v1.5";
         public const int GROUND_LEVEL = 8;
-        public static Color IM_BLUE = new Color(80, 150, 255);
-        public static Color IM_RED = new Color(222, 24, 24);
 
         public InfiniminerGame(string[] args)
         {
+        }
+        public static string configFilename()
+        {
+            return config_filename;
         }
 
         public static string Sanitize(string input)
@@ -74,7 +303,7 @@ namespace Infiniminer
             List<ServerInformation> serverList = new List<ServerInformation>();
             
             // Discover local servers.
-            propertyBag.netClient.DiscoverLocalServers(5565);
+            propertyBag.netClient.DiscoverLocalServers(InfiniminerGame.connectionPort());
             NetBuffer msgBuffer = propertyBag.netClient.CreateBuffer();
             NetMessageType msgType;
             float timeTaken = 0;
@@ -224,15 +453,15 @@ namespace Infiniminer
 
                                 case InfiniminerMessage.ResourceUpdate:
                                     {
-                                        // ore, cash, weight, max ore, max weight, team ore, red cash, blue cash, all uint
+                                        // ore, cash, weight, max ore, max weight, team ore, team A cash, team B cash, all uint
                                         propertyBag.playerOre = msgBuffer.ReadUInt32();
                                         propertyBag.playerCash = msgBuffer.ReadUInt32();
                                         propertyBag.playerWeight = msgBuffer.ReadUInt32();
                                         propertyBag.playerOreMax = msgBuffer.ReadUInt32();
                                         propertyBag.playerWeightMax = msgBuffer.ReadUInt32();
                                         propertyBag.teamOre = msgBuffer.ReadUInt32();
-                                        propertyBag.teamRedCash = msgBuffer.ReadUInt32();
-                                        propertyBag.teamBlueCash = msgBuffer.ReadUInt32();
+                                        propertyBag.teamACash = msgBuffer.ReadUInt32();
+                                        propertyBag.teamBCash = msgBuffer.ReadUInt32();
                                     }
                                     break;
 
@@ -271,7 +500,7 @@ namespace Infiniminer
                                         // Figure out what the effect is.
                                         float distFromExplosive = (blockPos + 0.5f * Vector3.One - propertyBag.playerPosition).Length();
                                         if (distFromExplosive < 3)
-                                            propertyBag.KillPlayer("WAS KILLED IN AN EXPLOSION!");
+                                            propertyBag.KillPlayer(InfiniminerGame.DONTBEATNTDICK);
                                         else if (distFromExplosive < 8)
                                         {
                                             // If we're not in explosion mode, turn it on with the minimum ammount of shakiness.
@@ -327,7 +556,7 @@ namespace Infiniminer
                                         {
                                             Player player = propertyBag.playerList[playerId];
                                             player.Alive = false;
-                                            propertyBag.particleEngine.CreateBloodSplatter(player.Position, player.Team == PlayerTeam.Red ? Color.Red : Color.Blue);
+                                            propertyBag.particleEngine.CreateBloodSplatter(player.Position, player.Team == PlayerTeam.A ? InfiniminerGame.teamBloodA() : InfiniminerGame.teamBloodB());
                                             if (playerId != propertyBag.playerMyId)
                                                 propertyBag.PlaySound(InfiniminerSound.Death, player.Position);
                                         }
@@ -403,6 +632,27 @@ namespace Infiniminer
                                             propertyBag.PlaySound(sound);
                                     }
                                     break;
+                                case InfiniminerMessage.TeamConfig:
+                                    {
+                                        PlayerTeam team = (PlayerTeam)msgBuffer.ReadByte();
+                                        string name = msgBuffer.ReadString();
+                                        Color teamColor = configHelper.string2Color(msgBuffer.ReadString());
+                                        Color bloodColor = configHelper.string2Color(msgBuffer.ReadString());
+                                        switch (team)
+                                        {
+                                            case PlayerTeam.A:
+                                                _teamNameA = name;
+                                                _teamColorA = teamColor;
+                                                _teamBloodA = bloodColor;
+                                            break;
+                                            case PlayerTeam.B:
+                                            _teamNameB = name;
+                                                _teamColorB = teamColor;
+                                                _teamBloodB = bloodColor;
+                                            break;
+                                        }
+                                    }
+                                 break;
                             }
                         }
                         break;
@@ -431,30 +681,9 @@ namespace Infiniminer
 
         protected override void Initialize()
         {
-            graphicsDeviceManager.IsFullScreen = false;
-            graphicsDeviceManager.PreferredBackBufferWidth = 1024;
-            graphicsDeviceManager.PreferredBackBufferHeight = 768;
             graphicsDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
 
-            DatafileLoader dataFile = new DatafileLoader("client.config.txt");
-            if (dataFile.Data.ContainsKey("width"))
-                graphicsDeviceManager.PreferredBackBufferWidth = int.Parse(dataFile.Data["width"], System.Globalization.CultureInfo.InvariantCulture);
-            if (dataFile.Data.ContainsKey("height"))
-                graphicsDeviceManager.PreferredBackBufferHeight = int.Parse(dataFile.Data["height"], System.Globalization.CultureInfo.InvariantCulture);
-            if (dataFile.Data.ContainsKey("fullscreen"))
-                graphicsDeviceManager.IsFullScreen = bool.Parse(dataFile.Data["fullscreen"]);
-            if (dataFile.Data.ContainsKey("handle"))
-                playerHandle = dataFile.Data["handle"];
-            if (dataFile.Data.ContainsKey("showfps"))
-                DrawFrameRate = bool.Parse(dataFile.Data["showfps"]);
-            if (dataFile.Data.ContainsKey("yinvert"))
-                InvertMouseYAxis = bool.Parse(dataFile.Data["yinvert"]);
-            if (dataFile.Data.ContainsKey("nosound"))
-                NoSound = bool.Parse(dataFile.Data["nosound"]);
-            if (dataFile.Data.ContainsKey("pretty"))
-                RenderPretty = bool.Parse(dataFile.Data["pretty"]);
-            if (dataFile.Data.ContainsKey("volume"))
-                volumeLevel = Math.Max(0,Math.Min(1,float.Parse(dataFile.Data["volume"], System.Globalization.CultureInfo.InvariantCulture)));
+            configure();
 
             graphicsDeviceManager.ApplyChanges();
             base.Initialize();
@@ -494,8 +723,11 @@ namespace Infiniminer
             // Play the title music.
             if (!NoSound)
             {
-                songTitle = Content.Load<Song>("song_title");
-                MediaPlayer.Play(songTitle);
+                songTitle = Content.Load<Song>(song_filename);
+                if (!noSong)
+                {
+                    MediaPlayer.Play(songTitle);
+                }
                 MediaPlayer.Volume = propertyBag.volumeLevel;
             }
         }

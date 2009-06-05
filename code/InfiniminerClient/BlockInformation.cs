@@ -17,18 +17,18 @@ namespace Infiniminer
         Explosive,
         Jump,
         Shock,
-        BankRed,
-        BankBlue,
-        BeaconRed,
-        BeaconBlue,
+        BankA,
+        BankB,
+        BeaconA,
+        BeaconB,
         Road,
-        SolidRed,
-        SolidBlue,
+        SolidA,
+        SolidB,
         Metal,
         DirtSign,
         Lava,
-        TransRed,
-        TransBlue,
+        TransA,
+        TransB,
         MAXIMUM
     }
 
@@ -46,32 +46,32 @@ namespace Infiniminer
         LadderTop,
         Explosive,
         Spikes,
-        HomeRed,
-        HomeBlue,
-        BankTopRed,
-        BankTopBlue,
-        BankFrontRed,
-        BankFrontBlue,
-        BankLeftRed,
-        BankLeftBlue,
-        BankRightRed,
-        BankRightBlue,
-        BankBackRed,
-        BankBackBlue,
+        HomeA,
+        HomeB,
+        BankTopA,
+        BankTopB,
+        BankFrontA,
+        BankFrontB,
+        BankLeftA,
+        BankLeftB,
+        BankRightA,
+        BankRightB,
+        BankBackA,
+        BankBackB,
         TeleTop,
         TeleBottom,
         TeleSideA,
         TeleSideB,
-        SolidRed,
-        SolidBlue,
+        SolidA,
+        SolidB,
         Metal,
         DirtSign,
         Lava,
         Road,
-        BeaconRed,
-        BeaconBlue,
-        TransRed,   // THESE MUST BE THE LAST TWO TEXTURES
-        TransBlue,
+        BeaconA,
+        BeaconB,
+        TransA,   // THESE MUST BE THE LAST TWO TEXTURES
+        TransB,
         MAXIMUM
     }
 
@@ -81,18 +81,18 @@ namespace Infiniminer
         {
             switch (blockType)
             {
-                case BlockType.BankRed:
-                case BlockType.BankBlue:
-                case BlockType.BeaconRed:
-                case BlockType.BeaconBlue:
+                case BlockType.BankA:
+                case BlockType.BankB:
+                case BlockType.BeaconA:
+                case BlockType.BeaconB:
                     return 50;
 
-                case BlockType.SolidRed:
-                case BlockType.SolidBlue:
+                case BlockType.SolidA:
+                case BlockType.SolidB:
                     return 10;
 
-                case BlockType.TransRed:
-                case BlockType.TransBlue:
+                case BlockType.TransA:
+                case BlockType.TransB:
                     return 25;
 
                 case BlockType.Road:
@@ -131,34 +131,34 @@ namespace Infiniminer
                 case BlockType.DirtSign:
                     return BlockTexture.DirtSign;
 
-                case BlockType.BankRed:
+                case BlockType.BankA:
                     switch (faceDir)
                     {
-                        case BlockFaceDirection.XIncreasing: return BlockTexture.BankFrontRed;
-                        case BlockFaceDirection.XDecreasing: return BlockTexture.BankBackRed;
-                        case BlockFaceDirection.ZIncreasing: return BlockTexture.BankLeftRed;
-                        case BlockFaceDirection.ZDecreasing: return BlockTexture.BankRightRed;
-                        default: return BlockTexture.BankTopRed;
+                        case BlockFaceDirection.XIncreasing: return BlockTexture.BankFrontA;
+                        case BlockFaceDirection.XDecreasing: return BlockTexture.BankBackA;
+                        case BlockFaceDirection.ZIncreasing: return BlockTexture.BankLeftA;
+                        case BlockFaceDirection.ZDecreasing: return BlockTexture.BankRightA;
+                        default: return BlockTexture.BankTopA;
                     }
 
-                case BlockType.BankBlue:
+                case BlockType.BankB:
                     switch (faceDir)
                     {
-                        case BlockFaceDirection.XIncreasing: return BlockTexture.BankFrontBlue;
-                        case BlockFaceDirection.XDecreasing: return BlockTexture.BankBackBlue;
-                        case BlockFaceDirection.ZIncreasing: return BlockTexture.BankLeftBlue;
-                        case BlockFaceDirection.ZDecreasing: return BlockTexture.BankRightBlue;
-                        default: return BlockTexture.BankTopBlue;
+                        case BlockFaceDirection.XIncreasing: return BlockTexture.BankFrontB;
+                        case BlockFaceDirection.XDecreasing: return BlockTexture.BankBackB;
+                        case BlockFaceDirection.ZIncreasing: return BlockTexture.BankLeftB;
+                        case BlockFaceDirection.ZDecreasing: return BlockTexture.BankRightB;
+                        default: return BlockTexture.BankTopB;
                     }
 
-                case BlockType.BeaconRed:
-                case BlockType.BeaconBlue:
+                case BlockType.BeaconA:
+                case BlockType.BeaconB:
                     switch (faceDir)
                     {
                         case BlockFaceDirection.YDecreasing:
                             return BlockTexture.LadderTop;
                         case BlockFaceDirection.YIncreasing:
-                            return blockType == BlockType.BeaconRed ? BlockTexture.BeaconRed : BlockTexture.BeaconBlue;
+                            return blockType == BlockType.BeaconA ? BlockTexture.BeaconA : BlockTexture.BeaconB;
                         case BlockFaceDirection.XDecreasing:
                         case BlockFaceDirection.XIncreasing:
                             return BlockTexture.TeleSideA;
@@ -203,14 +203,14 @@ namespace Infiniminer
                     }
                     break;
 
-                case BlockType.SolidRed:
-                    return BlockTexture.SolidRed;
-                case BlockType.SolidBlue:
-                    return BlockTexture.SolidBlue;
-                case BlockType.TransRed:
-                    return BlockTexture.TransRed;
-                case BlockType.TransBlue:
-                    return BlockTexture.TransBlue;
+                case BlockType.SolidA:
+                    return BlockTexture.SolidA;
+                case BlockType.SolidB:
+                    return BlockTexture.SolidB;
+                case BlockType.TransA:
+                    return BlockTexture.TransA;
+                case BlockType.TransB:
+                    return BlockTexture.TransB;
 
                 case BlockType.Ladder:
                     if (faceDir == BlockFaceDirection.YDecreasing || faceDir == BlockFaceDirection.YIncreasing)

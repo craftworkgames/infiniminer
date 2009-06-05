@@ -6,6 +6,7 @@ using System.Threading;
 using Lidgren.Network;
 using Lidgren.Network.Xna;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Infiniminer
 {
@@ -14,8 +15,144 @@ namespace Infiniminer
         InfiniminerNetServer netServer = null;
         BlockType[, ,] blockList = null;    // In game coordinates, where Y points up.
         PlayerTeam[, ,] blockCreatorTeam = null;
-        const int MAPSIZE = 64;
+        const ushort MAPSIZE = 64;
         Dictionary<NetConnection, Player> playerList = new Dictionary<NetConnection, Player>();
+
+        private const string config_filename = "marvulous_mod.server.config.txt";
+        private void configure()
+        {
+            // Read in from the config file.
+            DatafileLoader dataFile = new DatafileLoader(InfiniminerServer.configFilename());
+            try
+            {
+                configHelper.ushortTernaryConfig(ref _connectionPort, "networkport", dataFile, InfiniminerGame.connectionPort(), (ushort)(InfiniminerGame.connectionPort() + 100));
+            }
+            catch (Exception) { }
+            ConsoleWrite("NETWORK PORT: " + InfiniminerServer.connectionPort().ToString());
+            try
+            {
+                configHelper.boolTernaryConfig(ref autosave, "autosave", dataFile);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.uintTernaryConfig(ref winningCashAmount, "winningcash", dataFile, 100, 999999999);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.ushortTernaryConfig(ref _lavaMax, "lava", dataFile, 0, MAPSIZE);
+            }
+            catch (Exception)
+            {
+                _lavaMax = (ushort)(MAPSIZE / 2.0);
+            }
+            try
+            {
+                configHelper.ushortTernaryConfig(ref _lavaFlows, "lavaflows", dataFile, 0, 32);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.ushortTernaryConfig(ref lavaGenLoops, "lavagenloops", dataFile, 1, MAPSIZE);
+            }
+            catch (Exception) { }
+            includeLava = _lavaMax > 0;
+            try
+            {
+                configHelper.uintTernaryConfig(ref oreFactor, "orefactor", dataFile, 0, 999999999);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.uintTernaryConfig(ref maxPlayers, "maxplayers", dataFile, 1, 64);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.boolTernaryConfig(ref sandboxMode, "sandbox", dataFile);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.stringTernaryConfig(ref serverName, "servername", dataFile);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.stringTernaryConfig(ref publicServerList, "public", dataFile);
+            }
+            catch (Exception) { }
+            //          automatically configuring whether the server is public based on the presence of the publicserver string
+            //            configHelper.boolTernaryConfig(ref publicServer, "public", dataFile);
+            try
+            {
+                publicServer = bool.Parse(publicServerList);
+            }
+            catch (FormatException)
+            {
+                publicServer = publicServerList != "";
+            }
+            if (publicServer)
+            {
+                ConsoleWrite("PUBLIC LIST: " + publicServerList);
+            }
+            else
+            {
+                ConsoleWrite("PUBLIC LIST: SERVER IS PRIVATE");
+            }
+            try
+            {
+                configHelper.stringTernaryConfig(ref banListFile, "banlist", dataFile);
+            }
+            catch (Exception) { }
+            loadMapOnStart = "";
+            try
+            {
+                configHelper.stringTernaryConfig(ref loadMapOnStart, "map", dataFile);
+            }
+            catch (Exception)
+            {
+                ConsoleWrite("ERROR: Could not load starting map");
+            }
+            try
+            {
+                configHelper.stringTernaryConfig(ref _teamNameA, "team_a", dataFile);
+            }
+            catch (Exception) {
+                _teamNameA = "RED";
+            }
+            try
+            {
+                configHelper.colorTernaryConfig(ref _teamColorA, "color_a", dataFile);
+            }
+            catch (Exception) {
+                _teamColorA = new Color(222, 24, 24);
+            }
+
+            try
+            {
+                configHelper.stringTernaryConfig(ref _teamNameB, "team_b", dataFile);
+            }
+            catch (Exception) {
+                _teamNameB = "BLUE";
+            }
+            try
+            {
+                configHelper.colorTernaryConfig(ref _teamColorB, "color_b", dataFile);
+            }
+            catch (Exception)
+            {
+                _teamColorB = new Color(80, 150, 255);
+            }
+        }
+
+        private static ushort _connectionPort = InfiniminerGame.connectionPort();
+        public static ushort connectionPort()
+        {
+            return _connectionPort;
+        }
+        bool autosave = true;
         int lavaBlockCount = 0;
         uint oreFactor = 10;
         bool publicServer = false;
@@ -23,7 +160,15 @@ namespace Infiniminer
         string serverName = "Unnamed Server";
         bool sandboxMode = false;
         bool includeLava = true;
+        private static ushort _lavaFlows = 0;
+        private static ushort _lavaMax;
+        ushort lavaGenLoops = 2;
+        private static string publicServerList = "http://apps.keithholman.net/post";
+        private static string loadMapOnStart = "";
+
         DateTime lastServerListUpdate = DateTime.Now;
+
+        private static string banListFile = "banlist.txt";
         List<string> banList = null;
 
         const int CONSOLE_SIZE = 30;
@@ -32,10 +177,43 @@ namespace Infiniminer
 
         bool keepRunning = true;
 
-        uint teamCashRed = 0;
-        uint teamCashBlue = 0;
-        uint teamOreRed = 0;
-        uint teamOreBlue = 0;
+        private static string _teamNameA = "RED";
+        private static Color _teamColorA = new Color(222, 24, 24);
+        private static Color _teamBloodA = Color.Red;
+        uint teamCashA = 0;
+        uint teamOreA = 0;
+
+        private static string _teamNameB = "BLUE";
+        private static Color _teamColorB = new Color(80, 150, 255);
+        private static Color _teamBloodB = Color.Blue;
+        uint teamCashB = 0;
+        uint teamOreB = 0;
+
+        public static string teamNameA()
+        {
+            return _teamNameA;
+        }
+        public static Color teamColorA()
+        {
+            return _teamColorA;
+        }
+        public static Color teamBloodA()
+        {
+            return _teamBloodA;
+        }
+
+        public static string teamNameB()
+        {
+            return _teamNameB;
+        }
+        public static Color teamColorB()
+        {
+            return _teamColorB;
+        }
+        public static Color teamBloodB()
+        {
+            return _teamBloodB;
+        }
 
         uint winningCashAmount = 10000;
         PlayerTeam winningTeam = PlayerTeam.None;
@@ -49,6 +227,18 @@ namespace Infiniminer
             Console.SetWindowSize(1, 1);
             Console.SetBufferSize(80, CONSOLE_SIZE + 4);
             Console.SetWindowSize(80, CONSOLE_SIZE + 4);
+        }
+        public static string configFilename()
+        {
+            return config_filename;
+        }
+        public static ushort lavaFlows()
+        {
+            return _lavaFlows;
+        }
+        public static ushort lavaMax()
+        {
+            return (ushort)Math.Abs((MAPSIZE - _lavaMax));
         }
 
         public string GetExtraInfo()
@@ -66,7 +256,9 @@ namespace Infiniminer
         public void PublicServerListUpdate()
         {
             if (!publicServer)
+            {
                 return;
+            }
 
             Dictionary<string, string> postDict = new Dictionary<string, string>();
             postDict["name"] = serverName;
@@ -77,7 +269,7 @@ namespace Infiniminer
 
             try
             {
-                HttpRequest.Post("http://apps.keithholman.net/post", postDict);
+                HttpRequest.Post(publicServerList, postDict);
                 ConsoleWrite("PUBLICLIST: UPDATING SERVER LISTING");
             }
             catch (Exception)
@@ -102,7 +294,7 @@ namespace Infiniminer
 
             try
             {
-                FileStream file = new FileStream("banlist.txt", FileMode.Open, FileAccess.Read);
+                FileStream file = new FileStream(banListFile, FileMode.Open, FileAccess.Read);
                 StreamReader sr = new StreamReader(file);
                 string line = sr.ReadLine();
                 while (line != null)
@@ -113,8 +305,13 @@ namespace Infiniminer
                 sr.Close();
                 file.Close();
             }
+            catch (FileNotFoundException)
+            {
+                SaveBanList(new List<string>());
+            }
             catch (Exception e)
             {
+                ConsoleWrite("ERROR: Could not load banlist!:" + e.ToString());
             }
 
             return retList;
@@ -124,7 +321,7 @@ namespace Infiniminer
         {
             try
             {
-                FileStream file = new FileStream("banlist.txt", FileMode.Create, FileAccess.Write);
+                FileStream file = new FileStream(banListFile, FileMode.Create, FileAccess.Write);
                 StreamWriter sw = new StreamWriter(file);
                 foreach (string ip in banList)
                     sw.WriteLine(ip);
@@ -133,6 +330,7 @@ namespace Infiniminer
             }
             catch (Exception e)
             {
+                ConsoleWrite("ERROR: Could not save ban list! :" + e.ToString());
             }
         }
 
@@ -187,9 +385,9 @@ namespace Infiniminer
                         foreach (Player p in playerList.Values)
                         {
                             string teamIdent = "";
-                            if (p.Team == PlayerTeam.Red)
+                            if (p.Team == PlayerTeam.A)
                                 teamIdent = " (R)";
-                            else if (p.Team == PlayerTeam.Blue)
+                            else if (p.Team == PlayerTeam.B)
                                 teamIdent = " (B)";
                             ConsoleWrite(p.Handle + teamIdent + " - " + p.IP);
                         }
@@ -250,29 +448,7 @@ namespace Infiniminer
                     {
                         if (args.Length >= 2)
                         {
-                            try
-                            {
-                                FileStream fs = new FileStream(args[1], FileMode.Open);
-                                StreamReader sr = new StreamReader(fs);
-                                for (int x = 0; x < 64; x++)
-                                    for (int y = 0; y < 64; y++)
-                                        for (int z = 0; z < 64; z++)
-                                        {
-                                            string line = sr.ReadLine();
-                                            string[] fileArgs = line.Split(",".ToCharArray());
-                                            if (fileArgs.Length == 2)
-                                            {
-                                                blockList[x, y, z] = (BlockType)int.Parse(fileArgs[0], System.Globalization.CultureInfo.InvariantCulture);
-                                                blockCreatorTeam[x, y, z] = (PlayerTeam)int.Parse(fileArgs[1], System.Globalization.CultureInfo.InvariantCulture);
-                                            }
-                                        }
-                                sr.Close();
-                                fs.Close();
-                            }
-                            catch (FileNotFoundException e)
-                            {
-                                ConsoleWrite("ERROR: File not found!");
-                            }
+                            LoadLevel(args[1]);
                         }
                     }
                     break;
@@ -280,6 +456,43 @@ namespace Infiniminer
 
             consoleInput = "";
             ConsoleRedraw();
+        }
+
+        public void LoadLevel(string filename)
+        {
+            ConsoleWrite("LOADING MAP: " + filename);
+            try
+            {
+                FileStream fs = new FileStream(filename, FileMode.Open);
+                StreamReader sr = new StreamReader(fs);
+                while (sr.Peek() == 35)
+                {
+                    ConsoleWrite(sr.ReadLine());
+                }
+                for (int x = 0; x < 64; x++)
+                    for (int y = 0; y < 64; y++)
+                        for (int z = 0; z < 64; z++)
+                        {
+                            string line = sr.ReadLine();
+                            string[] fileArgs = line.Split(",".ToCharArray());
+                            if (fileArgs.Length == 2)
+                            {
+                                blockList[x, y, z] = (BlockType)int.Parse(fileArgs[0], System.Globalization.CultureInfo.InvariantCulture);
+                                blockCreatorTeam[x, y, z] = (PlayerTeam)int.Parse(fileArgs[1], System.Globalization.CultureInfo.InvariantCulture);
+                            }
+                        }
+                sr.Close();
+                fs.Close();
+            }
+            catch (FileNotFoundException e)
+            {
+                ConsoleWrite("ERROR: map file missing!:\n" + e.ToString());
+            }
+            catch (Exception e)
+            {
+                ConsoleWrite("ERROR: Could not load map file! :" + e.ToString());
+            }
+            ConsoleWrite("DONE LOADING MAP");
         }
 
         public void SaveLevel(string filename)
@@ -293,11 +506,22 @@ namespace Infiniminer
             sw.Close();
             fs.Close();
         }
+        public void AutoSave()
+        {
+            string fileName =
+                DateTime.Now.Year.ToString() + "-" +
+                DateTime.Now.Month.ToString().PadLeft(2, '0') + "-" +
+                DateTime.Now.Day.ToString().PadLeft(2, '0') + "_" +
+                DateTime.Now.Hour.ToString().PadLeft(2, '0') + "-" +
+                DateTime.Now.Minute.ToString().PadLeft(2, '0') + "-" +
+                DateTime.Now.Second.ToString().PadLeft(2, '0') + ".lvl";
+            SaveLevel("maps/autosave_" + fileName);
+        }
 
         public void ConsoleRedraw()
         {
             Console.Clear();
-            ConsoleDrawCentered("INFINIMINER SERVER " + InfiniminerGame.INFINIMINER_VERSION, 0);
+            ConsoleDrawCentered("INFINIMINER SERVER (Marvulous Mod) " + InfiniminerGame.INFINIMINER_VERSION, 0);
             ConsoleDraw("================================================================================", 0, 1);
             for (int i = 0; i < consoleText.Count; i++)
                 ConsoleDraw(consoleText[i], 0, i + 2);
@@ -338,19 +562,19 @@ namespace Infiniminer
 
         public void SetBlock(ushort x, ushort y, ushort z, BlockType blockType, PlayerTeam team)
         {
-            if (x <= 0 || y <= 0 || z <= 0 || x >= MAPSIZE - 1 || y >= MAPSIZE - 1 || z >= MAPSIZE - 1)
+            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(MAPSIZE) >= 0 || (y + 1).CompareTo(MAPSIZE) >= 0 || (z + 1).CompareTo(MAPSIZE) >= 0)
                 return;
 
-            if (blockType == BlockType.BeaconRed || blockType == BlockType.BeaconBlue)
+            if (blockType == BlockType.BeaconA || blockType == BlockType.BeaconB)
             {
                 Beacon newBeacon = new Beacon();
                 newBeacon.ID = GenerateBeaconID();
-                newBeacon.Team = blockType == BlockType.BeaconRed ? PlayerTeam.Red : PlayerTeam.Blue;
+                newBeacon.Team = blockType == BlockType.BeaconA ? PlayerTeam.A : PlayerTeam.B;
                 beaconList[new Vector3(x, y, z)] = newBeacon;
                 SendSetBeacon(new Vector3(x, y+1, z), newBeacon.ID, newBeacon.Team);
             }
 
-            if (blockType == BlockType.None && (blockList[x, y, z] == BlockType.BeaconRed || blockList[x, y, z] == BlockType.BeaconBlue))
+            if (blockType == BlockType.None && (blockList[x, y, z] == BlockType.BeaconA || blockList[x, y, z] == BlockType.BeaconB))
             {
                 if (beaconList.ContainsKey(new Vector3(x,y,z)))
                     beaconList.Remove(new Vector3(x,y,z));
@@ -376,51 +600,55 @@ namespace Infiniminer
             
             //ConsoleWrite("BLOCKSET: " + x + " " + y + " " + z + " " + blockType.ToString());
         }
-
         public bool Start()
         {
-            // Read in from the config file.
-            DatafileLoader dataFile = new DatafileLoader("server.config.txt");
-            if (dataFile.Data.ContainsKey("winningcash"))
-                winningCashAmount = uint.Parse(dataFile.Data["winningcash"], System.Globalization.CultureInfo.InvariantCulture);
-            if (dataFile.Data.ContainsKey("includelava"))
-                includeLava = bool.Parse(dataFile.Data["includelava"]);
-            if (dataFile.Data.ContainsKey("orefactor"))
-                oreFactor = uint.Parse(dataFile.Data["orefactor"], System.Globalization.CultureInfo.InvariantCulture);
-            if (dataFile.Data.ContainsKey("maxplayers"))
-                maxPlayers = Math.Min(32, uint.Parse(dataFile.Data["maxplayers"], System.Globalization.CultureInfo.InvariantCulture));
-            if (dataFile.Data.ContainsKey("public"))
-                publicServer = bool.Parse(dataFile.Data["public"]);
-            if (dataFile.Data.ContainsKey("servername"))
-                serverName = dataFile.Data["servername"];
-            if (dataFile.Data.ContainsKey("sandbox"))
-                sandboxMode = bool.Parse(dataFile.Data["sandbox"]);
-
+            configure();
             // Load the ban-list.
             banList = LoadBanList();
-
-            // Create our block world, translating the coordinates out of the cave generator (where Z points down)
-            BlockType[, ,] worldData = CaveGenerator.GenerateCaveSystem(MAPSIZE, includeLava, oreFactor);
+            bool makeNewMap = (loadMapOnStart == "");
             blockList = new BlockType[MAPSIZE, MAPSIZE, MAPSIZE];
             blockCreatorTeam = new PlayerTeam[MAPSIZE, MAPSIZE, MAPSIZE];
-            for (ushort i = 0; i < MAPSIZE; i++)
-                for (ushort j = 0; j < MAPSIZE; j++)
-                    for (ushort k = 0; k < MAPSIZE; k++)
+            if (makeNewMap == false)
+            {
+                try
+                {
+                    LoadLevel(loadMapOnStart);
+                }
+                catch (FileNotFoundException)
+                {
+                    ConsoleWrite("ERROR: Starting map could not be found, generating random level");
+                    makeNewMap = true;
+                }
+            }
+            if (makeNewMap)
+            {
+                ConsoleWrite("MAKING NEW MAP");
+                // Create our block world, translating the coordinates out of the cave generator (where Z points down)
+                BlockType[, ,] worldData = CaveGenerator.GenerateCaveSystem(MAPSIZE, includeLava, oreFactor);
+                for (ushort x = 0; x < MAPSIZE; x++)
+                {
+                    for (ushort y = 0; y < MAPSIZE; y++)
                     {
-                        blockList[i, (ushort)(MAPSIZE - 1 - k), j] = worldData[i, j, k];
-                        blockCreatorTeam[i, j, k] = PlayerTeam.None;
+                        for (ushort z = 0; z < MAPSIZE; z++)
+                        {
+                            blockList[x, (ushort)(MAPSIZE - 1 - z), y] = worldData[x, y, z];
+                            blockCreatorTeam[x, y, z] = PlayerTeam.None;
+                        }
                     }
+                }
+            }
 
             // Initialize the server.
             NetConfiguration netConfig = new NetConfiguration("InfiniminerPlus");
             netConfig.MaxConnections = (int)maxPlayers;
-            netConfig.Port = 5565;
+            netConfig.Port = InfiniminerServer.connectionPort();
             netServer = new InfiniminerNetServer(netConfig);
             netServer.SetMessageTypeEnabled(NetMessageType.ConnectionApproval, true);
             //netServer.SimulatedMinimumLatency = 0.1f;
             //netServer.SimulatedLatencyVariance = 0.05f;
             //netServer.SimulatedLoss = 0.1f;
             //netServer.SimulatedDuplicates = 0.05f;
+            ConsoleWrite("TEAMS: " + teamNameA() + " vs. " + teamNameB());
             netServer.Start();
 
             // Initialize variables we'll use.
@@ -432,10 +660,19 @@ namespace Infiniminer
             DateTime lastFlowCalc = DateTime.Now;
 
             // Calculate initial lava flows.
-            ConsoleWrite("CALCULATING INITIAL LAVA FLOWS");
-            for (int i=0; i<MAPSIZE*2; i++)
-                DoLavaStuff();
-            ConsoleWrite("TOTAL LAVA BLOCKS = " + lavaBlockCount);
+            if (includeLava)
+            {
+                ConsoleWrite("CALCULATING INITIAL LAVA FLOWS");
+                for (ushort i = 0; i < MAPSIZE * lavaGenLoops; i++)
+                {
+                    DoLavaStuff();
+                }
+                ConsoleWrite("TOTAL LAVA BLOCKS = " + lavaBlockCount);
+            }
+            else
+            {
+                ConsoleWrite("LAVA IS DISABLED");
+            }
 
             // Send the initial server list update.
             PublicServerListUpdate();
@@ -489,6 +726,7 @@ namespace Infiniminer
                                 {
                                     ConsoleWrite("CONNECT: " + playerList[msgSender].Handle);
                                     SendCurrentMap(msgSender);
+                                    SendTeamConfig(msgSender);
                                     SendPlayerJoined(player);
                                     PublicServerListUpdate();
                                 }
@@ -531,15 +769,15 @@ namespace Infiniminer
                                             // Construct the message packet.
                                             NetBuffer chatPacket = netServer.CreateBuffer();
                                             chatPacket.Write((byte)InfiniminerMessage.ChatMessage);
-                                            chatPacket.Write((byte)((player.Team == PlayerTeam.Red) ? ChatMessageType.SayRedTeam : ChatMessageType.SayBlueTeam));
+                                            chatPacket.Write((byte)((player.Team == PlayerTeam.A) ? ChatMessageType.SayTeamA : ChatMessageType.SayTeamB));
                                             chatPacket.Write(chatString);
 
                                             // Send the packet to people who should recieve it.
                                             foreach (Player p in playerList.Values)
                                             {
                                                 if (chatType == ChatMessageType.SayAll ||
-                                                    chatType == ChatMessageType.SayBlueTeam && p.Team == PlayerTeam.Blue ||
-                                                    chatType == ChatMessageType.SayRedTeam && p.Team == PlayerTeam.Red)
+                                                    chatType == ChatMessageType.SayTeamB && p.Team == PlayerTeam.B ||
+                                                    chatType == ChatMessageType.SayTeamA && p.Team == PlayerTeam.A)
                                                     if (p.NetConn.Status == NetConnectionStatus.Connected)
                                                         netServer.SendMessage(chatPacket, p.NetConn, NetChannel.ReliableInOrder3);
                                             }
@@ -625,7 +863,7 @@ namespace Infiniminer
                                             {
                                                 msgBuffer = netServer.CreateBuffer();
                                                 msgBuffer.Write((byte)InfiniminerMessage.ChatMessage);
-                                                msgBuffer.Write((byte)(player.Team == PlayerTeam.Red ? ChatMessageType.SayRedTeam : ChatMessageType.SayBlueTeam));
+                                                msgBuffer.Write((byte)(player.Team == PlayerTeam.A ? ChatMessageType.SayTeamA : ChatMessageType.SayTeamB));
                                                 msgBuffer.Write(player.Handle + " " + deathMessage);
                                                 foreach (NetConnection netConn in playerList.Keys)
                                                     if (netConn.Status == NetConnectionStatus.Connected)
@@ -691,10 +929,16 @@ namespace Infiniminer
                     }
                 }
 
-                // Time to send a new server update?
-                TimeSpan updateTimeSpan = DateTime.Now - lastServerListUpdate;
-                if (updateTimeSpan.TotalMinutes > 5)
-                    PublicServerListUpdate();
+                // Don't bother running check if server isn't public
+                if (publicServer)
+                {
+                    // Time to send a new server update?
+                    TimeSpan updateTimeSpan = DateTime.Now - lastServerListUpdate;
+                    if (updateTimeSpan.TotalMinutes > 5)
+                    {
+                        PublicServerListUpdate();
+                    }
+                }
 
                 // Check for players who are in the zone to deposit.
                 DepositForPlayers();
@@ -737,7 +981,10 @@ namespace Infiniminer
                 // Restart the server?
                 if (restartTriggered && DateTime.Now > restartTime)
                 {
-                    SaveLevel("autosave_" + (UInt64)DateTime.Now.ToBinary() + ".lvl");
+                    if (autosave)
+                    {
+                        AutoSave();
+                    }
                     netServer.Shutdown("The server is restarting.");
                     return true;
                 }
@@ -760,70 +1007,76 @@ namespace Infiniminer
 
             if (sandboxMode)
                 return;
-            if (teamCashBlue >= winningCashAmount && winningTeam == PlayerTeam.None)
-                winningTeam = PlayerTeam.Blue;
-            if (teamCashRed >= winningCashAmount && winningTeam == PlayerTeam.None)
-                winningTeam = PlayerTeam.Red;
+            if (teamCashB >= winningCashAmount && winningTeam == PlayerTeam.None)
+                winningTeam = PlayerTeam.B;
+            if (teamCashA >= winningCashAmount && winningTeam == PlayerTeam.None)
+                winningTeam = PlayerTeam.A;
         }
 
         public void DoLavaStuff()
         {
             bool[, ,] flowSleep = new bool[MAPSIZE, MAPSIZE, MAPSIZE]; //if true, do not calculate this turn
 
-            for (ushort i = 0; i < MAPSIZE; i++)
-                for (ushort j = 0; j < MAPSIZE; j++)
-                    for (ushort k = 0; k < MAPSIZE; k++)
-                        flowSleep[i, j, k] = false;
+            for (ushort x = 0; x < MAPSIZE; x++)
+                for (ushort y = 0; y < MAPSIZE; y++)
+                    for (ushort z = 0; z < MAPSIZE; z++)
+                        flowSleep[x, y, z] = false;
 
-            for (ushort i = 0; i < MAPSIZE; i++)
-                for (ushort j = 0; j < MAPSIZE; j++)
-                    for (ushort k = 0; k < MAPSIZE; k++)
-                        if (blockList[i, j, k] == BlockType.Lava && !flowSleep[i, j, k])
+            for (ushort x = 0; x < MAPSIZE; x++)
+            {
+                for (ushort y = 0; y < MAPSIZE; y++)
+                {
+                    for (ushort z = 0; z < MAPSIZE; z++)
+                    {
+                        if (blockList[x, y, z] == BlockType.Lava && !flowSleep[x, y, z])
                         {
                             // RULES FOR LAVA EXPANSION:
                             // if the block below is lava, do nothing
                             // if the block below is empty space, add lava there
                             // if the block below is something solid, add lava to the sides
-                            BlockType typeBelow = (j == 0) ? BlockType.Lava : blockList[i, j - 1, k];
+                            BlockType typeBelow = (y == 0) ? BlockType.Lava : blockList[x, y - 1, z];
                             if (typeBelow == BlockType.None)
                             {
-                                if (j > 0)
+                                if (y > 0)
                                 {
-                                    SetBlock(i, (ushort)(j - 1), k, BlockType.Lava, PlayerTeam.None);
-                                    flowSleep[i, j - 1, k] = true;
+                                    SetBlock(x, (ushort)(y - 1), z, BlockType.Lava, PlayerTeam.None);
+                                    flowSleep[x, y - 1, z] = true;
                                 }
                             }
                             else if (typeBelow != BlockType.Lava)
                             {
-                                if (i > 0 && blockList[i-1, j, k] == BlockType.None)
+                                if (x > 0 && blockList[x - 1, y, z] == BlockType.None)
                                 {
-                                    SetBlock((ushort)(i - 1), j, k, BlockType.Lava, PlayerTeam.None);
-                                    flowSleep[i - 1, j, k] = true;
+                                    SetBlock((ushort)(x - 1), y, z, BlockType.Lava, PlayerTeam.None);
+                                    flowSleep[x - 1, y, z] = true;
                                 }
-                                if (k > 0 && blockList[i, j, k-1] == BlockType.None)
+                                if (z > 0 && blockList[x, y, z - 1] == BlockType.None)
                                 {
-                                    SetBlock(i, j, (ushort)(k - 1), BlockType.Lava, PlayerTeam.None);
-                                    flowSleep[i, j, k - 1] = true;
+                                    SetBlock(x, y, (ushort)(z - 1), BlockType.Lava, PlayerTeam.None);
+                                    flowSleep[x, y, z - 1] = true;
                                 }
-                                if (i < MAPSIZE - 1 && blockList[i + 1, j, k] == BlockType.None)
+                                if ((x + 1).CompareTo(MAPSIZE) < 0 && blockList[x + 1, y, z] == BlockType.None)
                                 {
-                                    SetBlock((ushort)(i + 1), j, k, BlockType.Lava, PlayerTeam.None);
-                                    flowSleep[i + 1, j, k] = true;
+                                    SetBlock((ushort)(x + 1), y, z, BlockType.Lava, PlayerTeam.None);
+                                    flowSleep[x + 1, y, z] = true;
                                 }
-                                if (k < MAPSIZE - 1 && blockList[i, j, k+1] == BlockType.None)
+                                if ((z + 1).CompareTo(MAPSIZE) < 0 && blockList[x, y, z + 1] == BlockType.None)
                                 {
-                                    SetBlock(i, j, (ushort)(k + 1), BlockType.Lava, PlayerTeam.None);
-                                    flowSleep[i, j, k + 1] = true;
+                                    SetBlock(x, y, (ushort)(z + 1), BlockType.Lava, PlayerTeam.None);
+                                    flowSleep[x, y, z + 1] = true;
                                 }
                             }
                         }
+                    }
+                }
+            }
         }
 
         public BlockType BlockAtPoint(Vector3 point)
         {
-            ushort x = (ushort)point.X;
-            ushort y = (ushort)point.Y;
-            ushort z = (ushort)point.Z;
+            short x = (short)point.X;
+            short y = (short)point.Y;
+            short z = (short)point.Z;
             if (x <= 0 || y <= 0 || z <= 0 || x >= MAPSIZE - 1 || y >= MAPSIZE - 1 || z >= MAPSIZE - 1)
                 return BlockType.None;
             return blockList[x, y, z];
@@ -930,7 +1183,7 @@ namespace Infiniminer
         //    for (int i=0; i<MAPSIZE; i++)
         //        for (int j=0; j<MAPSIZE; j++)
         //            for (int k = 0; k < MAPSIZE; k++)
-        //                if (blockList[i, j, k] == BlockType.HomeBlue || blockList[i, j, k] == BlockType.HomeRed)
+        //                if (blockList[i, j, k] == BlockType.HomeB || blockList[i, j, k] == BlockType.HomeA)
         //                {
         //                    double dist = Math.Sqrt(Math.Pow(x - i, 2) + Math.Pow(y - j, 2) + Math.Pow(z - k, 2));
         //                    if (dist < 3)
@@ -967,7 +1220,7 @@ namespace Infiniminer
             }
 
             // If it's out of bounds, bail.
-            if (x <= 0 || y <= 0 || z <= 0 || x >= MAPSIZE - 1 || y >= MAPSIZE - 1 || z >= MAPSIZE - 1)
+            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(MAPSIZE) >= 0 || (y + 1).CompareTo(MAPSIZE) >= 0 || (z + 1).CompareTo(MAPSIZE) >= 0)
                 actionFailed = true;
 
             // If it's near a base, bail.
@@ -1020,18 +1273,18 @@ namespace Infiniminer
                 actionFailed = true;
 
             BlockType blockType = blockList[x, y, z];
-            if (!(blockType == BlockType.SolidBlue ||
-                blockType == BlockType.SolidRed ||
-                blockType == BlockType.BankBlue ||
-                blockType == BlockType.BankRed ||
+            if (!(blockType == BlockType.SolidB ||
+                blockType == BlockType.SolidA ||
+                blockType == BlockType.BankB ||
+                blockType == BlockType.BankA ||
                 blockType == BlockType.Jump ||
                 blockType == BlockType.Ladder ||
                 blockType == BlockType.Road ||
                 blockType == BlockType.Shock ||
-                blockType == BlockType.BeaconRed ||
-                blockType == BlockType.BeaconBlue ||
-                blockType == BlockType.TransBlue ||
-                blockType == BlockType.TransRed))
+                blockType == BlockType.BeaconA ||
+                blockType == BlockType.BeaconB ||
+                blockType == BlockType.TransB ||
+                blockType == BlockType.TransA))
                 actionFailed = true;
 
             if (actionFailed)
@@ -1055,7 +1308,7 @@ namespace Infiniminer
             if (player.NetConn.Status != NetConnectionStatus.Connected)
                 return;
 
-            // ore, cash, weight, max ore, max weight, team ore, red cash, blue cash, all uint
+            // ore, cash, weight, max ore, max weight, team ore, team A cash, team B cash, all uint
             NetBuffer msgBuffer = netServer.CreateBuffer();
             msgBuffer.Write((byte)InfiniminerMessage.TriggerConstructionGunAnimation);
             msgBuffer.Write(animationValue);
@@ -1085,19 +1338,19 @@ namespace Infiniminer
             }
         }
 
-        public void DetonateAtPoint(int x, int y, int z)
+        public void DetonateAtPoint(ushort x, ushort y, ushort z)
         {
             // Remove the block that is detonating.
-            SetBlock((ushort)(x), (ushort)(y), (ushort)(z), BlockType.None, PlayerTeam.None);
+            SetBlock(x, y, z, BlockType.None, PlayerTeam.None);
 
             // Remove this from any explosive lists it may be in.
             foreach (Player p in playerList.Values)
                 p.ExplosiveList.Remove(new Vector3(x, y, z));
 
             // Detonate the block.
-            for (int dx = -2; dx <= 2; dx++)
-                for (int dy = -2; dy <= 2; dy++)
-                    for (int dz = -2; dz <= 2; dz++)
+            for (short dx = -2; dx <= 2; dx++)
+                for (short dy = -2; dy <= 2; dy++)
+                    for (short dz = -2; dz <= 2; dz++)
                     {
                         // Check that this is a sane block position.
                         if (x + dx <= 0 || y + dy <= 0 || z + dz <= 0 || x + dx >= MAPSIZE - 1 || y + dy >= MAPSIZE - 1 || z + dz >= MAPSIZE - 1)
@@ -1105,7 +1358,7 @@ namespace Infiniminer
 
                         // Chain reactions!
                         if (blockList[x + dx, y + dy, z + dz] == BlockType.Explosive)
-                            DetonateAtPoint(x + dx, y + dy, z + dz);
+                            DetonateAtPoint((ushort)(x + dx), (ushort)(y + dy), (ushort)(z + dz));
 
                         // Detonation of normal blocks.
                         bool destroyBlock = false;
@@ -1115,10 +1368,10 @@ namespace Infiniminer
                             case BlockType.Dirt:
                             case BlockType.DirtSign:
                             case BlockType.Ore:
-                            case BlockType.SolidRed:
-                            case BlockType.SolidBlue:
-                            case BlockType.TransRed:
-                            case BlockType.TransBlue:
+                            case BlockType.SolidA:
+                            case BlockType.SolidB:
+                            case BlockType.TransA:
+                            case BlockType.TransB:
                             case BlockType.Ladder:
                             case BlockType.Shock:
                             case BlockType.Jump:
@@ -1161,25 +1414,25 @@ namespace Infiniminer
         {
             uint depositAmount = Math.Min(50, player.Ore);
             player.Ore -= depositAmount;
-            if (player.Team == PlayerTeam.Red)
-                teamOreRed = Math.Min(teamOreRed + depositAmount, 9999);
+            if (player.Team == PlayerTeam.A)
+                teamOreA = Math.Min(teamOreA + depositAmount, 9999);
             else
-                teamOreBlue = Math.Min(teamOreBlue + depositAmount, 9999);
+                teamOreB = Math.Min(teamOreB + depositAmount, 9999);
         }
 
         public void WithdrawOre(Player player)
         {
-            if (player.Team == PlayerTeam.Red)
+            if (player.Team == PlayerTeam.A)
             {
-                uint withdrawAmount = Math.Min(player.OreMax - player.Ore, Math.Min(50, teamOreRed));
+                uint withdrawAmount = Math.Min(player.OreMax - player.Ore, Math.Min(50, teamOreA));
                 player.Ore += withdrawAmount;
-                teamOreRed -= withdrawAmount;
+                teamOreA -= withdrawAmount;
             }
             else
             {
-                uint withdrawAmount = Math.Min(player.OreMax - player.Ore, Math.Min(50, teamOreBlue));
+                uint withdrawAmount = Math.Min(player.OreMax - player.Ore, Math.Min(50, teamOreB));
                 player.Ore += withdrawAmount;
-                teamOreBlue -= withdrawAmount;
+                teamOreB -= withdrawAmount;
             }
         }
 
@@ -1192,10 +1445,10 @@ namespace Infiniminer
 
             if (!sandboxMode)
             {
-                if (player.Team == PlayerTeam.Red)
-                    teamCashRed += player.Cash;
+                if (player.Team == PlayerTeam.A)
+                    teamCashA += player.Cash;
                 else
-                    teamCashBlue += player.Cash;
+                    teamCashB += player.Cash;
                 SendServerMessage("SERVER: " + player.Handle + " HAS EARNED $" + player.Cash + " FOR THE " + GetTeamName(player.Team) + " TEAM!");
             }
 
@@ -1208,15 +1461,14 @@ namespace Infiniminer
             foreach (Player p in playerList.Values)
                 SendResourceUpdate(p);
         }
-
         public string GetTeamName(PlayerTeam team)
         {
             switch (team)
             {
-                case PlayerTeam.Red:
-                    return "RED";
-                case PlayerTeam.Blue:
-                    return "BLUE";
+                case PlayerTeam.A:
+                    return InfiniminerGame.teamNameA();
+                case PlayerTeam.B:
+                    return InfiniminerGame.teamNameB();
             }
             return "";
         }
@@ -1232,6 +1484,30 @@ namespace Infiniminer
                 if (netConn.Status == NetConnectionStatus.Connected)
                     netServer.SendMessage(msgBuffer, netConn, NetChannel.ReliableInOrder3);
         }
+        public void SendTeamConfig(NetConnection client)
+        {
+            NetBuffer msgBuffer = netServer.CreateBuffer();
+                msgBuffer.Write((byte)InfiniminerMessage.TeamConfig);
+                msgBuffer.Write((byte)PlayerTeam.A);
+                msgBuffer.Write(teamNameA());
+                msgBuffer.Write(configHelper.color2String(teamColorA()));
+                msgBuffer.Write(configHelper.color2String(teamBloodA()));
+                    if (client.Status == NetConnectionStatus.Connected)
+                    {
+                        netServer.SendMessage(msgBuffer, client, NetChannel.ReliableInOrder1);
+                    }
+
+            msgBuffer = netServer.CreateBuffer();
+                msgBuffer.Write((byte)InfiniminerMessage.TeamConfig);
+                msgBuffer.Write((byte)PlayerTeam.B);
+                msgBuffer.Write(teamNameB());
+                msgBuffer.Write(configHelper.color2String(teamColorB()));
+                msgBuffer.Write(configHelper.color2String(teamBloodB()));
+                    if (client.Status == NetConnectionStatus.Connected)
+                    {
+                        netServer.SendMessage(msgBuffer, client, NetChannel.ReliableInOrder1);
+                    }
+        }
 
         // Lets a player know about their resources.
         public void SendResourceUpdate(Player player)
@@ -1239,7 +1515,7 @@ namespace Infiniminer
             if (player.NetConn.Status != NetConnectionStatus.Connected)
                 return;
 
-            // ore, cash, weight, max ore, max weight, team ore, red cash, blue cash, all uint
+            // ore, cash, weight, max ore, max weight, team ore, team A cash, team B cash, all uint
             NetBuffer msgBuffer = netServer.CreateBuffer();
             msgBuffer.Write((byte)InfiniminerMessage.ResourceUpdate);
             msgBuffer.Write((uint)player.Ore);
@@ -1247,9 +1523,9 @@ namespace Infiniminer
             msgBuffer.Write((uint)player.Weight);
             msgBuffer.Write((uint)player.OreMax);
             msgBuffer.Write((uint)player.WeightMax);
-            msgBuffer.Write((uint)(player.Team == PlayerTeam.Red ? teamOreRed : teamOreBlue));
-            msgBuffer.Write((uint)teamCashRed);
-            msgBuffer.Write((uint)teamCashBlue);
+            msgBuffer.Write((uint)(player.Team == PlayerTeam.A ? teamOreA : teamOreB));
+            msgBuffer.Write((uint)teamCashA);
+            msgBuffer.Write((uint)teamCashB);
             netServer.SendMessage(msgBuffer, player.NetConn, NetChannel.ReliableInOrder1);
         }
 

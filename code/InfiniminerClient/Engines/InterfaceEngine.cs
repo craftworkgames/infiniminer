@@ -24,8 +24,8 @@ namespace Infiniminer
 
         Texture2D texCrosshairs, texBlank, texHelp;
         Texture2D texRadarBackground, texRadarForeground, texRadarPlayerSame, texRadarPlayerAbove, texRadarPlayerBelow, texRadarPlayerPing, texRadarNorth;
-        Texture2D texToolRadarRed, texToolRadarBlue, texToolRadarGold, texToolRadarDiamond, texToolRadarLED, texToolRadarPointer, texToolRadarFlash;
-        Texture2D texToolDetonatorDownRed, texToolDetonatorUpRed, texToolDetonatorDownBlue, texToolDetonatorUpBlue;
+        Texture2D texToolRadarA, texToolRadarB, texToolRadarGold, texToolRadarDiamond, texToolRadarLED, texToolRadarPointer, texToolRadarFlash;
+        Texture2D texToolDetonatorDownA, texToolDetonatorUpA, texToolDetonatorDownB, texToolDetonatorUpB;
         Texture2D texToolBuild, texToolBuildCharge, texToolBuildBlast, texToolBuildSmoke;
 
         Dictionary<BlockType, Texture2D> blockIcons = new Dictionary<BlockType, Texture2D>();
@@ -48,8 +48,8 @@ namespace Infiniminer
             texRadarNorth = gameInstance.Content.Load<Texture2D>("ui/tex_radar_north");
             texHelp = gameInstance.Content.Load<Texture2D>("menus/tex_menu_help");
 
-            texToolRadarRed = gameInstance.Content.Load<Texture2D>("tools/tex_tool_radar_red");
-            texToolRadarBlue = gameInstance.Content.Load<Texture2D>("tools/tex_tool_radar_blue");
+            texToolRadarA = gameInstance.Content.Load<Texture2D>("tools/A/tex_tool_radar");
+            texToolRadarB = gameInstance.Content.Load<Texture2D>("tools/B/tex_tool_radar");
             texToolRadarGold = gameInstance.Content.Load<Texture2D>("tools/tex_tool_radar_screen_gold");
             texToolRadarDiamond = gameInstance.Content.Load<Texture2D>("tools/tex_tool_radar_screen_diamond");
             texToolRadarLED = gameInstance.Content.Load<Texture2D>("tools/tex_tool_radar_led");
@@ -61,10 +61,11 @@ namespace Infiniminer
             texToolBuildBlast = gameInstance.Content.Load<Texture2D>("tools/tex_tool_build_blast");
             texToolBuildSmoke = gameInstance.Content.Load<Texture2D>("tools/tex_tool_build_smoke");
 
-            texToolDetonatorDownRed = gameInstance.Content.Load<Texture2D>("tools/tex_tool_detonator_down_red");
-            texToolDetonatorUpRed = gameInstance.Content.Load<Texture2D>("tools/tex_tool_detonator_up_red");
-            texToolDetonatorDownBlue = gameInstance.Content.Load<Texture2D>("tools/tex_tool_detonator_down_blue");
-            texToolDetonatorUpBlue = gameInstance.Content.Load<Texture2D>("tools/tex_tool_detonator_up_blue");
+            texToolDetonatorDownA = gameInstance.Content.Load<Texture2D>("tools/A/tex_tool_detonator_down");
+            texToolDetonatorUpA = gameInstance.Content.Load<Texture2D>("tools/A/tex_tool_detonator_up");
+
+            texToolDetonatorDownB = gameInstance.Content.Load<Texture2D>("tools/B/tex_tool_detonator_down");
+            texToolDetonatorUpB = gameInstance.Content.Load<Texture2D>("tools/B/tex_tool_detonator_up");
 
             drawRect = new Rectangle(gameInstance.GraphicsDevice.Viewport.Width / 2 - 1024 / 2,
                                      gameInstance.GraphicsDevice.Viewport.Height / 2 - 768 / 2,
@@ -72,18 +73,20 @@ namespace Infiniminer
                                      1024);
 
             // Load icons.
-            blockIcons[BlockType.BankBlue] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_bank_blue");
-            blockIcons[BlockType.BankRed] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_bank_red");
+            blockIcons[BlockType.BankA] = gameInstance.Content.Load<Texture2D>("icons/A/tex_icon_bank");
+            blockIcons[BlockType.SolidA] = gameInstance.Content.Load<Texture2D>("icons/A/tex_icon_solid");
+            blockIcons[BlockType.TransA] = gameInstance.Content.Load<Texture2D>("icons/A/tex_icon_translucent");
+            blockIcons[BlockType.BeaconA] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_beacon");
+
+            blockIcons[BlockType.BankB] = gameInstance.Content.Load<Texture2D>("icons/B/tex_icon_bank");
+            blockIcons[BlockType.SolidB] = gameInstance.Content.Load<Texture2D>("icons/B/tex_icon_solid");
+            blockIcons[BlockType.TransB] = gameInstance.Content.Load<Texture2D>("icons/B/tex_icon_translucent");
+            blockIcons[BlockType.BeaconB] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_beacon");
+
             blockIcons[BlockType.Explosive] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_explosive");
             blockIcons[BlockType.Jump] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_jump");
             blockIcons[BlockType.Ladder] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_ladder");
-            blockIcons[BlockType.SolidBlue] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_solid_blue");
-            blockIcons[BlockType.SolidRed] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_solid_red");
             blockIcons[BlockType.Shock] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_spikes");
-            blockIcons[BlockType.TransBlue] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_translucent_blue");
-            blockIcons[BlockType.TransRed] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_translucent_red");
-            blockIcons[BlockType.BeaconRed] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_beacon");
-            blockIcons[BlockType.BeaconBlue] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_beacon");
             blockIcons[BlockType.Road] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_road");
             blockIcons[BlockType.None] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_deconstruction");
 
@@ -188,9 +191,9 @@ namespace Infiniminer
 
             Texture2D textureToUse;
             if (Mouse.GetState().LeftButton == ButtonState.Pressed || Mouse.GetState().MiddleButton == ButtonState.Pressed || Mouse.GetState().RightButton == ButtonState.Pressed)
-                textureToUse = _P.playerTeam == PlayerTeam.Red ? texToolDetonatorDownRed : texToolDetonatorDownBlue;
+                textureToUse = _P.playerTeam == PlayerTeam.A ? texToolDetonatorDownA : texToolDetonatorDownB;
             else
-                textureToUse = _P.playerTeam == PlayerTeam.Red ? texToolDetonatorUpRed : texToolDetonatorUpBlue;
+                textureToUse = _P.playerTeam == PlayerTeam.A ? texToolDetonatorUpA : texToolDetonatorUpB;
 
             spriteBatch.Draw(textureToUse, new Rectangle(screenWidth / 2 /*- 22 * 3*/, screenHeight - 77 * 3 + 14 * 3, 75 * 3, 77 * 3), Color.White);
         }
@@ -204,7 +207,7 @@ namespace Infiniminer
             int drawX = screenWidth / 2 - 32 * 3;
             int drawY = screenHeight - 102 * 3;
 
-            spriteBatch.Draw(_P.playerTeam == PlayerTeam.Red ? texToolRadarRed : texToolRadarBlue, new Rectangle(drawX, drawY, 70 * 3, 102 * 3), Color.White);
+            spriteBatch.Draw(_P.playerTeam == PlayerTeam.A ? texToolRadarA : texToolRadarB, new Rectangle(drawX, drawY, 70 * 3, 102 * 3), Color.White);
 
             if (_P.radarValue > 0)
                 spriteBatch.Draw(texToolRadarLED, new Rectangle(drawX, drawY, 70 * 3, 102 * 3), Color.White);
@@ -294,7 +297,7 @@ namespace Infiniminer
 
             // Show the altimeter.
             int altitude = (int)(_P.playerPosition.Y - 64 + InfiniminerGame.GROUND_LEVEL);
-            RenderMessageCenter(spriteBatch, String.Format("ALTITUDE: {0:00}", altitude), new Vector2(graphicsDevice.Viewport.Width - 90, graphicsDevice.Viewport.Height - 20), altitude >= 0 ? Color.Gray : InfiniminerGame.IM_RED, Color.Black);
+            RenderMessageCenter(spriteBatch, String.Format("ALTITUDE: {0:00}", altitude), new Vector2(graphicsDevice.Viewport.Width - 90, graphicsDevice.Viewport.Height - 20), altitude >= 0 ? Color.Gray : InfiniminerGame.teamColorA() , Color.Black);
 
             // Draw bank instructions.
             if (_P.AtBankTerminal())
@@ -311,8 +314,8 @@ namespace Infiniminer
             spriteBatch.DrawString(uiFont, "LOOT: $" + _P.playerCash, new Vector2(textStart + 170, 2), Color.White);
             spriteBatch.DrawString(uiFont, "WEIGHT: " + _P.playerWeight + "/" + _P.playerWeightMax, new Vector2(textStart + 340, 2), Color.White);
             spriteBatch.DrawString(uiFont, "TEAM ORE: " + _P.teamOre, new Vector2(textStart + 515, 2), Color.White);
-            spriteBatch.DrawString(uiFont, "RED: $" + _P.teamRedCash, new Vector2(textStart + 700, 2), InfiniminerGame.IM_RED);
-            spriteBatch.DrawString(uiFont, "BLUE: $" + _P.teamBlueCash, new Vector2(textStart + 860, 2), InfiniminerGame.IM_BLUE);
+            spriteBatch.DrawString(uiFont, InfiniminerGame.teamNameA() + ": $" + _P.teamACash, new Vector2(textStart + 700, 2), InfiniminerGame.teamColorA());
+            spriteBatch.DrawString(uiFont, InfiniminerGame.teamNameB() + ": $" + _P.teamBCash, new Vector2(textStart + 860, 2), InfiniminerGame.teamColorB());
 
             // Draw player information.
             if ((Keyboard.GetState().IsKeyDown(Keys.Tab) && _P.screenEffect == ScreenEffect.None) || _P.teamWinners != PlayerTeam.None)
@@ -321,8 +324,8 @@ namespace Infiniminer
 
                 if (_P.teamWinners != PlayerTeam.None)
                 {
-                    string teamName = _P.teamWinners == PlayerTeam.Red ? "RED" : "BLUE";
-                    Color teamColor = _P.teamWinners == PlayerTeam.Red ? InfiniminerGame.IM_RED : InfiniminerGame.IM_BLUE;
+                    string teamName = _P.teamWinners == PlayerTeam.A ? InfiniminerGame.teamNameA() : InfiniminerGame.teamNameB();
+                    Color teamColor = _P.teamWinners == PlayerTeam.A ? InfiniminerGame.teamColorA() : InfiniminerGame.teamColorB();
                     string gameOverMessage = "GAME OVER - " + teamName + " TEAM WINS!";
                     RenderMessageCenter(spriteBatch, gameOverMessage, new Vector2(graphicsDevice.Viewport.Width / 2, 150), teamColor, new Color(0, 0, 0, 0));
                 }
@@ -330,17 +333,17 @@ namespace Infiniminer
                 int drawY = 200;
                 foreach (Player p in _P.playerList.Values)
                 {
-                    if (p.Team != PlayerTeam.Red)
+                    if (p.Team != PlayerTeam.A)
                         continue;
-                    RenderMessageCenter(spriteBatch, p.Handle + " ( $" + p.Score + " )", new Vector2(graphicsDevice.Viewport.Width/4, drawY), InfiniminerGame.IM_RED, new Color(0, 0, 0, 0));
+                    RenderMessageCenter(spriteBatch, p.Handle + " ( $" + p.Score + " )", new Vector2(graphicsDevice.Viewport.Width/4, drawY), InfiniminerGame.teamColorA(), new Color(0, 0, 0, 0));
                     drawY += 35;
                 }
                 drawY = 200;
                 foreach (Player p in _P.playerList.Values)
                 {
-                    if (p.Team != PlayerTeam.Blue)
+                    if (p.Team != PlayerTeam.B)
                         continue;
-                    RenderMessageCenter(spriteBatch, p.Handle + " ( $" + p.Score + " )", new Vector2(graphicsDevice.Viewport.Width * 3 / 4, drawY), InfiniminerGame.IM_BLUE, new Color(0, 0, 0, 0));
+                    RenderMessageCenter(spriteBatch, p.Handle + " ( $" + p.Score + " )", new Vector2(graphicsDevice.Viewport.Width * 3 / 4, drawY), InfiniminerGame.teamColorB(), new Color(0, 0, 0, 0));
                     drawY += 35;
                 }
             }
@@ -351,7 +354,7 @@ namespace Infiniminer
                 spriteBatch.DrawString(uiFont, "ALL> " + _P.chatEntryBuffer, new Vector2(22, graphicsDevice.Viewport.Height - 98), Color.Black);
                 spriteBatch.DrawString(uiFont, "ALL> " + _P.chatEntryBuffer, new Vector2(20, graphicsDevice.Viewport.Height - 100), Color.White);
             }
-            else if (_P.chatMode == ChatMessageType.SayBlueTeam || _P.chatMode == ChatMessageType.SayRedTeam)
+            else if (_P.chatMode == ChatMessageType.SayTeamB || _P.chatMode == ChatMessageType.SayTeamA)
             {
                 spriteBatch.DrawString(uiFont, "TEAM> " + _P.chatEntryBuffer, new Vector2(22, graphicsDevice.Viewport.Height - 98), Color.Black);
                 spriteBatch.DrawString(uiFont, "TEAM> " + _P.chatEntryBuffer, new Vector2(20, graphicsDevice.Viewport.Height - 100), Color.White);
@@ -359,10 +362,10 @@ namespace Infiniminer
             for (int i = 0; i < _P.chatBuffer.Count; i++)
             {
                 Color chatColor = Color.White;
-                if (_P.chatBuffer[i].type == ChatMessageType.SayRedTeam)
-                    chatColor = InfiniminerGame.IM_RED;
-                if (_P.chatBuffer[i].type == ChatMessageType.SayBlueTeam)
-                    chatColor = InfiniminerGame.IM_BLUE;
+                if (_P.chatBuffer[i].type == ChatMessageType.SayTeamA)
+                    chatColor = InfiniminerGame.teamColorA();
+                if (_P.chatBuffer[i].type == ChatMessageType.SayTeamB)
+                    chatColor = InfiniminerGame.teamColorB();
                 spriteBatch.DrawString(uiFont, _P.chatBuffer[i].message, new Vector2(22, graphicsDevice.Viewport.Height - 114 - 16 * i), Color.Black);
                 spriteBatch.DrawString(uiFont, _P.chatBuffer[i].message, new Vector2(20, graphicsDevice.Viewport.Height - 116 - 16 * i), chatColor);
             }
@@ -371,7 +374,7 @@ namespace Infiniminer
             spriteBatch.Draw(texRadarBackground, new Vector2(10, 30), Color.White);
             foreach (Player p in _P.playerList.Values)
                 if (p.Team == _P.playerTeam && p.Alive)
-                    RenderRadarBlip(spriteBatch, p.ID == _P.playerMyId ? _P.playerPosition : p.Position, p.Team == PlayerTeam.Red ? InfiniminerGame.IM_RED : InfiniminerGame.IM_BLUE, p.Ping > 0, "");
+                    RenderRadarBlip(spriteBatch, p.ID == _P.playerMyId ? _P.playerPosition : p.Position, p.Team == PlayerTeam.A ? InfiniminerGame.teamColorA() : InfiniminerGame.teamColorB(), p.Ping > 0, "");
             foreach (KeyValuePair<Vector3, Beacon> bPair in _P.beaconList)
                 if (bPair.Value.Team == _P.playerTeam)
                     RenderRadarBlip(spriteBatch, bPair.Key, Color.White, false, bPair.Value.ID);

@@ -149,12 +149,8 @@ namespace Infiniminer
             blockTextures[(byte)BlockTexture.Dirt] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_dirt"));
             blockTextures[(byte)BlockTexture.Rock] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_rock"));
             blockTextures[(byte)BlockTexture.Ore] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_ore"));
-            blockTextures[(byte)BlockTexture.Gold] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_silver"));
+            blockTextures[(byte)BlockTexture.Gold] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_gold"));
             blockTextures[(byte)BlockTexture.Diamond] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_diamond"));
-            blockTextures[(byte)BlockTexture.HomeRed] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_home_red"));
-            blockTextures[(byte)BlockTexture.HomeBlue] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_home_blue"));
-            blockTextures[(byte)BlockTexture.SolidRed] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_red"));
-            blockTextures[(byte)BlockTexture.SolidBlue] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_blue"));
             blockTextures[(byte)BlockTexture.Ladder] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_ladder"));
             blockTextures[(byte)BlockTexture.LadderTop] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_ladder_top"));
             blockTextures[(byte)BlockTexture.Spikes] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_spikes"));
@@ -163,26 +159,32 @@ namespace Infiniminer
             blockTextures[(byte)BlockTexture.Explosive] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_explosive"));
             blockTextures[(byte)BlockTexture.Metal] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_metal"));
             blockTextures[(byte)BlockTexture.DirtSign] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_dirt_sign"));
-            blockTextures[(byte)BlockTexture.BankTopRed] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_bank_top_red"));
-            blockTextures[(byte)BlockTexture.BankLeftRed] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_bank_left_red"));
-            blockTextures[(byte)BlockTexture.BankFrontRed] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_bank_front_red"));
-            blockTextures[(byte)BlockTexture.BankRightRed] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_bank_right_red"));
-            blockTextures[(byte)BlockTexture.BankBackRed] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_bank_back_red"));
-            blockTextures[(byte)BlockTexture.BankTopBlue] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_bank_top_blue"));
-            blockTextures[(byte)BlockTexture.BankLeftBlue] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_bank_left_blue"));
-            blockTextures[(byte)BlockTexture.BankFrontBlue] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_bank_front_blue"));
-            blockTextures[(byte)BlockTexture.BankRightBlue] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_bank_right_blue"));
-            blockTextures[(byte)BlockTexture.BankBackBlue] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_bank_back_blue"));
-            blockTextures[(byte)BlockTexture.TeleSideA] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_teleporter_a"));
-            blockTextures[(byte)BlockTexture.TeleSideB] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_teleporter_b"));
+            blockTextures[(byte)BlockTexture.TeleSideA] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_teleporter_sideA"));
+            blockTextures[(byte)BlockTexture.TeleSideB] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_teleporter_sideB"));
             blockTextures[(byte)BlockTexture.TeleTop] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_teleporter_top"));
             blockTextures[(byte)BlockTexture.TeleBottom] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_teleporter_bottom"));
             blockTextures[(byte)BlockTexture.Lava] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_lava"));
             blockTextures[(byte)BlockTexture.Road] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_road"));
-            blockTextures[(byte)BlockTexture.BeaconRed] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_beacon_top_red"));
-            blockTextures[(byte)BlockTexture.BeaconBlue] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_beacon_top_blue"));
-            blockTextures[(byte)BlockTexture.TransRed] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_trans_red"));
-            blockTextures[(byte)BlockTexture.TransBlue] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_trans_blue"));
+
+            blockTextures[(byte)BlockTexture.HomeA] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/A/tex_block_home"));
+            blockTextures[(byte)BlockTexture.SolidA] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/A/tex_block"));
+            blockTextures[(byte)BlockTexture.BankTopA] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/A/tex_block_bank_top"));
+            blockTextures[(byte)BlockTexture.BankLeftA] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/A/tex_block_bank_left"));
+            blockTextures[(byte)BlockTexture.BankFrontA] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/A/tex_block_bank_front"));
+            blockTextures[(byte)BlockTexture.BankRightA] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/A/tex_block_bank_right"));
+            blockTextures[(byte)BlockTexture.BankBackA] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/A/tex_block_bank_back"));
+            blockTextures[(byte)BlockTexture.BeaconA] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/A/tex_block_beacon_top"));
+            blockTextures[(byte)BlockTexture.TransA] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/A/tex_block_trans"));
+
+            blockTextures[(byte)BlockTexture.HomeB] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/B/tex_block_home"));
+            blockTextures[(byte)BlockTexture.SolidB] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/B/tex_block"));
+            blockTextures[(byte)BlockTexture.BankTopB] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/B/tex_block_bank_top"));
+            blockTextures[(byte)BlockTexture.BankLeftB] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/B/tex_block_bank_left"));
+            blockTextures[(byte)BlockTexture.BankFrontB] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/B/tex_block_bank_front"));
+            blockTextures[(byte)BlockTexture.BankRightB] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/B/tex_block_bank_right"));
+            blockTextures[(byte)BlockTexture.BankBackB] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/B/tex_block_bank_back"));
+            blockTextures[(byte)BlockTexture.BeaconB] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/B/tex_block_beacon_top"));
+            blockTextures[(byte)BlockTexture.TransB] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/B/tex_block_trans"));
 
             // Load our effects.
             basicEffect = gameInstance.Content.Load<Effect>("effect_basic");
@@ -222,9 +224,9 @@ namespace Infiniminer
         {
             if (blockType == BlockType.None)
                 return true;
-            if (gameInstance.propertyBag.playerTeam == PlayerTeam.Red && blockType == BlockType.TransRed)
+            if (gameInstance.propertyBag.playerTeam == PlayerTeam.A && blockType == BlockType.TransA)
                 return true;
-            if (gameInstance.propertyBag.playerTeam == PlayerTeam.Blue && blockType == BlockType.TransBlue)
+            if (gameInstance.propertyBag.playerTeam == PlayerTeam.B && blockType == BlockType.TransB)
                 return true;
             return false;
         }
@@ -267,7 +269,7 @@ namespace Infiniminer
                 {
                     // Figure out if we should be rendering translucently.
                     bool renderTranslucent = false;
-                    if (blockTexture == BlockTexture.TransRed || blockTexture == BlockTexture.TransBlue)
+                    if (blockTexture == BlockTexture.TransA || blockTexture == BlockTexture.TransB)
                         renderTranslucent = true;
 
                     // If this is empty, don't render it.
@@ -483,7 +485,7 @@ namespace Infiniminer
         private void _AddBlock(ushort x, ushort y, ushort z, BlockFaceDirection dir, BlockType type, int x2, int y2, int z2, BlockFaceDirection dir2)
         {
             BlockType type2 = blockList[x2, y2, z2];
-            if (type2 != BlockType.None && type != BlockType.TransRed && type != BlockType.TransBlue && type2 != BlockType.TransRed && type2 != BlockType.TransBlue)
+            if (type2 != BlockType.None && type != BlockType.TransA && type != BlockType.TransB && type2 != BlockType.TransA && type2 != BlockType.TransB)
                 HideQuad((ushort)x2, (ushort)y2, (ushort)z2, dir2, type2);
             else
                 ShowQuad(x, y, z, dir, type);
@@ -491,7 +493,7 @@ namespace Infiniminer
 
         public void AddBlock(ushort x, ushort y, ushort z, BlockType blockType)
         {
-            if (x <= 0 || y <= 0 || z <= 0 || x >= MAPSIZE - 1 || y >= MAPSIZE - 1 || z >= MAPSIZE - 1)
+            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(MAPSIZE) >= 0 || (y + 1).CompareTo(MAPSIZE) >= 0 || (z + 1).CompareTo(MAPSIZE) >= 0)
                 return;
 
             blockList[x, y, z] = blockType;
@@ -508,7 +510,7 @@ namespace Infiniminer
         {
             BlockType type = blockList[x, y, z];
             BlockType type2 = blockList[x2, y2, z2];
-            if (type2 != BlockType.None && type != BlockType.TransRed && type != BlockType.TransBlue && type2 != BlockType.TransRed && type2 != BlockType.TransBlue)
+            if (type2 != BlockType.None && type != BlockType.TransA && type != BlockType.TransB && type2 != BlockType.TransA && type2 != BlockType.TransB)
                 ShowQuad((ushort)x2, (ushort)y2, (ushort)z2, dir2, type2);
             else
                 HideQuad(x, y, z, dir, type);
@@ -516,7 +518,7 @@ namespace Infiniminer
 
         public void RemoveBlock(ushort x, ushort y, ushort z)
         {
-            if (x <= 0 || y <= 0 || z <= 0 || x >= MAPSIZE - 1 || y >= MAPSIZE - 1 || z >= MAPSIZE - 1)
+            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(MAPSIZE) >= 0 || (y + 1).CompareTo(MAPSIZE) >= 0 || (z + 1).CompareTo(MAPSIZE) >= 0)
                 return;
 
             _RemoveBlock(x, y, z, BlockFaceDirection.XIncreasing, x + 1, y, z, BlockFaceDirection.XDecreasing);

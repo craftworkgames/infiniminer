@@ -23,6 +23,23 @@ namespace Infiniminer
         Sapper
     }
 
+    public class ToolCooldown
+    {
+        public const float defaultCooldown                     = 0.5f;
+        public const float PickaxeCooldown                     = 0.55f;
+        public const float DetonatorCooldown                   = 0.1f;
+
+        public const float defaultMultiplier                   = 1.0f;
+
+        public const float MinerPickaxeMultiplier              = 0.4f;
+        public const float EngineerPickaxeMultiplier           = 0.8f;
+        public const float SapperPickaxeMultiplier             = 2.0f;
+
+        public const float EngineerConstructionGunMultiplier   = 0.4f;
+        public const float ProspectorConstructionGunMultiplier = 0.8f;
+        public const float SapperConstructionGunMultiplier     = 1.2f;
+    }
+
     public enum PlayerTools
     {
         Pickaxe,
@@ -35,8 +52,8 @@ namespace Infiniminer
     public enum PlayerTeam
     {
         None,
-        Red,
-        Blue
+        A,
+        B
     }
 
     public enum ScreenEffect
@@ -52,8 +69,8 @@ namespace Infiniminer
     {
         None,
         SayAll,
-        SayRedTeam,
-        SayBlueTeam,
+        SayTeamA,
+        SayTeamB,
     }
 
     public class ChatMessage
@@ -95,7 +112,7 @@ namespace Infiniminer
         BlockSet,               // x, y, z, type
         UseTool,                // position, heading, tool, blocktype 
         SelectClass,            // class
-        ResourceUpdate,         // ore, cash, weight, max ore, max weight, team ore, red cash, blue cash: ReliableInOrder1
+        ResourceUpdate,         // ore, cash, weight, max ore, max weight, team ore, team A cash, team B cash: ReliableInOrder1
         DepositOre,
         DepositCash,
         WithdrawOre,
@@ -114,6 +131,7 @@ namespace Infiniminer
         PlaySound,              // byte sound, bool isPositional, ?Vector3 location : ReliableUnordered
         TriggerConstructionGunAnimation,
         SetBeacon,              // vector3 position, string text ("" means remove)
+        TeamConfig,             // byte team, string name, string color, string blood
     }
 
     public class Beacon
@@ -145,7 +163,7 @@ namespace Infiniminer
         public int playerToolSelected = 0;
         public BlockType[] playerBlocks = new BlockType[1] {BlockType.None};
         public int playerBlockSelected = 0;
-        public PlayerTeam playerTeam = PlayerTeam.Red;
+        public PlayerTeam playerTeam = PlayerTeam.A;
         public bool playerDead = true;
         public uint playerOre = 0;
         public uint playerCash = 0;
@@ -164,8 +182,8 @@ namespace Infiniminer
 
         // Team variables.
         public uint teamOre = 0;
-        public uint teamRedCash = 0;
-        public uint teamBlueCash = 0;
+        public uint teamACash = 0;
+        public uint teamBCash = 0;
         public PlayerTeam teamWinners = PlayerTeam.None;
         public Dictionary<Vector3, Beacon> beaconList = new Dictionary<Vector3, Beacon>();
 
@@ -414,17 +432,17 @@ namespace Infiniminer
                     playerTools = new PlayerTools[3] {  PlayerTools.Pickaxe,
                                                         PlayerTools.ConstructionGun,
                                                         PlayerTools.ProspectingRadar     };
-                    playerBlocks = new BlockType[4] {   playerTeam == PlayerTeam.Red ? BlockType.SolidRed : BlockType.SolidBlue,
-                                                        playerTeam == PlayerTeam.Red ? BlockType.TransRed : BlockType.TransBlue,
-                                                        playerTeam == PlayerTeam.Red ? BlockType.BeaconRed : BlockType.BeaconBlue,
+                    playerBlocks = new BlockType[4] {   playerTeam == PlayerTeam.A ? BlockType.SolidA : BlockType.SolidB,
+                                                        playerTeam == PlayerTeam.A ? BlockType.TransA : BlockType.TransB,
+                                                        playerTeam == PlayerTeam.A ? BlockType.BeaconA : BlockType.BeaconB,
                                                         BlockType.Ladder    };
                     break;
 
                 case PlayerClass.Miner:
                     playerTools = new PlayerTools[2] {  PlayerTools.Pickaxe,
                                                         PlayerTools.ConstructionGun     };
-                    playerBlocks = new BlockType[3] {   playerTeam == PlayerTeam.Red ? BlockType.SolidRed : BlockType.SolidBlue,
-                                                        playerTeam == PlayerTeam.Red ? BlockType.TransRed : BlockType.TransBlue,
+                    playerBlocks = new BlockType[3] {   playerTeam == PlayerTeam.A ? BlockType.SolidA : BlockType.SolidB,
+                                                        playerTeam == PlayerTeam.A ? BlockType.TransA : BlockType.TransB,
                                                         BlockType.Ladder    };
                     break;
 
@@ -432,23 +450,23 @@ namespace Infiniminer
                     playerTools = new PlayerTools[3] {  PlayerTools.Pickaxe,
                                                         PlayerTools.ConstructionGun,     
                                                         PlayerTools.DeconstructionGun   };
-                    playerBlocks = new BlockType[9] {   playerTeam == PlayerTeam.Red ? BlockType.SolidRed : BlockType.SolidBlue,
-                                                        BlockType.TransRed,
-                                                        BlockType.TransBlue,
+                    playerBlocks = new BlockType[9] {   playerTeam == PlayerTeam.A ? BlockType.SolidA : BlockType.SolidB,
+                                                        BlockType.TransA,
+                                                        BlockType.TransB,
                                                         BlockType.Road,
                                                         BlockType.Ladder,
                                                         BlockType.Jump,
                                                         BlockType.Shock,
-                                                        playerTeam == PlayerTeam.Red ? BlockType.BeaconRed : BlockType.BeaconBlue,
-                                                        playerTeam == PlayerTeam.Red ? BlockType.BankRed : BlockType.BankBlue  };
+                                                        playerTeam == PlayerTeam.A ? BlockType.BeaconA : BlockType.BeaconB,
+                                                        playerTeam == PlayerTeam.A ? BlockType.BankA : BlockType.BankB  };
                     break;
 
                 case PlayerClass.Sapper:
                     playerTools = new PlayerTools[3] {  PlayerTools.Pickaxe,
                                                         PlayerTools.ConstructionGun,
                                                         PlayerTools.Detonator     };
-                    playerBlocks = new BlockType[4] {   playerTeam == PlayerTeam.Red ? BlockType.SolidRed : BlockType.SolidBlue,
-                                                        playerTeam == PlayerTeam.Red ? BlockType.TransRed : BlockType.TransBlue,
+                    playerBlocks = new BlockType[4] {   playerTeam == PlayerTeam.A ? BlockType.SolidA : BlockType.SolidB,
+                                                        playerTeam == PlayerTeam.A ? BlockType.TransA : BlockType.TransB,
                                                         BlockType.Ladder,
                                                         BlockType.Explosive     };
                     break;
@@ -584,9 +602,9 @@ namespace Infiniminer
 
             // If it's a valid bank object, we're good!
             BlockType blockType = blockEngine.BlockAtPoint(hitPoint);
-            if (blockType == BlockType.BankRed && playerTeam == PlayerTeam.Red)
+            if (blockType == BlockType.BankA && playerTeam == PlayerTeam.A)
                 return true;
-            if (blockType == BlockType.BankBlue && playerTeam == PlayerTeam.Blue)
+            if (blockType == BlockType.BankB && playerTeam == PlayerTeam.B)
                 return true;
             return false;
         }
@@ -595,13 +613,46 @@ namespace Infiniminer
         {
             switch (tool)
             {
-                case PlayerTools.Pickaxe: return 0.55f;
-                case PlayerTools.Detonator: return 0.01f;
-                case PlayerTools.ConstructionGun: return 0.5f;
-                case PlayerTools.DeconstructionGun: return 0.5f;
-                case PlayerTools.ProspectingRadar: return 0.5f;
+                case PlayerTools.Pickaxe:
+                    return ToolCooldown.PickaxeCooldown;
+                case PlayerTools.Detonator:
+                    return ToolCooldown.DetonatorCooldown;
+                case PlayerTools.ConstructionGun:
+                case PlayerTools.DeconstructionGun:
+                case PlayerTools.ProspectingRadar:
+                    return ToolCooldown.defaultCooldown;
                 default: return 0;
             }
+        }
+        public float ToolCooldownMultiplier(PlayerClass playerClass, PlayerTools tool)
+        {
+            if(tool == PlayerTools.Pickaxe)
+            {
+                switch (playerClass)
+                {
+                    case PlayerClass.Miner:
+                        return ToolCooldown.MinerPickaxeMultiplier;
+                    case PlayerClass.Engineer:
+                        return ToolCooldown.EngineerPickaxeMultiplier;
+                    case PlayerClass.Sapper:
+                        return ToolCooldown.SapperPickaxeMultiplier;
+                    default:
+                        return ToolCooldown.defaultMultiplier;
+                }
+            }
+            else if(tool == PlayerTools.ConstructionGun)
+            {
+                switch (playerClass)
+                {
+                    case PlayerClass.Engineer:
+                        return ToolCooldown.EngineerConstructionGunMultiplier;
+                    case PlayerClass.Prospector:
+                        return ToolCooldown.ProspectorConstructionGunMultiplier;
+                    case PlayerClass.Sapper:
+                        return ToolCooldown.SapperConstructionGunMultiplier;
+                }
+            }
+            return ToolCooldown.defaultMultiplier;
         }
 
         public void SendPlayerUpdate()
