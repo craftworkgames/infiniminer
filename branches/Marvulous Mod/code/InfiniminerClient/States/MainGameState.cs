@@ -19,12 +19,6 @@ namespace Infiniminer.States
 {
     public class MainGameState : State
     {
-        const float MOVESPEED = 3.5f;
-        const float GRAVITY = -8.0f;
-        const float JUMPVELOCITY = 4.0f;
-        const float CLIMBVELOCITY = 2.5f;
-        const float DIEVELOCITY = 15.0f;
-
         string nextState = null;
         bool mouseInitialized = false;
         KeyMap keyMap;
@@ -88,13 +82,25 @@ namespace Infiniminer.States
                 mouseInitialized = false;
 
             // Digging like a freaking terrier! Now for everyone!
-            if (mouseInitialized && mouseState.LeftButton == ButtonState.Pressed && !_P.playerDead && _P.playerToolCooldown == 0 && _P.playerTools[_P.playerToolSelected] == PlayerTools.Pickaxe)
+            if (mouseInitialized && mouseState.LeftButton == ButtonState.Pressed && !_P.playerDead && _P.playerToolCooldown == 0)
             {
-                _P.FirePickaxe();
-                if (_P.playerClass == PlayerClass.Miner)
-                    _P.playerToolCooldown = _P.GetToolCooldown(PlayerTools.Pickaxe) * 0.4f;
-                else
-                    _P.playerToolCooldown = _P.GetToolCooldown(PlayerTools.Pickaxe);
+                switch(_P.playerTools[_P.playerToolSelected])
+                {
+                    case PlayerTools.Pickaxe:
+                        _P.FirePickaxe();
+                        _P.playerToolCooldown = _P.GetToolCooldown(PlayerTools.Pickaxe) * _P.ToolCooldownMultiplier(_P.playerClass, PlayerTools.Pickaxe);
+                    break;
+                    case PlayerTools.ConstructionGun:
+                        _P.FireConstructionGun(_P.playerBlocks[_P.playerBlockSelected]);
+                        _P.playerToolCooldown = _P.GetToolCooldown(PlayerTools.ConstructionGun) * _P.ToolCooldownMultiplier(_P.playerClass, PlayerTools.ConstructionGun);
+                    break;
+                }
+                if(
+                    _P.playerTools[_P.playerToolSelected] == PlayerTools.Pickaxe ||
+                    _P.playerTools[_P.playerToolSelected] == PlayerTools.Pickaxe
+                ){
+                    _P.playerToolCooldown = _P.GetToolCooldown(_P.playerTools[_P.playerToolSelected]) * _P.ToolCooldownMultiplier(_P.playerClass, _P.playerTools[_P.playerToolSelected]);
+                }
             }
 
             // Prospector radar stuff.
@@ -127,7 +133,7 @@ namespace Infiniminer.States
             bool movingOnRoad = false;
 
             // Apply "gravity".
-            _P.playerVelocity.Y += GRAVITY * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            _P.playerVelocity.Y += InfiniminerGame.GRAVITY * (float)gameTime.ElapsedGameTime.TotalSeconds;
             Vector3 footPosition = _P.playerPosition + new Vector3(0f, -1.5f, 0f);
             Vector3 headPosition = _P.playerPosition + new Vector3(0f, 0.1f, 0f);
             if (_P.blockEngine.SolidAtPointForPlayer(footPosition) || _P.blockEngine.SolidAtPointForPlayer(headPosition))
@@ -138,11 +144,11 @@ namespace Infiniminer.States
                 // If we"re hitting the ground with a high velocity, die!
                 if (standingOnBlock != BlockType.None && _P.playerVelocity.Y < 0)
                 {
-                    float fallDamage = Math.Abs(_P.playerVelocity.Y) / DIEVELOCITY;
+                    float fallDamage = Math.Abs(_P.playerVelocity.Y) / InfiniminerGame.DIEVELOCITY;
                     if (fallDamage >= 1)
                     {
                         _P.PlaySoundForEveryone(InfiniminerSound.GroundHit, _P.playerPosition);
-                        _P.KillPlayer("WAS KILLED BY GRAVITY!");
+                        _P.KillPlayer(InfiniminerGame.SPLATMSG);
                         return;
                     }
                     else if (fallDamage > 0.5)
@@ -176,7 +182,7 @@ namespace Infiniminer.States
                 switch (standingOnBlock)
                 {
                     case BlockType.Jump:
-                        _P.playerVelocity.Y = 2.5f * JUMPVELOCITY;
+                        _P.playerVelocity.Y = 2.5f * InfiniminerGame.JUMPVELOCITY;
                         _P.PlaySoundForEveryone(InfiniminerSound.Jumpblock, _P.playerPosition);
                         break;
 
@@ -193,11 +199,11 @@ namespace Infiniminer.States
                     //    break;
 
                     //case BlockType.Shock:
-                    //    _P.KillPlayer("WAS ELECTROCUTED!");
+                    //    _P.KillPlayer(InfiniminerGame.SHOCKMSG);
                     //    return;
 
                     case BlockType.Lava:
-                        _P.KillPlayer("WAS INCINERATED BY LAVA!");
+                        _P.KillPlayer(InfiniminerGame.LAVAMSG);
                         return;
                 }
 
@@ -205,11 +211,11 @@ namespace Infiniminer.States
                 switch (hittingHeadOnBlock)
                 {
                     case BlockType.Shock:
-                        _P.KillPlayer("WAS ELECTROCUTED!");
+                        _P.KillPlayer(InfiniminerGame.SHOCKMSG);
                         return;
 
                     case BlockType.Lava:
-                        _P.KillPlayer("WAS INCINERATED BY LAVA!");
+                        _P.KillPlayer(InfiniminerGame.LAVAMSG);
                         return;
                 }
             }                
@@ -218,7 +224,7 @@ namespace Infiniminer.States
             // Death by falling off the map.
             if (_P.playerPosition.Y < -30)
             {
-                _P.KillPlayer("WAS KILLED BY MISADVENTURE!");
+                _P.KillPlayer(InfiniminerGame.THEEARTHISFLAT);
                 return;
             }
 
@@ -242,7 +248,7 @@ namespace Infiniminer.States
                 // "Flatten" the movement vector so that we don"t move up/down.
                 moveVector.Y = 0;
                 moveVector.Normalize();
-                moveVector *= MOVESPEED * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                moveVector *= InfiniminerGame.MOVESPEED * (float)gameTime.ElapsedGameTime.TotalSeconds;
                 if (movingOnRoad)
                     moveVector *= 2;
 
@@ -280,27 +286,27 @@ namespace Infiniminer.States
             //// It"s solid there, so see if it"s a spike block. If so, touching it will kill us!
             //if (upperBlock == BlockType.Shock || lowerBlock == BlockType.Shock || midBlock == BlockType.Shock)
             //{
-            //    _P.KillPlayer("WAS ELECTROCUTED!");
+            //    _P.KillPlayer(InfiniminerGame.SHOCKMSG);
             //    return true;
             //}
 
             // It"s solid there, so see if it"s a lava block. If so, touching it will kill us!
             if (upperBlock == BlockType.Lava || lowerBlock == BlockType.Lava || midBlock == BlockType.Lava)
             {
-                _P.KillPlayer("WAS INCINERATED BY LAVA!");
+                _P.KillPlayer(InfiniminerGame.LAVAMSG);
                 return true;
             }
 
             //// If it"s our home block, deposit our money.
-            //if ((upperBlock == BlockType.HomeRed || lowerBlock == BlockType.HomeRed || midBlock == BlockType.HomeRed) && _P.playerTeam == PlayerTeam.Red)
+            //if ((upperBlock == BlockType.HomeA || lowerBlock == BlockType.HomeA || midBlock == BlockType.HomeA) && _P.playerTeam == PlayerTeam.A)
             //    _P.DepositLoot();
-            //if ((upperBlock == BlockType.HomeBlue || lowerBlock == BlockType.HomeBlue || midBlock == BlockType.HomeBlue) && _P.playerTeam == PlayerTeam.Blue)
+            //if ((upperBlock == BlockType.HomeB || lowerBlock == BlockType.HomeB || midBlock == BlockType.HomeB) && _P.playerTeam == PlayerTeam.B)
             //    _P.DepositLoot();
 
             // If it"s a ladder, move up.
             if (upperBlock == BlockType.Ladder || lowerBlock == BlockType.Ladder || midBlock == BlockType.Ladder)
             {
-                _P.playerVelocity.Y = CLIMBVELOCITY;
+                _P.playerVelocity.Y = InfiniminerGame.CLIMBVELOCITY;
                 Vector3 footPosition = _P.playerPosition + new Vector3(0f, -1.5f, 0f);
                 if (_P.blockEngine.SolidAtPointForPlayer(footPosition))
                     _P.playerPosition.Y += 0.1f;
@@ -381,7 +387,7 @@ namespace Infiniminer.States
                 _P.chatMode = ChatMessageType.SayAll;
 
             if (key == Keys.U)
-                _P.chatMode = _P.playerTeam == PlayerTeam.Red ? ChatMessageType.SayRedTeam : ChatMessageType.SayBlueTeam;
+                _P.chatMode = _P.playerTeam == PlayerTeam.A ? ChatMessageType.SayTeamA : ChatMessageType.SayTeamB;
 
             if (!_P.playerDead)
             {
@@ -391,7 +397,7 @@ namespace Infiniminer.States
                     Vector3 footPosition = _P.playerPosition + new Vector3(0f, -1.5f, 0f);
                     if (_P.blockEngine.SolidAtPointForPlayer(footPosition) && _P.playerVelocity.Y == 0)
                     {
-                        _P.playerVelocity.Y = JUMPVELOCITY;
+                        _P.playerVelocity.Y = InfiniminerGame.JUMPVELOCITY;
                         float amountBelowSurface = ((ushort)footPosition.Y) + 1 - footPosition.Y;
                         _P.playerPosition.Y += amountBelowSurface + 0.01f;
                     }
@@ -446,6 +452,10 @@ namespace Infiniminer.States
                 // Change team.
                 if (key == Keys.N)
                     nextState = "Infiniminer.States.TeamSelectionState";
+
+                // Randomly Teleport
+                if (key == Keys.T && _P.playerPosition.Y > 64 - InfiniminerGame.GROUND_LEVEL)
+                    _P.RespawnPlayer();
             }
         }
 
@@ -461,16 +471,6 @@ namespace Infiniminer.States
             {
                 switch (_P.playerTools[_P.playerToolSelected])
                 {
-                    // Disabled as everyone speed-mines now.
-                    //case PlayerTools.Pickaxe:
-                    //    if (_P.playerClass != PlayerClass.Miner)
-                    //        _P.FirePickaxe();
-                    //    break;
-
-                    case PlayerTools.ConstructionGun:
-                        _P.FireConstructionGun(_P.playerBlocks[_P.playerBlockSelected]);
-                        break;
-
                     case PlayerTools.DeconstructionGun:
                         _P.FireDeconstructionGun();
                         break;

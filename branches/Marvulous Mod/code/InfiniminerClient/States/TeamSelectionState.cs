@@ -24,8 +24,8 @@ namespace Infiniminer.States
         bool canCancel = false;
 
         ClickRegion[] clkTeamMenu = new ClickRegion[2] {
-	        new ClickRegion(new Rectangle(229,156,572,190), "red"), 
-	        new ClickRegion(new Rectangle(135,424,761,181), "blue")
+	        new ClickRegion(new Rectangle(229,156,572,190), "A"), 
+	        new ClickRegion(new Rectangle(135,424,761,181), "B")
         };
 
         public override void OnEnter(string oldState)
@@ -70,20 +70,20 @@ namespace Infiniminer.States
 
         public override void OnRenderAtUpdate(GraphicsDevice graphicsDevice, GameTime gameTime)
         {
-            int redTeamCount = 0, blueTeamCount = 0;
+            int teamCountA = 0, teamCountB = 0;
             foreach (Player p in _P.playerList.Values)
             {
-                if (p.Team == PlayerTeam.Red)
-                    redTeamCount += 1;
-                else if (p.Team == PlayerTeam.Blue)
-                    blueTeamCount += 1;
+                if (p.Team == PlayerTeam.A)
+                    teamCountA += 1;
+                else if (p.Team == PlayerTeam.B)
+                    teamCountB += 1;
             }
 
             SpriteBatch spriteBatch = new SpriteBatch(graphicsDevice);
             spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Deferred, SaveStateMode.SaveState);
             spriteBatch.Draw(texMenu, drawRect, Color.White);
-            QuickDrawText(spriteBatch, "" + redTeamCount + " PLAYERS", 360, InfiniminerGame.IM_RED);
-            QuickDrawText(spriteBatch, "" + blueTeamCount + " PLAYERS", 620, InfiniminerGame.IM_BLUE);
+            QuickDrawText(spriteBatch, "" + teamCountA + " PLAYERS", 360, InfiniminerGame.teamColorA());
+            QuickDrawText(spriteBatch, "" + teamCountB + " PLAYERS", 620, InfiniminerGame.teamColorB());
             spriteBatch.End();
         }
 
@@ -104,22 +104,22 @@ namespace Infiniminer.States
             y -= drawRect.Y;
             switch (ClickRegion.HitTest(clkTeamMenu, new Point(x, y)))
             {
-                case "red":
-                    if (_P.playerTeam == PlayerTeam.Red && canCancel)
+                case "A":
+                    if (_P.playerTeam == PlayerTeam.A && canCancel)
                         nextState = "Infiniminer.States.MainGameState";
                     else
                     {
-                        _P.SetPlayerTeam(PlayerTeam.Red);
+                        _P.SetPlayerTeam(PlayerTeam.A);
                         nextState = "Infiniminer.States.ClassSelectionState";
                     }
                     _P.PlaySound(InfiniminerSound.ClickHigh);
                     break;
-                case "blue":
-                    if (_P.playerTeam == PlayerTeam.Blue && canCancel)
+                case "B":
+                    if (_P.playerTeam == PlayerTeam.B && canCancel)
                         nextState = "Infiniminer.States.MainGameState";
                     else
                     {
-                        _P.SetPlayerTeam(PlayerTeam.Blue);
+                        _P.SetPlayerTeam(PlayerTeam.B);
                         nextState = "Infiniminer.States.ClassSelectionState";
                     }
                     _P.PlaySound(InfiniminerSound.ClickHigh);

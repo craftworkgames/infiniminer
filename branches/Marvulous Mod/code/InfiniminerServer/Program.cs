@@ -10,7 +10,7 @@ namespace Infiniminer
         static void Main(string[] args)
         {
             bool authEnabled = true, publicServer = false;
-            DatafileLoader dataFile = new DatafileLoader("server.config.txt");
+            DatafileLoader dataFile = new DatafileLoader(InfiniminerServer.configFilename());
             if (dataFile.Data.ContainsKey("authenabled"))
                 authEnabled = bool.Parse(dataFile.Data["authenabled"]);
             if (dataFile.Data.ContainsKey("public"))

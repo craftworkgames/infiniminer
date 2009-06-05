@@ -181,11 +181,9 @@ namespace Infiniminer
             if (gameInstance == null)
                 return;
 
-            string textureName = "sprites/tex_sprite_";
-            if (team == PlayerTeam.Red)
-                textureName += "red_";
-            else
-                textureName += "blue_";
+            string textureName = "sprites/";
+            textureName += (team == PlayerTeam.A) ? "A/" : "B/";
+
             switch (tool)
             {
                 case PlayerTools.ConstructionGun:

@@ -135,7 +135,7 @@ namespace Infiniminer.States
                     }
                     if (connectIp != null)                   
                     {
-                        (_SM as InfiniminerGame).JoinGame(new IPEndPoint(connectIp, 5565));
+                        (_SM as InfiniminerGame).JoinGame(new IPEndPoint(connectIp, InfiniminerGame.connectionPort()));
                         nextState = "Infiniminer.States.LoadingState";
                     }
                     directConnectIP = "";
@@ -147,9 +147,7 @@ namespace Infiniminer.States
                     {
                         directConnectIP += System.Windows.Forms.Clipboard.GetText();
                     }
-                    catch (Exception e)
-                    {
-                    }
+                    catch (Exception){}
                 }
                 else if (keyMap.IsKeyMapped(key))
                 {

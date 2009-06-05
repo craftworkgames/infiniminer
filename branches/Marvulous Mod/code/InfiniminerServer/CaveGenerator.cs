@@ -78,8 +78,8 @@ namespace Infiniminer
                 AddLava(ref caveData, size);
 
             // Add starting positions.
-            //AddStartingPosition(ref caveData, size, size - 5, size - 5, InfiniminerGame.GROUND_LEVEL, BlockType.HomeRed);
-            //AddStartingPosition(ref caveData, size, 5, 5, InfiniminerGame.GROUND_LEVEL, BlockType.HomeBlue);
+            //AddStartingPosition(ref caveData, size, size - 5, size - 5, InfiniminerGame.GROUND_LEVEL, BlockType.HomeA);
+            //AddStartingPosition(ref caveData, size, 5, 5, InfiniminerGame.GROUND_LEVEL, BlockType.HomeB);
 
             oreNoise = null;
             caveNoise = null;
@@ -134,7 +134,11 @@ namespace Infiniminer
 
         public static void AddLava(ref BlockType[, ,] data, int size)
         {
-            int numFlows = randGen.Next(size / 16, size / 2);
+            ushort numFlows = InfiniminerServer.lavaFlows();
+            if (numFlows == 0)
+            {
+                numFlows = (ushort)randGen.Next(size / 16, size / 2);
+            }
             while (numFlows > 0)
             {
                 int x = randGen.Next(0, size);
@@ -155,6 +159,20 @@ namespace Infiniminer
                 zf /= 2;
                 zf = 1 - Math.Abs(zf - 1);
                 int z = (int)(zf * size);
+                if (InfiniminerServer.lavaMax() < z)
+                {
+                    z = randGen.Next(InfiniminerServer.lavaMax(), z);
+                }
+                else if (InfiniminerServer.lavaMax() == z)
+                {
+                    z -= 1;
+                    z = randGen.Next(z, InfiniminerServer.lavaMax());
+                }
+                else
+                {
+                    z = randGen.Next(z, InfiniminerServer.lavaMax()); 
+                }
+
 
                 if (data[x, y, z] == BlockType.None && z+1 < size-1)
                 {
