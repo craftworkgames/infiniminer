@@ -83,12 +83,19 @@ namespace Infiniminer.States
 
         public override void OnRenderAtUpdate(GraphicsDevice graphicsDevice, GameTime gameTime)
         {
-            uint dataPacketsRecieved = 0;
-            for (int x = 0; x < 64; x++)
-                for (int y = 0; y < 64; y+=16)
-                    if (_P.mapLoadProgress[x, y])
-                        dataPacketsRecieved += 1;
-            string progressText = String.Format("{0:00}% LOADED", dataPacketsRecieved / 256.0f * 100);
+            string progressText = "";
+            if (_P.MapSize != 0)
+            {
+                uint dataPacketsRecieved = 0;
+                for (int x = 0; x < _P.MapSize; x++)
+                    for (int y = 0; y < _P.MapSize; y += _P.MapSize)
+                        if (_P.mapLoadProgress[x, y])
+                            dataPacketsRecieved += 1;
+                progressText = String.Format("{0:00}% LOADED",
+                    dataPacketsRecieved * 100 / _P.MapSize);
+            }
+            else
+                progressText = "0.00%";
 
             SpriteBatch spriteBatch = new SpriteBatch(graphicsDevice);
             spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Deferred, SaveStateMode.SaveState);

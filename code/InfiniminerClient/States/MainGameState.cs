@@ -440,7 +440,7 @@ namespace Infiniminer.States
                 }
 
                 // Change class.
-                if (key == Keys.M && _P.playerPosition.Y > 64 - InfiniminerGame.GROUND_LEVEL)
+                if (key == Keys.M && _P.playerPosition.Y > (_SM as InfiniminerGame).propertyBag.MapSize - InfiniminerGame.GROUND_LEVEL)
                     nextState = "Infiniminer.States.ClassSelectionState";
 
                 // Change team.

@@ -55,10 +55,10 @@ namespace Infiniminer
         public void JoinGame(IPEndPoint serverEndPoint)
         {
             // Clear out the map load progress indicator.
-            propertyBag.mapLoadProgress = new bool[GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE];
-            for (int i = 0; i < GlobalVariables.MAPSIZE; i++)
-                for (int j=0; j< GlobalVariables.MAPSIZE; j++)
-                    propertyBag.mapLoadProgress[i,j] = false;
+            //propertyBag.mapLoadProgress = new bool[propertyBag.mapSize, propertyBag.mapSize];
+            //for (int i = 0; i < propertyBag.mapSize; i++)
+            //    for (int j = 0; j < propertyBag.mapSize; j++)
+            //        propertyBag.mapLoadProgress[i,j] = false;
 
             // Create our connect message.
             NetBuffer connectBuffer = propertyBag.netClient.CreateBuffer();
@@ -144,6 +144,17 @@ namespace Infiniminer
                         {
                             if (propertyBag.netClient.Status == NetConnectionStatus.Disconnected)
                                 ChangeState("Infiniminer.States.ServerBrowserState");
+
+                            else if (propertyBag.netClient.Status == NetConnectionStatus.Connected)
+                            {
+                                if (propertyBag.MapSize == 0)
+                                {
+                                    //Get the map size from the server message
+                                    propertyBag.MapSize = propertyBag.netClient.ServerConnection.RemoteHailData[0];
+                                    // Clear out the map load progress indicator.
+                                    propertyBag.mapLoadProgress = new bool[propertyBag.MapSize, propertyBag.MapSize];
+                                }
+                            }
                         }
                         break;
 
@@ -157,7 +168,6 @@ namespace Infiniminer
                             ChangeState("Infiniminer.States.ServerBrowserState");
                         }
                         break;
-
                     case NetMessageType.Data:
                         {
                             InfiniminerMessage dataType = (InfiniminerMessage)msgBuffer.ReadByte();
@@ -173,16 +183,16 @@ namespace Infiniminer
                                         byte x = (byte)decompresser.ReadByte();
                                         byte y = (byte)decompresser.ReadByte();
                                         propertyBag.mapLoadProgress[x,y] = true;
-                                        for (byte dy=0; dy<GlobalVariables.PACKETSIZE; dy++)
-                                            for (byte z=0; z<GlobalVariables.MAPSIZE; z++)
+                                        for (byte dy = 0; dy < propertyBag.MapSize; dy++)
+                                            for (byte z = 0; z < propertyBag.MapSize; z++)
                                             {
                                                 BlockType blockType = (BlockType)decompresser.ReadByte();
                                                 if (blockType != BlockType.None)
                                                     propertyBag.blockEngine.downloadList[x, y+dy, z] = blockType;
                                             }
                                         bool downloadComplete = true;
-                                        for (x=0; x<GlobalVariables.MAPSIZE; x++)
-                                            for (y=0; y<GlobalVariables.MAPSIZE; y+=GlobalVariables.PACKETSIZE)
+                                        for (x = 0; x < propertyBag.MapSize; x++)
+                                            for (y = 0; y < propertyBag.MapSize; y += propertyBag.MapSize)
                                                 if (propertyBag.mapLoadProgress[x,y] == false)
                                                 {
                                                     downloadComplete = false;
