@@ -131,14 +131,9 @@ namespace Infiniminer
                 PaintAtPoint(ref data, x, y, z, size, rockSize, BlockType.Rock);
             }
         }
-
         public static void AddLava(ref BlockType[, ,] data, int size)
         {
-            ushort numFlows = InfiniminerServer.lavaFlows();
-            if (numFlows == 0)
-            {
-                numFlows = (ushort)randGen.Next(size / 16, size / 2);
-            }
+            int numFlows = randGen.Next(size / 16, size / 2);
             while (numFlows > 0)
             {
                 int x = randGen.Next(0, size);
@@ -159,29 +154,20 @@ namespace Infiniminer
                 zf /= 2;
                 zf = 1 - Math.Abs(zf - 1);
                 int z = (int)(zf * size);
-                if (InfiniminerServer.lavaMax() < z)
-                {
-                    z = randGen.Next(InfiniminerServer.lavaMax(), z);
-                }
-                else if (InfiniminerServer.lavaMax() == z)
-                {
-                    z -= 1;
-                    z = randGen.Next(z, InfiniminerServer.lavaMax());
-                }
-                else
-                {
-                    z = randGen.Next(z, InfiniminerServer.lavaMax()); 
-                }
-
 
                 if (data[x, y, z] == BlockType.None && z+1 < size-1)
                 {
                     data[x, y, z] = BlockType.Rock;
-                    data[x, y, z+1] = BlockType.Lava;
+                    data[x, y, z + 1] = BlockType.Lava;
+                    if (InfiniminerServer.lavaAtGroundLevel() && data[x, y, InfiniminerGame.GROUND_LEVEL] == BlockType.None)
+                    {
+                        data[x, y, InfiniminerGame.GROUND_LEVEL] = BlockType.Lava;
+                    }
                     numFlows -= 1;
                 }
             }
         }
+
 
         public static void AddDiamond(ref BlockType[, ,] data, int size)
         {

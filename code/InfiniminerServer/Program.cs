@@ -25,14 +25,18 @@ namespace Infiniminer.Server
             }
             else
             {
+#if !DEBUG
                 try
                 {
+#endif
                     RunServer();
+#if !DEBUG
                 }
                 catch (Exception e)
                 {
                     System.Windows.Forms.MessageBox.Show(e.Message + "\r\n\r\n" + e.StackTrace);
                 }
+#endif
             }
         }
     }
