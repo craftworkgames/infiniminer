@@ -3,32 +3,34 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows;
 
-namespace Infiniminer
+namespace Infiniminer.Server
 {
     class Program
     {
+        static void RunServer()
+        {
+            bool restartServer = true;
+            while (restartServer)
+            {
+                InfiniminerServer infiniminerServer = new InfiniminerServer();
+                restartServer = infiniminerServer.Start();
+            }
+        }
+
         static void Main(string[] args)
         {
-            bool authEnabled = true, publicServer = false;
-            DatafileLoader dataFile = new DatafileLoader("server.config.txt");
-            if (dataFile.Data.ContainsKey("authenabled"))
-                authEnabled = bool.Parse(dataFile.Data["authenabled"]);
-            if (dataFile.Data.ContainsKey("public"))
-                publicServer = bool.Parse(dataFile.Data["public"]);
-
+#if !DEBUG
             try
             {
-                bool restartServer = true;
-                while (restartServer)
-                {
-                    InfiniminerServer infiniminerServer = new InfiniminerServer();
-                    restartServer = infiniminerServer.Start();
-                }
+#endif
+                RunServer();
+#if !DEBUG
             }
             catch (Exception e)
             {
                 System.Windows.Forms.MessageBox.Show(e.Message + "\r\n\r\n" + e.StackTrace);
             }
+#endif
         }
     }
 }
