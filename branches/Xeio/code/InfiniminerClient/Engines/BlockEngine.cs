@@ -102,16 +102,15 @@ namespace Infiniminer
             vertexListDirty[texture, region] = true;
         }
 
-        public const int MAPSIZE = 64;
         const int REGIONSIZE = 16;
-        const int REGIONRATIO = MAPSIZE / REGIONSIZE;
-        const int NUMREGIONS = REGIONRATIO * REGIONRATIO * REGIONRATIO;
+        int REGIONRATIO;
+        int NUMREGIONS;
 
         public void DownloadComplete()
         {
-            for (ushort i = 0; i < MAPSIZE; i++)
-                for (ushort j = 0; j < MAPSIZE; j++)
-                    for (ushort k = 0; k < MAPSIZE; k++)
+            for (ushort i = 0; i < gameInstance.propertyBag.MapSize; i++)
+                for (ushort j = 0; j < gameInstance.propertyBag.MapSize; j++)
+                    for (ushort k = 0; k < gameInstance.propertyBag.MapSize; k++)
                         if (downloadList[i, j, k] != BlockType.None)
                             AddBlock(i, j, k, downloadList[i, j, k]);
         }
@@ -119,13 +118,15 @@ namespace Infiniminer
         public BlockEngine(InfiniminerGame gameInstance)
         {
             this.gameInstance = gameInstance;
+            REGIONRATIO = gameInstance.propertyBag.MapSize / REGIONSIZE;
+            NUMREGIONS = REGIONRATIO * REGIONRATIO * REGIONRATIO;
 
             // Initialize the block list.
-            downloadList = new BlockType[MAPSIZE, MAPSIZE, MAPSIZE];
-            blockList = new BlockType[MAPSIZE, MAPSIZE, MAPSIZE];
-            for (ushort i = 0; i < MAPSIZE; i++)
-                for (ushort j = 0; j < MAPSIZE; j++)
-                    for (ushort k = 0; k < MAPSIZE; k++)
+            downloadList = new BlockType[gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize];
+            blockList = new BlockType[gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize];
+            for (ushort i = 0; i < gameInstance.propertyBag.MapSize; i++)
+                for (ushort j = 0; j < gameInstance.propertyBag.MapSize; j++)
+                    for (ushort k = 0; k < gameInstance.propertyBag.MapSize; k++)
                     {
                         downloadList[i, j, k] = BlockType.None;
                         blockList[i, j, k] = BlockType.None;
@@ -234,7 +235,7 @@ namespace Infiniminer
             ushort x = (ushort)point.X;
             ushort y = (ushort)point.Y;
             ushort z = (ushort)point.Z;
-            if (x < 0 || y < 0 || z < 0 || x >= MAPSIZE || y >= MAPSIZE || z >= MAPSIZE)
+            if (x < 0 || y < 0 || z < 0 || x >= gameInstance.propertyBag.MapSize || y >= gameInstance.propertyBag.MapSize || z >= gameInstance.propertyBag.MapSize)
                 return BlockType.None;
             return blockList[x, y, z]; 
         }
@@ -491,7 +492,7 @@ namespace Infiniminer
 
         public void AddBlock(ushort x, ushort y, ushort z, BlockType blockType)
         {
-            if (x <= 0 || y <= 0 || z <= 0 || x >= MAPSIZE - 1 || y >= MAPSIZE - 1 || z >= MAPSIZE - 1)
+            if (x <= 0 || y <= 0 || z <= 0 || x >= gameInstance.propertyBag.MapSize - 1 || y >= gameInstance.propertyBag.MapSize - 1 || z >= gameInstance.propertyBag.MapSize - 1)
                 return;
 
             blockList[x, y, z] = blockType;
@@ -516,7 +517,7 @@ namespace Infiniminer
 
         public void RemoveBlock(ushort x, ushort y, ushort z)
         {
-            if (x <= 0 || y <= 0 || z <= 0 || x >= MAPSIZE - 1 || y >= MAPSIZE - 1 || z >= MAPSIZE - 1)
+            if (x <= 0 || y <= 0 || z <= 0 || x >= gameInstance.propertyBag.MapSize - 1 || y >= gameInstance.propertyBag.MapSize - 1 || z >= gameInstance.propertyBag.MapSize - 1)
                 return;
 
             _RemoveBlock(x, y, z, BlockFaceDirection.XIncreasing, x + 1, y, z, BlockFaceDirection.XDecreasing);
@@ -532,17 +533,17 @@ namespace Infiniminer
         private uint EncodeBlockFace(ushort x, ushort y, ushort z, BlockFaceDirection faceDir)
         {
             //TODO: OPTIMIZE BY HARD CODING VALUES IN
-            return (uint)(x + y * MAPSIZE + z * MAPSIZE * MAPSIZE + (byte)faceDir * MAPSIZE * MAPSIZE * MAPSIZE);
+            return (uint)(x + y * gameInstance.propertyBag.MapSize + z * gameInstance.propertyBag.MapSize * gameInstance.propertyBag.MapSize + (byte)faceDir * gameInstance.propertyBag.MapSize * gameInstance.propertyBag.MapSize * gameInstance.propertyBag.MapSize);
         }
 
         private void DecodeBlockFace(uint faceCode, ref ushort x, ref ushort y, ref ushort z, ref BlockFaceDirection faceDir)
         {
-            x = (ushort)(faceCode % MAPSIZE);
-            faceCode = (faceCode - x) / MAPSIZE;
-            y = (ushort)(faceCode % MAPSIZE);
-            faceCode = (faceCode - y) / MAPSIZE;
-            z = (ushort)(faceCode % MAPSIZE);
-            faceCode = (faceCode - z) / MAPSIZE;
+            x = (ushort)(faceCode % gameInstance.propertyBag.MapSize);
+            faceCode = (faceCode - x) / gameInstance.propertyBag.MapSize;
+            y = (ushort)(faceCode % gameInstance.propertyBag.MapSize);
+            faceCode = (faceCode - y) / gameInstance.propertyBag.MapSize;
+            z = (ushort)(faceCode % gameInstance.propertyBag.MapSize);
+            faceCode = (faceCode - z) / gameInstance.propertyBag.MapSize;
             faceDir = (BlockFaceDirection)faceCode;
         }
 
@@ -555,10 +556,10 @@ namespace Infiniminer
         private Vector3 GetRegionCenter(uint regionNumber)
         {
             uint x, y, z;
-            x = regionNumber % REGIONRATIO;
-            regionNumber = (regionNumber - x) / REGIONRATIO;
-            y = regionNumber % REGIONRATIO;
-            regionNumber = (regionNumber - y) / REGIONRATIO;
+            x = (uint)(regionNumber % REGIONRATIO);
+            regionNumber = (uint)((regionNumber - x) / REGIONRATIO);
+            y = (uint)(regionNumber % REGIONRATIO);
+            regionNumber = (uint)((regionNumber - y) / REGIONRATIO);
             z = regionNumber;
             return new Vector3(x * REGIONSIZE + REGIONSIZE / 2, y * REGIONSIZE + REGIONSIZE / 2, z * REGIONSIZE + REGIONSIZE / 2);            
         }

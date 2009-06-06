@@ -489,7 +489,10 @@ namespace Infiniminer
                                 {
                                     playerList[msgSender] = newPlayer;
                                     this.netServer.SanityCheck(msgSender);
-                                    msgSender.Approve();
+                                    //Send the server mapsize so that the client knows what to expect
+                                    var arr = new byte[1];
+                                    arr[0] = (byte)GlobalVariables.MAPSIZE;
+                                    msgSender.Approve(arr);
                                 }
                             }
                             break;
@@ -807,6 +810,7 @@ namespace Infiniminer
                 }
                 else if (typeBelow != BlockType.Lava)
                 {
+                    
                     if (i > 0 && blockList[i - 1, j, k] == BlockType.None)
                         tempLava.Add(new Point3D() { X = (ushort)(i - 1), Y = j, Z = k });
                     if (k > 0 && blockList[i, j, k - 1] == BlockType.None)
@@ -1270,7 +1274,7 @@ namespace Infiniminer
         public void SendCurrentMap(NetConnection client)
         {
             for (byte x = 0; x < GlobalVariables.MAPSIZE; x++)
-                for (byte y=0; y< GlobalVariables.MAPSIZE; y+= GlobalVariables.PACKETSIZE)
+                for (byte y=0; y< GlobalVariables.MAPSIZE; y+= GlobalVariables.MAPSIZE)
                 {
                     NetBuffer msgBuffer = netServer.CreateBuffer();
                     msgBuffer.Write((byte)InfiniminerMessage.BlockBulkTransfer);
@@ -1282,7 +1286,7 @@ namespace Infiniminer
                     //Write everything we want to compress to the uncompressed stream
                     uncompressed.WriteByte(x);
                     uncompressed.WriteByte(y);
-                    for (byte dy = 0; dy < GlobalVariables.PACKETSIZE; dy++)
+                    for (byte dy = 0; dy < GlobalVariables.MAPSIZE; dy++)
                         for (byte z = 0; z < GlobalVariables.MAPSIZE; z++)
                             uncompressed.WriteByte((byte)(blockList[x, y + dy, z]));
                     //Compress the input
