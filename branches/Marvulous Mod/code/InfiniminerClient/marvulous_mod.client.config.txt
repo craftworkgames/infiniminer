@@ -1,0 +1,27 @@
+# This value specifies your name - please change it to something unique!
+# handle = I NEED TO RENAME MYSELF # default
+
+width = 1024
+height = 768
+fullscreen = false
+
+# If this flag is set to true, pretty mode will be enabled, which turns on bloom lighting!
+# If your performance is bad, try turning this off.
+pretty = true
+
+showfps = true
+yinvert = false
+
+# This value specifies the override volume multiplier, for people who find the sounds too loud.
+volume = 0.7
+
+# If this flag is true, all sound for the game will be disabled. This should fix all AllocateFormatAndData crashes.
+# If volume is set to 0.0, nosound will automatically be set to true
+nosound = false
+nosong  = false # Title music in Marvulous Mod is "80's" by Torley Wong (http://www.torley.com ) track is made available under CC-BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
+
+msg_splat        = went splat
+msg_lava         = got deep-fried
+msg_shock        = failed his uncle fester impression
+msg_misadventure = was eaten by a grue
+msg_explosion    = was blown to itty bitty pieces. You bastards!

@@ -472,14 +472,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="song_title.wma">
-      <Name>song_title</Name>
-      <Importer>WmaImporter</Importer>
-      <Processor>SongProcessor</Processor>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="blocks\tex_block_gold.png">
       <Name>tex_block_gold</Name>
       <Importer>TextureImporter</Importer>
@@ -738,6 +730,14 @@
       <Name>tex_icon_translucent</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="song_title.mp3">
+      <Name>song_title</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SongProcessor</Processor>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\v3.0\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
