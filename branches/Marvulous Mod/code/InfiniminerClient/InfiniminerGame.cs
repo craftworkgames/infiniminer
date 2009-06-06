@@ -298,10 +298,14 @@ namespace Infiniminer
         public void JoinGame(IPEndPoint serverEndPoint)
         {
             // Clear out the map load progress indicator.
-            propertyBag.mapLoadProgress = new bool[64,64];
-            for (int i = 0; i < 64; i++)
-                for (int j=0; j<64; j++)
-                    propertyBag.mapLoadProgress[i,j] = false;
+            propertyBag.mapLoadProgress = new bool[GlobalVariables.MAPSIZE,GlobalVariables.MAPSIZE];
+            for (int i = 0; i < GlobalVariables.MAPSIZE; i++)
+            {
+                for (int j = 0; j < GlobalVariables.MAPSIZE; j++)
+                {
+                    propertyBag.mapLoadProgress[i, j] = false;
+                }
+            }
 
             // Create our connect message.
             NetBuffer connectBuffer = propertyBag.netClient.CreateBuffer();
@@ -411,21 +415,29 @@ namespace Infiniminer
                                         byte x = msgBuffer.ReadByte();
                                         byte y = msgBuffer.ReadByte();
                                         propertyBag.mapLoadProgress[x,y] = true;
-                                        for (byte dy=0; dy<16; dy++)
-                                            for (byte z=0; z<64; z++)
+                                        for (byte dy = 0; dy < GlobalVariables.PACKETSIZE; dy++)
+                                        {
+                                            for (byte z = 0; z < GlobalVariables.MAPSIZE; z++)
                                             {
                                                 BlockType blockType = (BlockType)msgBuffer.ReadByte();
                                                 if (blockType != BlockType.None)
-                                                    propertyBag.blockEngine.downloadList[x, y+dy, z] = blockType;
+                                                {
+                                                    propertyBag.blockEngine.downloadList[x, y + dy, z] = blockType;
+                                                }
                                             }
+                                        }
                                         bool downloadComplete = true;
-                                        for (x=0; x<64; x++)
-                                            for (y=0; y<64; y+=16)
-                                                if (propertyBag.mapLoadProgress[x,y] == false)
+                                        for (x = 0; x < GlobalVariables.MAPSIZE; x++)
+                                        {
+                                            for (y = 0; y < GlobalVariables.MAPSIZE; y += GlobalVariables.PACKETSIZE)
+                                            {
+                                                if (propertyBag.mapLoadProgress[x, y] == false)
                                                 {
                                                     downloadComplete = false;
                                                     break;
                                                 }
+                                            }
+                                        }
                                         if (downloadComplete)
                                         {
                                             ChangeState("Infiniminer.States.TeamSelectionState");

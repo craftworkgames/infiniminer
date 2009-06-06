@@ -15,7 +15,6 @@ namespace Infiniminer
         InfiniminerNetServer netServer = null;
         BlockType[, ,] blockList = null;    // In game coordinates, where Y points up.
         PlayerTeam[, ,] blockCreatorTeam = null;
-        const ushort MAPSIZE = 64;
         Dictionary<NetConnection, Player> playerList = new Dictionary<NetConnection, Player>();
 
         private const string config_filename = "marvulous_mod.server.config.txt";
@@ -41,23 +40,19 @@ namespace Infiniminer
             catch (Exception) { }
             try
             {
-                configHelper.ushortTernaryConfig(ref _lavaMax, "lava", dataFile, 0, MAPSIZE);
-            }
-            catch (Exception)
-            {
-                _lavaMax = (ushort)(MAPSIZE / 2.0);
-            }
-            try
-            {
                 configHelper.ushortTernaryConfig(ref _lavaFlows, "lavaflows", dataFile, 0, 32);
             }
             catch (Exception) { }
             try
             {
-                configHelper.ushortTernaryConfig(ref lavaGenLoops, "lavagenloops", dataFile, 1, MAPSIZE);
+                configHelper.boolTernaryConfig(ref _lavaAtGroundLevel, "lavaground", dataFile);
             }
             catch (Exception) { }
-            includeLava = _lavaMax > 0;
+            includeLava = _lavaFlows > 0 || _lavaAtGroundLevel;
+            if (_lavaAtGroundLevel && _lavaFlows == 0)
+            {
+                _lavaFlows = 1;
+            }
             try
             {
                 configHelper.uintTernaryConfig(ref oreFactor, "orefactor", dataFile, 0, 999999999);
@@ -124,6 +119,13 @@ namespace Infiniminer
             }
             try
             {
+                configHelper.boolTernaryConfig(ref authEnabled, "compress_maps", dataFile);
+            }
+            catch (Exception) { }
+            
+            
+            try
+            {
                 configHelper.stringTernaryConfig(ref _teamNameA, "team_a", dataFile);
             }
             catch (Exception) {
@@ -159,8 +161,17 @@ namespace Infiniminer
         {
             return _connectionPort;
         }
+        private static bool _compressMaps = false;
+        public static bool compressMaps()
+        {
+            return _compressMaps;
+        }
+        private static bool _lavaAtGroundLevel = false;
+        public static bool lavaAtGroundLevel()
+        {
+            return _lavaAtGroundLevel;
+        }
         bool autosave = true;
-        int lavaBlockCount = 0;
         uint oreFactor = 10;
         bool publicServer = false;
         uint maxPlayers = 16;
@@ -168,8 +179,6 @@ namespace Infiniminer
         bool sandboxMode = false;
         bool includeLava = true;
         private static ushort _lavaFlows = 0;
-        private static ushort _lavaMax;
-        ushort lavaGenLoops = 2;
         private static string publicServerList = "http://apps.keithholman.net/post";
         private static bool authEnabled = false;
         private static string loadMapOnStart = "";
@@ -230,6 +239,14 @@ namespace Infiniminer
         DateTime restartTime = DateTime.Now;
         bool restartTriggered = false;
 
+        //All the lava blocks on the map
+        //This could be a hashSet, but we're using .net 2.0
+        Dictionary<Point3D, byte> LavaBlocks = new Dictionary<Point3D, byte>();
+        struct Point3D
+        {
+            public ushort X, Y, Z;
+        }
+
         public InfiniminerServer()
         {
             Console.SetWindowSize(1, 1);
@@ -243,10 +260,6 @@ namespace Infiniminer
         public static ushort lavaFlows()
         {
             return _lavaFlows;
-        }
-        public static ushort lavaMax()
-        {
-            return (ushort)Math.Abs((MAPSIZE - _lavaMax));
         }
 
         public string GetExtraInfo()
@@ -478,15 +491,20 @@ namespace Infiniminer
                 {
                     ConsoleWrite(sr.ReadLine());
                 }
-                for (int x = 0; x < 64; x++)
-                    for (int y = 0; y < 64; y++)
-                        for (int z = 0; z < 64; z++)
+                LavaBlocks.Clear();
+                for (int x = 0; x < GlobalVariables.MAPSIZE; x++)
+                    for (int y = 0; y < GlobalVariables.MAPSIZE; y++)
+                        for (int z = 0; z < GlobalVariables.MAPSIZE; z++)
                         {
                             string line = sr.ReadLine();
                             string[] fileArgs = line.Split(",".ToCharArray());
                             if (fileArgs.Length == 2)
                             {
                                 blockList[x, y, z] = (BlockType)int.Parse(fileArgs[0], System.Globalization.CultureInfo.InvariantCulture);
+                                if (blockList[x, y, z] == BlockType.Lava)
+                                {
+                                    LavaBlocks.Add(new Point3D() { X = (ushort)x, Y = (ushort)y, Z = (ushort)z }, 0);
+                                }
                                 blockCreatorTeam[x, y, z] = (PlayerTeam)int.Parse(fileArgs[1], System.Globalization.CultureInfo.InvariantCulture);
                             }
                         }
@@ -508,9 +526,9 @@ namespace Infiniminer
         {
             FileStream fs = new FileStream(filename, FileMode.Create);
             StreamWriter sw = new StreamWriter(fs);
-            for (int x = 0; x < 64; x++)
-                for (int y = 0; y < 64; y++)
-                    for (int z = 0; z < 64; z++)
+            for (int x = 0; x < GlobalVariables.MAPSIZE; x++)
+                for (int y = 0; y < GlobalVariables.MAPSIZE; y++)
+                    for (int z = 0; z < GlobalVariables.MAPSIZE; z++)
                         sw.WriteLine((byte)blockList[x, y, z] + "," + (byte)blockCreatorTeam[x, y, z]);
             sw.Close();
             fs.Close();
@@ -571,8 +589,11 @@ namespace Infiniminer
 
         public void SetBlock(ushort x, ushort y, ushort z, BlockType blockType, PlayerTeam team)
         {
-            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(MAPSIZE) >= 0 || (y + 1).CompareTo(MAPSIZE) >= 0 || (z + 1).CompareTo(MAPSIZE) >= 0)
+            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (y + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (z + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0)
+            {
                 return;
+            }
+            var oldBlockType = blockList[x, y, z];
 
             if (blockType == BlockType.BeaconA || blockType == BlockType.BeaconB)
             {
@@ -601,12 +622,22 @@ namespace Infiniminer
             msgBuffer.Write((byte)z);
             msgBuffer.Write((byte)blockType);
             foreach (NetConnection netConn in playerList.Keys)
+            {
                 if (netConn.Status == NetConnectionStatus.Connected)
+                {
                     netServer.SendMessage(msgBuffer, netConn, NetChannel.ReliableUnordered);
+                }
+            }
 
-            if (blockType == BlockType.Lava)
-                lavaBlockCount += 1;
-            
+            var lavaBlockPoint3D = new Point3D() { X = (ushort)x, Y = (ushort)y, Z = (ushort)z };
+            if (oldBlockType == BlockType.Lava && blockType != BlockType.Lava)
+            {
+                LavaBlocks.Remove(lavaBlockPoint3D);
+            }
+            else if (blockType == BlockType.Lava && oldBlockType != BlockType.Lava)
+            {
+                LavaBlocks.Add(lavaBlockPoint3D, 0);
+            }
             //ConsoleWrite("BLOCKSET: " + x + " " + y + " " + z + " " + blockType.ToString());
         }
         public bool Start()
@@ -615,8 +646,8 @@ namespace Infiniminer
             // Load the ban-list.
             banList = LoadBanList();
             bool makeNewMap = (loadMapOnStart == "");
-            blockList = new BlockType[MAPSIZE, MAPSIZE, MAPSIZE];
-            blockCreatorTeam = new PlayerTeam[MAPSIZE, MAPSIZE, MAPSIZE];
+            blockList = new BlockType[GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE];
+            blockCreatorTeam = new PlayerTeam[GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE];
             if (makeNewMap == false)
             {
                 try
@@ -633,14 +664,18 @@ namespace Infiniminer
             {
                 ConsoleWrite("MAKING NEW MAP");
                 // Create our block world, translating the coordinates out of the cave generator (where Z points down)
-                BlockType[, ,] worldData = CaveGenerator.GenerateCaveSystem(MAPSIZE, includeLava, oreFactor);
-                for (ushort x = 0; x < MAPSIZE; x++)
+                BlockType[, ,] worldData = CaveGenerator.GenerateCaveSystem(GlobalVariables.MAPSIZE, includeLava, oreFactor);
+                for (ushort x = 0; x < GlobalVariables.MAPSIZE; x++)
                 {
-                    for (ushort y = 0; y < MAPSIZE; y++)
+                    for (ushort y = 0; y < GlobalVariables.MAPSIZE; y++)
                     {
-                        for (ushort z = 0; z < MAPSIZE; z++)
+                        for (ushort z = 0; z < GlobalVariables.MAPSIZE; z++)
                         {
-                            blockList[x, (ushort)(MAPSIZE - 1 - z), y] = worldData[x, y, z];
+                            blockList[x, (ushort)(GlobalVariables.MAPSIZE - 1 - z), y] = worldData[x, y, z];
+                            if (blockList[x, (ushort)(GlobalVariables.MAPSIZE - 1 - z), y] == BlockType.Lava)
+                            {
+                                LavaBlocks.Add(new Point3D() { X = (ushort)x, Y = (ushort)(GlobalVariables.MAPSIZE - 1 - z), Z = (ushort)y }, 0);
+                            }
                             blockCreatorTeam[x, y, z] = PlayerTeam.None;
                         }
                     }
@@ -672,11 +707,11 @@ namespace Infiniminer
             if (includeLava)
             {
                 ConsoleWrite("CALCULATING INITIAL LAVA FLOWS");
-                for (ushort i = 0; i < MAPSIZE * lavaGenLoops; i++)
+                for (int i = 0; i < GlobalVariables.MAPSIZE * 2; i++)
                 {
                     DoLavaStuff();
                 }
-                ConsoleWrite("TOTAL LAVA BLOCKS = " + lavaBlockCount);
+                ConsoleWrite("TOTAL LAVA BLOCKS = " + LavaBlocks.Count);
             }
             else
             {
@@ -1010,7 +1045,7 @@ namespace Infiniminer
         {
             foreach (Player p in playerList.Values)
             {
-                if (p.Position.Y > 64 - InfiniminerGame.GROUND_LEVEL)
+                if (p.Position.Y > GlobalVariables.MAPSIZE - InfiniminerGame.GROUND_LEVEL)
                     DepositCash(p);
             }
 
@@ -1022,71 +1057,63 @@ namespace Infiniminer
                 winningTeam = PlayerTeam.A;
         }
 
-        public void DoLavaStuff()
+        public bool DoLavaStuff()
         {
-            bool[, ,] flowSleep = new bool[MAPSIZE, MAPSIZE, MAPSIZE]; //if true, do not calculate this turn
-
-            for (ushort x = 0; x < MAPSIZE; x++)
-                for (ushort y = 0; y < MAPSIZE; y++)
-                    for (ushort z = 0; z < MAPSIZE; z++)
-                        flowSleep[x, y, z] = false;
-
-            for (ushort x = 0; x < MAPSIZE; x++)
+            //Temporary list of new blocks, we don't add them immediately so they aren't
+            //we only make one lave step per run.
+            List<Point3D> tempLava = new List<Point3D>();
+            foreach (var blockposition in LavaBlocks.Keys)
             {
-                for (ushort y = 0; y < MAPSIZE; y++)
+                ushort i = blockposition.X,
+                    j = blockposition.Y,
+                    k = blockposition.Z;
+                // RULES FOR LAVA EXPANSION:
+                // if the block below is lava, do nothing
+                // if the block below is empty space, add lava there
+                // if the block below is something solid, add lava to the sides
+                if (j == 0)
+                    continue;
+                BlockType typeBelow = blockList[i, j - 1, k];
+                if (typeBelow == BlockType.None)
                 {
-                    for (ushort z = 0; z < MAPSIZE; z++)
-                    {
-                        if (blockList[x, y, z] == BlockType.Lava && !flowSleep[x, y, z])
-                        {
-                            // RULES FOR LAVA EXPANSION:
-                            // if the block below is lava, do nothing
-                            // if the block below is empty space, add lava there
-                            // if the block below is something solid, add lava to the sides
-                            BlockType typeBelow = (y == 0) ? BlockType.Lava : blockList[x, y - 1, z];
-                            if (typeBelow == BlockType.None)
-                            {
-                                if (y > 0)
-                                {
-                                    SetBlock(x, (ushort)(y - 1), z, BlockType.Lava, PlayerTeam.None);
-                                    flowSleep[x, y - 1, z] = true;
-                                }
-                            }
-                            else if (typeBelow != BlockType.Lava)
-                            {
-                                if (x > 0 && blockList[x - 1, y, z] == BlockType.None)
-                                {
-                                    SetBlock((ushort)(x - 1), y, z, BlockType.Lava, PlayerTeam.None);
-                                    flowSleep[x - 1, y, z] = true;
-                                }
-                                if (z > 0 && blockList[x, y, z - 1] == BlockType.None)
-                                {
-                                    SetBlock(x, y, (ushort)(z - 1), BlockType.Lava, PlayerTeam.None);
-                                    flowSleep[x, y, z - 1] = true;
-                                }
-                                if ((x + 1).CompareTo(MAPSIZE) < 0 && blockList[x + 1, y, z] == BlockType.None)
-                                {
-                                    SetBlock((ushort)(x + 1), y, z, BlockType.Lava, PlayerTeam.None);
-                                    flowSleep[x + 1, y, z] = true;
-                                }
-                                if ((z + 1).CompareTo(MAPSIZE) < 0 && blockList[x, y, z + 1] == BlockType.None)
-                                {
-                                    SetBlock(x, y, (ushort)(z + 1), BlockType.Lava, PlayerTeam.None);
-                                    flowSleep[x, y, z + 1] = true;
-                                }
-                            }
-                        }
-                    }
+                    tempLava.Add(new Point3D() { X = i, Y = (ushort)(j - 1), Z = k });
+                }
+                else if (typeBelow != BlockType.Lava)
+                {
+                    if (i > 0 && blockList[i - 1, j, k] == BlockType.None)
+                        tempLava.Add(new Point3D() { X = (ushort)(i - 1), Y = j, Z = k });
+                    if (k > 0 && blockList[i, j, k - 1] == BlockType.None)
+                        tempLava.Add(new Point3D() { X = i, Y = j, Z = (ushort)(k - 1) });
+                    if ((i + 1).CompareTo(GlobalVariables.MAPSIZE) < 0 && blockList[i + 1, j, k] == BlockType.None)
+                        tempLava.Add(new Point3D() { X = (ushort)(i + 1), Y = j, Z = k });
+                    if ((k + 1).CompareTo(GlobalVariables.MAPSIZE) < 0 && blockList[i, j, k + 1] == BlockType.None)
+                        tempLava.Add(new Point3D() { X = i, Y = j, Z = (ushort)(k + 1) });
                 }
             }
+
+
+            //Keep track of if we changed anything
+            bool changedstuff = false;
+            //Add the temporary lava blocks to the list
+            foreach (var newLavaPoint in tempLava)
+            {
+                //Makes sure we don't try to add a block twice (if it is both below/next to already existing lava)
+                if (!LavaBlocks.ContainsKey(newLavaPoint))
+                {
+                    SetBlock(newLavaPoint.X, newLavaPoint.Y, newLavaPoint.Z, BlockType.Lava, PlayerTeam.None);
+                    changedstuff = true;
+                }
+            }
+            return changedstuff;
         }
+
 
         public BlockType BlockAtPoint(Vector3 point)
         {
             short x = (short)point.X;
             short y = (short)point.Y;
             short z = (short)point.Z;
-            if (x <= 0 || y <= 0 || z <= 0 || x >= MAPSIZE - 1 || y >= MAPSIZE - 1 || z >= MAPSIZE - 1)
+            if (x <= 0 || y <= 0 || z <= 0 || x >= GlobalVariables.MAPSIZE - 1 || y >= GlobalVariables.MAPSIZE - 1 || z >= GlobalVariables.MAPSIZE - 1)
                 return BlockType.None;
             return blockList[x, y, z];
         }
@@ -1189,9 +1216,9 @@ namespace Infiniminer
 
         //private bool LocationNearBase(ushort x, ushort y, ushort z)
         //{
-        //    for (int i=0; i<MAPSIZE; i++)
-        //        for (int j=0; j<MAPSIZE; j++)
-        //            for (int k = 0; k < MAPSIZE; k++)
+        //    for (int i=0; i<GlobalVariables.MAPSIZE; i++)
+        //        for (int j=0; j<GlobalVariables.MAPSIZE; j++)
+        //            for (int k = 0; k < GlobalVariables.MAPSIZE; k++)
         //                if (blockList[i, j, k] == BlockType.HomeB || blockList[i, j, k] == BlockType.HomeA)
         //                {
         //                    double dist = Math.Sqrt(Math.Pow(x - i, 2) + Math.Pow(y - j, 2) + Math.Pow(z - k, 2));
@@ -1229,7 +1256,7 @@ namespace Infiniminer
             }
 
             // If it's out of bounds, bail.
-            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(MAPSIZE) >= 0 || (y + 1).CompareTo(MAPSIZE) >= 0 || (z + 1).CompareTo(MAPSIZE) >= 0)
+            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (y + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (z + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0)
                 actionFailed = true;
 
             // If it's near a base, bail.
@@ -1362,7 +1389,7 @@ namespace Infiniminer
                     for (short dz = -2; dz <= 2; dz++)
                     {
                         // Check that this is a sane block position.
-                        if (x + dx <= 0 || y + dy <= 0 || z + dz <= 0 || x + dx >= MAPSIZE - 1 || y + dy >= MAPSIZE - 1 || z + dz >= MAPSIZE - 1)
+                        if (x + dx <= 0 || y + dy <= 0 || z + dz <= 0 || x + dx >= GlobalVariables.MAPSIZE - 1 || y + dy >= GlobalVariables.MAPSIZE - 1 || z + dz >= GlobalVariables.MAPSIZE - 1)
                             continue;
 
                         // Chain reactions!
@@ -1540,21 +1567,51 @@ namespace Infiniminer
 
         public void SendCurrentMap(NetConnection client)
         {
-            Debug.Assert(MAPSIZE == 64, "The BlockBulkTransfer message requires a map size of 64.");
-            
-            for (byte x = 0; x < MAPSIZE; x++)
-                for (byte y=0; y<MAPSIZE; y+=16)
+            for (byte x = 0; x < GlobalVariables.MAPSIZE; x++)
+            {
+                for (byte y = 0; y < GlobalVariables.MAPSIZE; y += GlobalVariables.PACKETSIZE)
                 {
                     NetBuffer msgBuffer = netServer.CreateBuffer();
                     msgBuffer.Write((byte)InfiniminerMessage.BlockBulkTransfer);
-                    msgBuffer.Write(x);
-                    msgBuffer.Write(y);
-                    for (byte dy=0; dy<16; dy++)
-                        for (byte z = 0; z < MAPSIZE; z++)
-                            msgBuffer.Write((byte)(blockList[x, y+dy, z]));
+                    if (compressMaps())
+                    {
+                        //Compress the data so we don't use as much bandwith
+                        var compressedstream = new System.IO.MemoryStream();
+                        var uncompressed = new System.IO.MemoryStream();
+                        var compresser = new System.IO.Compression.GZipStream(compressedstream, System.IO.Compression.CompressionMode.Compress);
+                        //Write everything we want to compress to the uncompressed stream
+                        uncompressed.WriteByte(x);
+                        uncompressed.WriteByte(y);
+                        for (byte dy = 0; dy < GlobalVariables.PACKETSIZE; dy++)
+                        {
+                            for (byte z = 0; z < GlobalVariables.MAPSIZE; z++)
+                            {
+                                if (compressMaps())
+                                {
+                                    uncompressed.WriteByte((byte)(blockList[x, y + dy, z]));
+                                }
+                            }
+                        }
+                        msgBuffer.Write(compressedstream.ToArray());
+                    }
+                    else
+                    {
+                        msgBuffer.Write(x);
+                        msgBuffer.Write(y);
+                        for (byte dy = 0; dy < GlobalVariables.PACKETSIZE; dy++)
+                        {
+                            for (byte z = 0; z < GlobalVariables.MAPSIZE; z++)
+                            {
+                                msgBuffer.Write((byte)(blockList[x, y + dy, z]));
+                            }
+                        }
+                    }
                     if (client.Status == NetConnectionStatus.Connected)
+                    {
                         netServer.SendMessage(msgBuffer, client, NetChannel.ReliableUnordered);
+                    }
                 }
+            }
         }
 
         public void SendPlayerPing(uint playerId)

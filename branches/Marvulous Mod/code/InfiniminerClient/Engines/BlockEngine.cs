@@ -102,16 +102,15 @@ namespace Infiniminer
             vertexListDirty[texture, region] = true;
         }
 
-        public const int MAPSIZE = 64;
         const int REGIONSIZE = 16;
-        const int REGIONRATIO = MAPSIZE / REGIONSIZE;
+        const int REGIONRATIO = GlobalVariables.MAPSIZE / REGIONSIZE;
         const int NUMREGIONS = REGIONRATIO * REGIONRATIO * REGIONRATIO;
 
         public void DownloadComplete()
         {
-            for (ushort i = 0; i < MAPSIZE; i++)
-                for (ushort j = 0; j < MAPSIZE; j++)
-                    for (ushort k = 0; k < MAPSIZE; k++)
+            for (ushort i = 0; i < GlobalVariables.MAPSIZE; i++)
+                for (ushort j = 0; j < GlobalVariables.MAPSIZE; j++)
+                    for (ushort k = 0; k < GlobalVariables.MAPSIZE; k++)
                         if (downloadList[i, j, k] != BlockType.None)
                             AddBlock(i, j, k, downloadList[i, j, k]);
         }
@@ -121,11 +120,11 @@ namespace Infiniminer
             this.gameInstance = gameInstance;
 
             // Initialize the block list.
-            downloadList = new BlockType[MAPSIZE, MAPSIZE, MAPSIZE];
-            blockList = new BlockType[MAPSIZE, MAPSIZE, MAPSIZE];
-            for (ushort i = 0; i < MAPSIZE; i++)
-                for (ushort j = 0; j < MAPSIZE; j++)
-                    for (ushort k = 0; k < MAPSIZE; k++)
+            downloadList = new BlockType[GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE];
+            blockList = new BlockType[GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE];
+            for (ushort i = 0; i < GlobalVariables.MAPSIZE; i++)
+                for (ushort j = 0; j < GlobalVariables.MAPSIZE; j++)
+                    for (ushort k = 0; k < GlobalVariables.MAPSIZE; k++)
                     {
                         downloadList[i, j, k] = BlockType.None;
                         blockList[i, j, k] = BlockType.None;
@@ -236,7 +235,7 @@ namespace Infiniminer
             ushort x = (ushort)point.X;
             ushort y = (ushort)point.Y;
             ushort z = (ushort)point.Z;
-            if (x < 0 || y < 0 || z < 0 || x >= MAPSIZE || y >= MAPSIZE || z >= MAPSIZE)
+            if (x < 0 || y < 0 || z < 0 || x >= GlobalVariables.MAPSIZE || y >= GlobalVariables.MAPSIZE || z >= GlobalVariables.MAPSIZE)
                 return BlockType.None;
             return blockList[x, y, z]; 
         }
@@ -493,7 +492,7 @@ namespace Infiniminer
 
         public void AddBlock(ushort x, ushort y, ushort z, BlockType blockType)
         {
-            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(MAPSIZE) >= 0 || (y + 1).CompareTo(MAPSIZE) >= 0 || (z + 1).CompareTo(MAPSIZE) >= 0)
+            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (y + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (z + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0)
                 return;
 
             blockList[x, y, z] = blockType;
@@ -518,7 +517,7 @@ namespace Infiniminer
 
         public void RemoveBlock(ushort x, ushort y, ushort z)
         {
-            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(MAPSIZE) >= 0 || (y + 1).CompareTo(MAPSIZE) >= 0 || (z + 1).CompareTo(MAPSIZE) >= 0)
+            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (y + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (z + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0)
                 return;
 
             _RemoveBlock(x, y, z, BlockFaceDirection.XIncreasing, x + 1, y, z, BlockFaceDirection.XDecreasing);
@@ -534,17 +533,17 @@ namespace Infiniminer
         private uint EncodeBlockFace(ushort x, ushort y, ushort z, BlockFaceDirection faceDir)
         {
             //TODO: OPTIMIZE BY HARD CODING VALUES IN
-            return (uint)(x + y * MAPSIZE + z * MAPSIZE * MAPSIZE + (byte)faceDir * MAPSIZE * MAPSIZE * MAPSIZE);
+            return (uint)(x + y * GlobalVariables.MAPSIZE + z * GlobalVariables.MAPSIZE * GlobalVariables.MAPSIZE + (byte)faceDir * GlobalVariables.MAPSIZE * GlobalVariables.MAPSIZE * GlobalVariables.MAPSIZE);
         }
 
         private void DecodeBlockFace(uint faceCode, ref ushort x, ref ushort y, ref ushort z, ref BlockFaceDirection faceDir)
         {
-            x = (ushort)(faceCode % MAPSIZE);
-            faceCode = (faceCode - x) / MAPSIZE;
-            y = (ushort)(faceCode % MAPSIZE);
-            faceCode = (faceCode - y) / MAPSIZE;
-            z = (ushort)(faceCode % MAPSIZE);
-            faceCode = (faceCode - z) / MAPSIZE;
+            x = (ushort)(faceCode % GlobalVariables.MAPSIZE);
+            faceCode = (faceCode - x) / GlobalVariables.MAPSIZE;
+            y = (ushort)(faceCode % GlobalVariables.MAPSIZE);
+            faceCode = (faceCode - y) / GlobalVariables.MAPSIZE;
+            z = (ushort)(faceCode % GlobalVariables.MAPSIZE);
+            faceCode = (faceCode - z) / GlobalVariables.MAPSIZE;
             faceDir = (BlockFaceDirection)faceCode;
         }
 
