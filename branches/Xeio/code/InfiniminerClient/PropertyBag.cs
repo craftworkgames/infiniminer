@@ -252,12 +252,50 @@ namespace Infiniminer
                 return;
 
             playerDead = false;
-            playerPosition = new Vector3(randGen.Next(2, 62) + 0.5f, 66, randGen.Next(2, 62) + 0.5f);
+
+            // Respawn a few blocks above a safe position above altitude 0.
+            bool positionFound = false;
+
+            // Try 20 times; use a potentially invalid position if we fail.
+            for (int i = 0; i < 20; i++)
+            {
+                // Pick a random starting point.
+                Vector3 startPos = new Vector3(randGen.Next(2, GlobalVariables.MAPSIZE-2), GlobalVariables.MAPSIZE-1, randGen.Next(2, GlobalVariables.MAPSIZE-2));
+
+                // See if this is a safe place to drop.
+                for (startPos.Y = GlobalVariables.MAPSIZE-1; startPos.Y >= GlobalVariables.MAPSIZE-8; startPos.Y--)
+                {
+                    BlockType blockType = blockEngine.BlockAtPoint(startPos);
+                    if (blockType == BlockType.Lava)
+                        break;
+                    else if (blockType != BlockType.None)
+                    {
+                        // We have found a valid place to spawn, so spawn a few above it.
+                        playerPosition = startPos + Vector3.UnitY * 5;
+                        positionFound = true;
+                        break;
+                    }
+                }
+
+                // If we found a position, no need to try anymore!
+                if (positionFound)
+                    break;
+            }
+
+            // If we failed to find a spawn point, drop randomly.
+            if (!positionFound)
+                playerPosition = new Vector3(randGen.Next(2, 62), 66, randGen.Next(2, 62));
+
+            // Drop the player on the middle of the block, not at the corner.
+            playerPosition += new Vector3(0.5f, 0, 0.5f);
+
+            // Zero out velocity and reset camera and screen effects.
             playerVelocity = Vector3.Zero;
             screenEffect = ScreenEffect.None;
             screenEffectCounter = 0;
             UpdateCamera();
 
+            // Tell the server we have respawned.
             NetBuffer msgBuffer = netClient.CreateBuffer();
             msgBuffer.Write((byte)InfiniminerMessage.PlayerAlive);
             netClient.SendMessage(msgBuffer, NetChannel.ReliableUnordered);
