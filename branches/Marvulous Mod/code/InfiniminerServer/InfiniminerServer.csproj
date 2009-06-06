@@ -14,7 +14,7 @@
     <FileAlignment>512</FileAlignment>
     <ApplicationIcon>Server.ico</ApplicationIcon>
     <NoWin32Manifest>true</NoWin32Manifest>
-    <StartupObject>Infiniminer.Program</StartupObject>
+    <StartupObject>Infiniminer.Server.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>false</DebugSymbols>

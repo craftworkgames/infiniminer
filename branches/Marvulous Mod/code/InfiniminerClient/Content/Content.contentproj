@@ -737,7 +737,6 @@
       <Name>song_title</Name>
       <Importer>Mp3Importer</Importer>
       <Processor>SongProcessor</Processor>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\v3.0\Microsoft.Xna.GameStudio.ContentPipeline.targets" />

@@ -36,6 +36,13 @@ namespace Infiniminer
             catch (Exception) { }
             try
             {
+                configHelper.stringTernaryConfig(ref _publicServerList, "public", dataFile);
+            }
+            catch (Exception) { }
+
+
+            try
+            {
                 configHelper.stringTernaryConfig(ref playerHandle, "handle", dataFile);
             }
             catch (Exception) { }
@@ -177,6 +184,13 @@ namespace Infiniminer
         public static ushort connectionPort()
         {
             return _connectionPort;
+        }
+
+        private static string _publicServerList = "http://apps.keithholman.net/plain";
+        public const string gameName = "INFINIMINER";
+        public static string publicServerList()
+        {
+            return _publicServerList;
         }
 
         private const string song_filename = "song_title";
@@ -330,14 +344,14 @@ namespace Infiniminer
             // Discover remote servers.
             try
             {
-                string publicList = HttpRequest.Get("http://apps.keithholman.net/plain", null);
+                string publicList = HttpRequest.Get(publicServerList(), null);
                 foreach (string s in publicList.Split("\r\n".ToCharArray()))
                 {
                     string[] args = s.Split(";".ToCharArray());
                     if (args.Length == 6)
                     {
                         IPAddress serverIp;
-                        if (IPAddress.TryParse(args[1], out serverIp) && args[2] == "INFINIMINER")
+                        if (IPAddress.TryParse(args[1], out serverIp) && args[2] == gameName)
                         {
                             ServerInformation serverInfo = new ServerInformation(serverIp, args[0], args[5], args[3], args[4]);
                             serverList.Add(serverInfo);

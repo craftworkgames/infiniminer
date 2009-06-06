@@ -103,6 +103,13 @@ namespace Infiniminer
             }
             try
             {
+                configHelper.boolTernaryConfig(ref authEnabled, "authenabled", dataFile);
+            }
+            catch (Exception) { }
+
+
+            try
+            {
                 configHelper.stringTernaryConfig(ref banListFile, "banlist", dataFile);
             }
             catch (Exception) { }
@@ -164,6 +171,7 @@ namespace Infiniminer
         private static ushort _lavaMax;
         ushort lavaGenLoops = 2;
         private static string publicServerList = "http://apps.keithholman.net/post";
+        private static bool authEnabled = false;
         private static string loadMapOnStart = "";
 
         DateTime lastServerListUpdate = DateTime.Now;
@@ -262,10 +270,11 @@ namespace Infiniminer
 
             Dictionary<string, string> postDict = new Dictionary<string, string>();
             postDict["name"] = serverName;
-            postDict["game"] = "INFINIMINER";
+            postDict["game"] = InfiniminerGame.gameName;
             postDict["player_count"] = "" + playerList.Keys.Count;
             postDict["player_capacity"] = "" + maxPlayers;
             postDict["extra"] = GetExtraInfo();
+            postDict["post"] = _connectionPort.ToString();
 
             try
             {
