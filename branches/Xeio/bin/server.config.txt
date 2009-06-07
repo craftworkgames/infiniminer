@@ -16,3 +16,7 @@ orefactor = 10
 
 # If this flag is true, all blocks will be free and the game will be unwinnable.
 sandbox = false
+
+# The size of the map (map is cubic, width/heigth/length are equal)
+# This should be a multiple of 32 less than 225
+mapsize = 64

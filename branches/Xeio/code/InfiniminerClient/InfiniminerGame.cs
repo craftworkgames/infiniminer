@@ -54,11 +54,8 @@ namespace Infiniminer
 
         public void JoinGame(IPEndPoint serverEndPoint)
         {
-            // Clear out the map load progress indicator.
-            //propertyBag.mapLoadProgress = new bool[propertyBag.mapSize, propertyBag.mapSize];
-            //for (int i = 0; i < propertyBag.mapSize; i++)
-            //    for (int j = 0; j < propertyBag.mapSize; j++)
-            //        propertyBag.mapLoadProgress[i,j] = false;
+            // Set mapsize to 0 untill we recieve the correct size from the server
+            propertyBag.MapSize = 0;
 
             // Create our connect message.
             NetBuffer connectBuffer = propertyBag.netClient.CreateBuffer();

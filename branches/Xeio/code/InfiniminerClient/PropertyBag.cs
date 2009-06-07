@@ -147,8 +147,20 @@ namespace Infiniminer
             set
             {
                 mapSize = value;
-                blockEngine = new BlockEngine(gameInstance);
-                interfaceEngine = new InterfaceEngine(gameInstance);
+                //If we just recieved a valid map size, initialize the engines with that size,
+                //otherwise, clear them.
+                if (mapSize != 0)
+                {
+                    blockEngine = new BlockEngine(gameInstance);
+                    interfaceEngine = new InterfaceEngine(gameInstance);
+                    skyplaneEngine = new SkyplaneEngine(gameInstance);
+                }
+                else
+                {
+                    blockEngine = null;
+                    interfaceEngine = null;
+                    skyplaneEngine = null;
+                }
             }
         }
 
@@ -214,10 +226,11 @@ namespace Infiniminer
             netClient.Start();
 
             // Initialize engines.
-            //blockEngine = new BlockEngine(gameInstance); Don't initialize till we get correct map size later
+            // Commented engines are initialized when mapsize is set
+            //blockEngine = new BlockEngine(gameInstance);
             //interfaceEngine = new InterfaceEngine(gameInstance);
             playerEngine = new PlayerEngine(gameInstance);
-            skyplaneEngine = new SkyplaneEngine(gameInstance);
+            //skyplaneEngine = new SkyplaneEngine(gameInstance);
             particleEngine = new ParticleEngine(gameInstance);
 
             // Create a camera.

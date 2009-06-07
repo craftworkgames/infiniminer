@@ -30,9 +30,10 @@ namespace Infiniminer
 
             // Generate a noise texture.
             randGen = new Random();
-            texNoise = new Texture2D(gameInstance.GraphicsDevice, 64, 64);
-            uint[] noiseData = new uint[64*64];
-            for (int i = 0; i < 64 * 64; i++)
+            float mapsize = gameInstance.propertyBag.MapSize;
+            texNoise = new Texture2D(gameInstance.GraphicsDevice, (int)mapsize, (int)mapsize);
+            uint[] noiseData = new uint[(int)(mapsize * mapsize)];
+            for (int i = 0; i < mapsize * mapsize; i++)
                 if (randGen.Next(32) == 0)
                     noiseData[i] = Color.White.PackedValue;
                 else
@@ -45,12 +46,12 @@ namespace Infiniminer
             // Create our vertices.
             vertexDeclaration = new VertexDeclaration(gameInstance.GraphicsDevice, VertexPositionTexture.VertexElements);
             vertices = new VertexPositionTexture[6];
-            vertices[0] = new VertexPositionTexture(new Vector3(-210, 100, -210), new Vector2(0, 0));
-            vertices[1] = new VertexPositionTexture(new Vector3(274, 100, -210), new Vector2(1, 0));
-            vertices[2] = new VertexPositionTexture(new Vector3(274, 100, 274), new Vector2(1, 1));
-            vertices[3] = new VertexPositionTexture(new Vector3(-210, 100, -210), new Vector2(0, 0));
-            vertices[4] = new VertexPositionTexture(new Vector3(274, 100, 274), new Vector2(1, 1));
-            vertices[5] = new VertexPositionTexture(new Vector3(-210, 100, 274), new Vector2(0, 1));
+            vertices[0] = new VertexPositionTexture(new Vector3(-mapsize - 220, mapsize + 40, -mapsize - 220), new Vector2(0, 0));
+            vertices[1] = new VertexPositionTexture(new Vector3(mapsize + 220, mapsize + 40, -mapsize - 220), new Vector2(1, 0));
+            vertices[2] = new VertexPositionTexture(new Vector3(mapsize + 220, mapsize + 40, mapsize + 220), new Vector2(1, 1));
+            vertices[3] = new VertexPositionTexture(new Vector3(-mapsize - 220, mapsize + 40, -mapsize - 220), new Vector2(0, 0));
+            vertices[4] = new VertexPositionTexture(new Vector3(mapsize + 220, mapsize + 40, mapsize + 220), new Vector2(1, 1));
+            vertices[5] = new VertexPositionTexture(new Vector3(-mapsize - 220, mapsize + 40, mapsize + 220), new Vector2(0, 1));
         }
 
         public void Update(GameTime gameTime)
