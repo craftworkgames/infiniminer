@@ -18,7 +18,8 @@ volume = 0.7
 # If this flag is true, all sound for the game will be disabled. This should fix all AllocateFormatAndData crashes.
 # If volume is set to 0.0, nosound will automatically be set to true
 nosound = false
-nosong  = false # Title music in Marvulous Mod is "80's" by Torley Wong (http://www.torley.com ) track is made available under CC-BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
+# Title music in Marvulous Mod is "80's" by Torley Wong (http://www.torley.com ) track is made available under CC-BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
+nosong = true
 
 msg_splat        = went splat
 msg_lava         = got deep-fried
@@ -29,5 +30,5 @@ msg_explosion    = was blown to itty bitty pieces. You bastards!
 # NON-COMPATIBLE FEATURES
 # If these values are set to true, you will likely have problems joining servers
 
-checkmapsize = true
-gzip = true
+checkmapsize = false
+gzip = false
