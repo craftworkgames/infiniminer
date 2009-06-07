@@ -108,7 +108,8 @@ namespace Infiniminer
 
     public enum InfiniminerMessage : byte
     {
-        BlockBulkTransfer,      // x-value, y-value, followed by 64 bytes of blocktype ; 
+        MapInfo,                // server information (currently only mapsize)
+        BlockBulkTransfer,      // x-value, y-value, followed by mapsize bytes of blocktype ; 
         BlockSet,               // x, y, z, type
         UseTool,                // position, heading, tool, blocktype 
         SelectClass,            // class
@@ -132,6 +133,7 @@ namespace Infiniminer
         TriggerConstructionGunAnimation,
         SetBeacon,              // vector3 position, string text ("" means remove)
         TeamConfig,             // byte team, string name, string color, string blood
+        compatibleClient,       // string url to download page (preferably web page, not direct link)
     }
 
     public class Beacon
@@ -142,6 +144,7 @@ namespace Infiniminer
 
 	public class PropertyBag
 	{
+        InfiniminerGame gameInstance;
         // Game engines.
         public BlockEngine blockEngine = null;
         public InterfaceEngine interfaceEngine = null;
@@ -153,6 +156,19 @@ namespace Infiniminer
         public NetClient netClient = null;
         public Dictionary<uint, Player> playerList = new Dictionary<uint, Player>();
         public bool[,] mapLoadProgress = null;
+
+        // Map stuff
+        private byte mapSize = 0;
+        public byte MapSize
+        {
+            get { return mapSize; }
+            set
+            {
+                mapSize = value;
+                blockEngine = new BlockEngine(gameInstance);
+                interfaceEngine = new InterfaceEngine(gameInstance);
+            }
+        }
 
         // Player variables.
         public Camera playerCamera = null;
@@ -203,6 +219,7 @@ namespace Infiniminer
 
         public PropertyBag(InfiniminerGame gameInstance)
         {
+            this.gameInstance = gameInstance;
             // Initialize our network device.
             NetConfiguration netConfig = new NetConfiguration("InfiniminerPlus");
             
@@ -215,8 +232,8 @@ namespace Infiniminer
             netClient.Start();
 
             // Initialize engines.
-            blockEngine = new BlockEngine(gameInstance);
-            interfaceEngine = new InterfaceEngine(gameInstance);
+            //blockEngine = new BlockEngine(gameInstance); Don't initialize till we get correct map size later
+            //interfaceEngine = new InterfaceEngine(gameInstance);
             playerEngine = new PlayerEngine(gameInstance);
             skyplaneEngine = new SkyplaneEngine(gameInstance);
             particleEngine = new ParticleEngine(gameInstance);
@@ -270,7 +287,7 @@ namespace Infiniminer
                 return;
 
             playerDead = false;
-            playerPosition = new Vector3(randGen.Next(2, 62) + 0.5f, 66, randGen.Next(2, 62) + 0.5f);
+
             // Respawn a few blocks above a safe position above altitude 0.
             bool positionFound = false;
 
@@ -278,10 +295,10 @@ namespace Infiniminer
             for (int i = 0; i < 20; i++)
             {
                 // Pick a random starting point.
-                Vector3 startPos = new Vector3(randGen.Next(2, 62), 63, randGen.Next(2, 62));
+                Vector3 startPos = new Vector3(randGen.Next(2, mapSize - 2), mapSize - 1, randGen.Next(2, mapSize - 2));
 
                 // See if this is a safe place to drop.
-                for (startPos.Y = 63; startPos.Y >= 54; startPos.Y--)
+                for (startPos.Y = mapSize - 1; startPos.Y >= mapSize - InfiniminerGame.GROUND_LEVEL; startPos.Y--)
                 {
                     BlockType blockType = blockEngine.BlockAtPoint(startPos);
                     if (blockType == BlockType.Lava)

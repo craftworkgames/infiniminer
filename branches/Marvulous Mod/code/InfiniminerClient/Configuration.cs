@@ -76,7 +76,5 @@ namespace Infiniminer
     {
         //Should be multiple of PACKETSIZE less than 256
         public const int MAPSIZE = 64;
-        //Probably best to set equal to MAPSIZE
-        public const int PACKETSIZE = 64;
     }
 }

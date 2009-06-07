@@ -119,10 +119,9 @@ namespace Infiniminer
             }
             try
             {
-                configHelper.boolTernaryConfig(ref authEnabled, "compress_maps", dataFile);
+                configHelper.boolTernaryConfig(ref _compressMaps, "compress_maps", dataFile);
             }
             catch (Exception) { }
-            
             
             try
             {
@@ -240,8 +239,9 @@ namespace Infiniminer
         bool restartTriggered = false;
 
         //All the lava blocks on the map
-        //This could be a hashSet, but we're using .net 2.0
-        Dictionary<Point3D, byte> LavaBlocks = new Dictionary<Point3D, byte>();
+        //This could be a hashSet, but we're using .NET 2.0
+        Dictionary<Point3D, byte> LavaBlocks = new Dictionary<Point3D,byte>();
+        //3D point of 3 ushorts
         struct Point3D
         {
             public ushort X, Y, Z;
@@ -622,12 +622,8 @@ namespace Infiniminer
             msgBuffer.Write((byte)z);
             msgBuffer.Write((byte)blockType);
             foreach (NetConnection netConn in playerList.Keys)
-            {
                 if (netConn.Status == NetConnectionStatus.Connected)
-                {
                     netServer.SendMessage(msgBuffer, netConn, NetChannel.ReliableUnordered);
-                }
-            }
 
             var lavaBlockPoint3D = new Point3D() { X = (ushort)x, Y = (ushort)y, Z = (ushort)z };
             if (oldBlockType == BlockType.Lava && blockType != BlockType.Lava)
@@ -752,7 +748,10 @@ namespace Infiniminer
                                 {
                                     playerList[msgSender] = newPlayer;
                                     this.netServer.SanityCheck(msgSender);
-                                    msgSender.Approve();
+                                    //Send the server mapsize so that the client knows what to expect
+                                    var arr = new byte[1];
+                                    arr[0] = (byte)GlobalVariables.MAPSIZE;
+                                    msgSender.Approve(arr);
                                 }
                             }
                             break;
@@ -1110,9 +1109,9 @@ namespace Infiniminer
 
         public BlockType BlockAtPoint(Vector3 point)
         {
-            short x = (short)point.X;
-            short y = (short)point.Y;
-            short z = (short)point.Z;
+            ushort x = (ushort)point.X;
+            ushort y = (ushort)point.Y;
+            ushort z = (ushort)point.Z;
             if (x <= 0 || y <= 0 || z <= 0 || x >= GlobalVariables.MAPSIZE - 1 || y >= GlobalVariables.MAPSIZE - 1 || z >= GlobalVariables.MAPSIZE - 1)
                 return BlockType.None;
             return blockList[x, y, z];
@@ -1567,9 +1566,13 @@ namespace Infiniminer
 
         public void SendCurrentMap(NetConnection client)
         {
+            if (compressMaps())
+            {
+                ConsoleWrite("Gzip compressing map");
+            }
             for (byte x = 0; x < GlobalVariables.MAPSIZE; x++)
             {
-                for (byte y = 0; y < GlobalVariables.MAPSIZE; y += GlobalVariables.PACKETSIZE)
+                for (byte y = 0; y < GlobalVariables.MAPSIZE; y += GlobalVariables.MAPSIZE)
                 {
                     NetBuffer msgBuffer = netServer.CreateBuffer();
                     msgBuffer.Write((byte)InfiniminerMessage.BlockBulkTransfer);
@@ -1582,7 +1585,7 @@ namespace Infiniminer
                         //Write everything we want to compress to the uncompressed stream
                         uncompressed.WriteByte(x);
                         uncompressed.WriteByte(y);
-                        for (byte dy = 0; dy < GlobalVariables.PACKETSIZE; dy++)
+                        for (byte dy = 0; dy < GlobalVariables.MAPSIZE; dy++)
                         {
                             for (byte z = 0; z < GlobalVariables.MAPSIZE; z++)
                             {
@@ -1598,7 +1601,7 @@ namespace Infiniminer
                     {
                         msgBuffer.Write(x);
                         msgBuffer.Write(y);
-                        for (byte dy = 0; dy < GlobalVariables.PACKETSIZE; dy++)
+                        for (byte dy = 0; dy < GlobalVariables.MAPSIZE; dy++)
                         {
                             for (byte z = 0; z < GlobalVariables.MAPSIZE; z++)
                             {

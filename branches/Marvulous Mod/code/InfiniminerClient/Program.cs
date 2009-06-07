@@ -1,6 +1,6 @@
 using System;
 
-namespace Infiniminer
+namespace Infiniminer.Client
 {
     static class Program
     {
