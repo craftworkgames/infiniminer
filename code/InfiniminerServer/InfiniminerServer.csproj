@@ -50,7 +50,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CaveGenerator.cs" />
-    <Compile Include="GlobalVariables.cs" />
     <Compile Include="InfiniminerNetServer.cs" />
     <Compile Include="InfiniminerServer.cs" />
     <Compile Include="Program.cs" />
