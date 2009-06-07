@@ -25,6 +25,7 @@ namespace Infiniminer
         bool includeLava = true;
         DateTime lastServerListUpdate = DateTime.Now;
         List<string> banList = null;
+        List<string> adminList = null;
 
         const int CONSOLE_SIZE = 30;
         List<string> consoleText = new List<string>();
@@ -136,6 +137,46 @@ namespace Infiniminer
             }
         }
 
+        public List<string> LoadAdminList()
+        {
+            List<string> retList = new List<string>();
+
+            try
+            {
+                FileStream file = new FileStream("adminlist.txt", FileMode.Open, FileAccess.Read);
+                StreamReader sr = new StreamReader(file);
+                string line = sr.ReadLine();
+                while (line != null)
+                {
+                    retList.Add(line.Trim());
+                    line = sr.ReadLine();
+                }
+                sr.Close();
+                file.Close();
+            }
+            catch (Exception e)
+            {
+            }
+
+            return retList;
+        }
+
+        public void SaveAdminList(List<string> adminList)
+        {
+            try
+            {
+                FileStream file = new FileStream("adminlist.txt", FileMode.Create, FileAccess.Write);
+                StreamWriter sw = new StreamWriter(file);
+                foreach (string ip in adminList)
+                    sw.WriteLine(ip);
+                sw.Close();
+                file.Close();
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
         public void KickPlayer(string ip)
         {
             List<Player> playersToKick = new List<Player>();
@@ -160,6 +201,24 @@ namespace Infiniminer
             }
         }
 
+        public void AdminPlayer(string ip)
+        {
+            if (!adminList.Contains(ip))
+            {
+                adminList.Add(ip);
+                SaveAdminList(adminList);
+            }
+        }
+
+        public void DeadminPlayer(string ip)
+        {
+            if (adminList.Contains(ip))
+            {
+                adminList.Remove(ip);
+                SaveAdminList(adminList);
+            }
+        }
+
         public void ConsoleProcessInput()
         {
             string[] args = consoleInput.Split(" ".ToCharArray());
@@ -174,6 +233,8 @@ namespace Infiniminer
                         ConsoleWrite(" players");
                         ConsoleWrite(" kick <ip>");
                         ConsoleWrite(" ban <ip>");
+                        ConsoleWrite(" admin <ip>");
+                        ConsoleWrite(" deadmin <ip>");
                         ConsoleWrite(" say <message>");
                         ConsoleWrite(" save <mapfile>");
                         ConsoleWrite(" load <mapfile>");
@@ -211,6 +272,24 @@ namespace Infiniminer
                         {
                             KickPlayer(args[1]);
                             BanPlayer(args[1]);
+                        }
+                    }
+                    break;
+
+                case "admin":
+                    {
+                        if (args.Length == 2)
+                        {
+                            AdminPlayer(args[1]);
+                        }
+                    }
+                    break;
+
+                case "deadmin":
+                    {
+                        if (args.Length == 2)
+                        {
+                            DeadminPlayer(args[1]);
                         }
                     }
                     break;
@@ -254,9 +333,15 @@ namespace Infiniminer
                             {
                                 FileStream fs = new FileStream(args[1], FileMode.Open);
                                 StreamReader sr = new StreamReader(fs);
-                                for (int x = 0; x < 64; x++)
-                                    for (int y = 0; y < 64; y++)
-                                        for (int z = 0; z < 64; z++)
+
+                                string message = "Loading map " + args[1] + " - please rejoin.";
+                                SendServerMessage(message);
+
+                                foreach (Player p in playerList.Values)
+                                    KickPlayer(p.IP);
+                                for (int x = 0; x < MAPSIZE; x++)
+                                    for (int y = 0; y < MAPSIZE; y++)
+                                        for (int z = 0; z < MAPSIZE; z++)
                                         {
                                             string line = sr.ReadLine();
                                             string[] fileArgs = line.Split(",".ToCharArray());
@@ -286,9 +371,9 @@ namespace Infiniminer
         {
             FileStream fs = new FileStream(filename, FileMode.Create);
             StreamWriter sw = new StreamWriter(fs);
-            for (int x = 0; x < 64; x++)
-                for (int y = 0; y < 64; y++)
-                    for (int z = 0; z < 64; z++)
+            for (int x = 0; x < MAPSIZE; x++)
+                for (int y = 0; y < MAPSIZE; y++)
+                    for (int z = 0; z < MAPSIZE; z++)
                         sw.WriteLine((byte)blockList[x, y, z] + "," + (byte)blockCreatorTeam[x, y, z]);
             sw.Close();
             fs.Close();
@@ -398,6 +483,7 @@ namespace Infiniminer
 
             // Load the ban-list.
             banList = LoadBanList();
+            adminList = LoadAdminList();
 
             // Create our block world, translating the coordinates out of the cave generator (where Z points down)
             BlockType[, ,] worldData = CaveGenerator.GenerateCaveSystem(MAPSIZE, includeLava, oreFactor);
@@ -534,14 +620,112 @@ namespace Infiniminer
                                             chatPacket.Write((byte)((player.Team == PlayerTeam.Red) ? ChatMessageType.SayRedTeam : ChatMessageType.SayBlueTeam));
                                             chatPacket.Write(chatString);
 
-                                            // Send the packet to people who should recieve it.
-                                            foreach (Player p in playerList.Values)
+                                            bool dontSend = false;
+                                            string[] splitString = chatString.Split(' ');
+                                            if ((splitString[2] == "/kick" ||
+                                                splitString[2] == "/ip" ||
+                                                splitString[2] == "/restart" ||
+                                                splitString[2] == "/load" ||
+                                                splitString[2] == "/save" ||
+                                                splitString[2] == "/flatmap" ||
+                                                splitString[2] == "/nukelava") && adminList.Contains(player.IP))
+                                                dontSend = true;
+
+                                            if (!dontSend)
                                             {
-                                                if (chatType == ChatMessageType.SayAll ||
-                                                    chatType == ChatMessageType.SayBlueTeam && p.Team == PlayerTeam.Blue ||
-                                                    chatType == ChatMessageType.SayRedTeam && p.Team == PlayerTeam.Red)
-                                                    if (p.NetConn.Status == NetConnectionStatus.Connected)
-                                                        netServer.SendMessage(chatPacket, p.NetConn, NetChannel.ReliableInOrder3);
+                                                // Send the packet to people who should recieve it.
+                                                foreach (Player p in playerList.Values)
+                                                {
+                                                    if (chatType == ChatMessageType.SayAll ||
+                                                        chatType == ChatMessageType.SayBlueTeam && p.Team == PlayerTeam.Blue ||
+                                                        chatType == ChatMessageType.SayRedTeam && p.Team == PlayerTeam.Red)
+                                                        if (p.NetConn.Status == NetConnectionStatus.Connected)
+                                                            netServer.SendMessage(chatPacket, p.NetConn, NetChannel.ReliableInOrder3);
+                                                }
+                                            }
+
+                                            if (dontSend)
+                                            {
+                                                switch (splitString[2])
+                                                {
+                                                    case "/ip":
+
+                                                        foreach (Player p in playerList.Values)
+                                                        {
+                                                            string teamIdent = "";
+                                                            if (p.Team == PlayerTeam.Red)
+                                                                teamIdent = " (R)";
+                                                            else if (p.Team == PlayerTeam.Blue)
+                                                                teamIdent = " (B)";
+
+                                                            NetBuffer ipList = netServer.CreateBuffer();
+                                                            ipList.Write((byte)InfiniminerMessage.ChatMessage);
+                                                            ipList.Write((byte)(p.Team == PlayerTeam.Red ? ChatMessageType.SayRedTeam : ChatMessageType.SayBlueTeam));
+                                                            ipList.Write(p.Handle + teamIdent + " - " + p.IP);
+                                                            netServer.SendMessage(ipList, player.NetConn, NetChannel.ReliableUnordered);
+                                                        }
+
+                                                        break;
+
+                                                    case "/kick":
+                                                        if (splitString.Length >= 4)
+                                                            KickPlayer(splitString[3]);
+                                                        break;
+
+                                                    case "/restart":
+                                                        {
+                                                            restartTriggered = true;
+                                                            restartTime = DateTime.Now;
+                                                        }
+                                                        break;
+
+                                                    case "/save":
+                                                        {
+                                                            if (splitString.Length >= 4)
+                                                            {
+                                                                SaveLevel(splitString[3]);
+                                                            }
+                                                        }
+                                                        break;
+
+                                                    case "/load":
+                                                        {
+                                                            if (splitString.Length >= 4)
+                                                            {
+                                                                try
+                                                                {
+                                                                    FileStream fs = new FileStream(splitString[3], FileMode.Open);
+                                                                    StreamReader sr = new StreamReader(fs);
+
+                                                                    string message = "Loading map " + splitString[3] + " - please rejoin.";
+                                                                    SendServerMessage(message);
+
+                                                                    foreach (Player p in playerList.Values)
+                                                                        KickPlayer(p.IP);
+                                                                    for (int x = 0; x < MAPSIZE; x++)
+                                                                        for (int y = 0; y < MAPSIZE; y++)
+                                                                            for (int z = 0; z < MAPSIZE; z++)
+                                                                            {
+                                                                                string line = sr.ReadLine();
+                                                                                string[] fileArgs = line.Split(",".ToCharArray());
+                                                                                if (fileArgs.Length == 2)
+                                                                                {
+                                                                                    blockList[x, y, z] = (BlockType)int.Parse(fileArgs[0], System.Globalization.CultureInfo.InvariantCulture);
+                                                                                    blockCreatorTeam[x, y, z] = (PlayerTeam)int.Parse(fileArgs[1], System.Globalization.CultureInfo.InvariantCulture);
+                                                                                }
+                                                                            }
+                                                                    sr.Close();
+                                                                    fs.Close();
+                                                                    
+                                                                }
+                                                                catch (FileNotFoundException e)
+                                                                {
+                                                                    ConsoleWrite("ERROR: File not found!");
+                                                                }
+                                                            }
+                                                        }
+                                                        break;
+                                                }
                                             }
                                         }
                                         break;
