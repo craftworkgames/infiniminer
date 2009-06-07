@@ -11,7 +11,7 @@ maxplayers = 2
 winningcash = 25000
 
 # This flag specifies whether or not generated levels will include lava.
-lava        = 32
+lavaground  = false
 lavaflows   = 16
 
 
@@ -20,3 +20,9 @@ orefactor = 20
 
 # If this flag is true, all blocks will be free and the game will be unwinnable.
 sandbox = false
+
+# NON-COMPATIBLE FEATURES
+# If these values are set to true, incompatible clients will likely be unable to join
+
+checkmapsize = true
+gzip = true

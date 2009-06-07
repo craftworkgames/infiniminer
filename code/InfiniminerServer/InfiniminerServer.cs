@@ -119,7 +119,7 @@ namespace Infiniminer
             }
             try
             {
-                configHelper.boolTernaryConfig(ref _compressMaps, "compress_maps", dataFile);
+                configHelper.boolTernaryConfig(ref gzip, "gzip", dataFile);
             }
             catch (Exception) { }
             
@@ -160,11 +160,16 @@ namespace Infiniminer
         {
             return _connectionPort;
         }
-        private static bool _compressMaps = true;
-        public static bool compressMaps()
+        private static bool gzip = false;
+        public static bool gZip
         {
-            return _compressMaps;
+            get { return gzip; }
+            private set
+            {
+                gzip = value;
+            }
         }
+
         private static bool _lavaAtGroundLevel = false;
         public static bool lavaAtGroundLevel()
         {
@@ -1112,8 +1117,10 @@ namespace Infiniminer
             ushort x = (ushort)point.X;
             ushort y = (ushort)point.Y;
             ushort z = (ushort)point.Z;
-            if (x <= 0 || y <= 0 || z <= 0 || x >= GlobalVariables.MAPSIZE - 1 || y >= GlobalVariables.MAPSIZE - 1 || z >= GlobalVariables.MAPSIZE - 1)
+            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (y + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (z + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0)
+            {
                 return BlockType.None;
+            }
             return blockList[x, y, z];
         }
 
@@ -1566,10 +1573,9 @@ namespace Infiniminer
 
         public void SendCurrentMap(NetConnection client)
         {
-//           if (compressMaps())
-//           {
+            if (gZip)
+            {
                 ConsoleWrite("Gzip compressing map");
-//           }
                 for (byte x = 0; x < GlobalVariables.MAPSIZE; x++)
                 {
                     for (byte y = 0; y < GlobalVariables.MAPSIZE; y += GlobalVariables.MAPSIZE)
@@ -1585,8 +1591,12 @@ namespace Infiniminer
                         uncompressed.WriteByte(x);
                         uncompressed.WriteByte(y);
                         for (byte dy = 0; dy < GlobalVariables.MAPSIZE; dy++)
+                        {
                             for (byte z = 0; z < GlobalVariables.MAPSIZE; z++)
+                            {
                                 uncompressed.WriteByte((byte)(blockList[x, y + dy, z]));
+                            }
+                        }
                         //Compress the input
                         compresser.Write(uncompressed.ToArray(), 0, (int)uncompressed.Length);
                         compresser.Close();
@@ -1599,6 +1609,31 @@ namespace Infiniminer
                         }
                     }
                 }
+            }
+            else
+            {
+                for (byte x = 0; x < GlobalVariables.MAPSIZE; x++)
+                {
+                    for (byte y = 0; y < GlobalVariables.MAPSIZE; y += GlobalVariables.MAPSIZE)
+                    {
+                        NetBuffer msgBuffer = netServer.CreateBuffer();
+                        msgBuffer.Write((byte)InfiniminerMessage.BlockBulkTransfer);
+                        msgBuffer.Write(x);
+                        msgBuffer.Write(y);
+                        for (byte dy = 0; dy < 16; dy++)
+                        {
+                            for (byte z = 0; z < GlobalVariables.MAPSIZE; z++)
+                            {
+                                msgBuffer.Write((byte)(blockList[x, y + dy, z]));
+                            }
+                        }
+                        if (client.Status == NetConnectionStatus.Connected)
+                        {
+                            netServer.SendMessage(msgBuffer, client, NetChannel.ReliableUnordered);
+                        }
+                    }
+                }
+            }
         }
 
         public void SendPlayerPing(uint playerId)

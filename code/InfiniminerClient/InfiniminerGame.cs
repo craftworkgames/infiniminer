@@ -40,6 +40,16 @@ namespace Infiniminer
                 configHelper.stringTernaryConfig(ref _publicServerList, "public", dataFile);
             }
             catch (Exception) { }
+            try
+            {
+                configHelper.boolTernaryConfig(ref gzip, "gzip", dataFile);
+            }
+            catch (Exception) { }
+            try
+            {
+                configHelper.boolTernaryConfig(ref checkmapsize, "checkmapsize", dataFile);
+            }
+            catch (Exception) { }
 
 
             try
@@ -185,6 +195,19 @@ namespace Infiniminer
         public static ushort connectionPort()
         {
             return _connectionPort;
+        }
+
+        private static bool gzip = false;
+        public static bool gZip
+        {
+            get { return gzip; }
+            private set { gzip = value; }
+        }
+        private static bool checkmapsize = false;
+        public static bool checkMapSize
+        {
+            get { return checkmapsize; }
+            private set { checkmapsize = value; }
         }
 
         private static string _publicServerList = "http://apps.keithholman.net/plain";
@@ -394,8 +417,15 @@ namespace Infiniminer
                             {
                                 if (propertyBag.MapSize == 0)
                                 {
-                                    //Get the map size from the server message
-                                    propertyBag.MapSize = propertyBag.netClient.ServerConnection.RemoteHailData[0];
+                                    if (checkMapSize)
+                                    {
+                                        //Get the map size from the server message
+                                        propertyBag.MapSize = propertyBag.netClient.ServerConnection.RemoteHailData[0];
+                                    }
+                                    else
+                                    {
+                                        propertyBag.MapSize = GlobalVariables.MAPSIZE;
+                                    }
                                     // Clear out the map load progress indicator.
                                     propertyBag.mapLoadProgress = new bool[propertyBag.MapSize, propertyBag.MapSize];
                                 }
@@ -421,34 +451,66 @@ namespace Infiniminer
                             {
                                 case InfiniminerMessage.BlockBulkTransfer:
                                     {
-                                        //Decompress the sent data into its origonal size in decompressed stream
-                                        var compressed = msgBuffer.ReadBytes(msgBuffer.LengthBytes-msgBuffer.Position/8);
-                                        var compressedstream = new System.IO.MemoryStream(compressed);
-                                        var decompresser = new System.IO.Compression.GZipStream(compressedstream, System.IO.Compression.CompressionMode.Decompress);
+                                        byte x;
+                                        byte y;
+                                        if (gZip)
+                                        {
+                                            //Decompress the sent data into its origonal size in decompressed stream
+                                            var compressed = msgBuffer.ReadBytes(msgBuffer.LengthBytes - msgBuffer.Position / 8);
+                                            var compressedstream = new System.IO.MemoryStream(compressed);
+                                            var decompresser = new System.IO.Compression.GZipStream(compressedstream, System.IO.Compression.CompressionMode.Decompress);
 
-                                        byte x = (byte)decompresser.ReadByte();
-                                        byte y = (byte)decompresser.ReadByte();
-                                        propertyBag.mapLoadProgress[x,y] = true;
-                                        for (byte dy = 0; dy < propertyBag.MapSize; dy++)
-                                            for (byte z = 0; z < propertyBag.MapSize; z++)
+                                            x = (byte)decompresser.ReadByte();
+                                            y = (byte)decompresser.ReadByte();
+                                            propertyBag.mapLoadProgress[x, y] = true;
+                                            for (byte dy = 0; dy < propertyBag.MapSize; dy++)
                                             {
-                                                BlockType blockType = (BlockType)decompresser.ReadByte();
-                                                if (blockType != BlockType.None)
-                                                    propertyBag.blockEngine.downloadList[x, y+dy, z] = blockType;
+                                                for (byte z = 0; z < propertyBag.MapSize; z++)
+                                                {
+                                                    BlockType blockType = (BlockType)decompresser.ReadByte();
+                                                    if (blockType != BlockType.None)
+                                                    {
+                                                        propertyBag.blockEngine.downloadList[x, y + dy, z] = blockType;
+                                                    }
+                                                }
                                             }
+                                        }
+                                        else
+                                        {
+                                            x = msgBuffer.ReadByte();
+                                            y = msgBuffer.ReadByte();
+                                            propertyBag.mapLoadProgress[x, y] = true;
+                                            for (byte dy = 0; dy < 16; dy++)
+                                            {
+                                                for (byte z = 0; z < 64; z++)
+                                                {
+                                                    BlockType blockType = (BlockType)msgBuffer.ReadByte();
+                                                    if (blockType != BlockType.None)
+                                                    {
+                                                        propertyBag.blockEngine.downloadList[x, y + dy, z] = blockType;
+                                                    }
+                                                }
+                                            }
+                                        }
                                         bool downloadComplete = true;
                                         for (x = 0; x < propertyBag.MapSize; x++)
+                                        {
                                             for (y = 0; y < propertyBag.MapSize; y += propertyBag.MapSize)
-                                                if (propertyBag.mapLoadProgress[x,y] == false)
+                                            {
+                                                if (propertyBag.mapLoadProgress[x, y] == false)
                                                 {
                                                     downloadComplete = false;
                                                     break;
                                                 }
+                                            }
+                                        }
                                         if (downloadComplete)
                                         {
                                             ChangeState("Infiniminer.States.TeamSelectionState");
                                             if (!NoSound)
+                                            {
                                                 MediaPlayer.Stop();
+                                            }
                                             propertyBag.blockEngine.DownloadComplete();
                                         }
                                     }
