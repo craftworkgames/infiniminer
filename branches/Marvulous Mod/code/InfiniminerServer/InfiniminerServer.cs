@@ -160,7 +160,7 @@ namespace Infiniminer
         {
             return _connectionPort;
         }
-        private static bool _compressMaps = false;
+        private static bool _compressMaps = true;
         public static bool compressMaps()
         {
             return _compressMaps;
@@ -1566,18 +1566,17 @@ namespace Infiniminer
 
         public void SendCurrentMap(NetConnection client)
         {
-            if (compressMaps())
-            {
+//           if (compressMaps())
+//           {
                 ConsoleWrite("Gzip compressing map");
-            }
-            for (byte x = 0; x < GlobalVariables.MAPSIZE; x++)
-            {
-                for (byte y = 0; y < GlobalVariables.MAPSIZE; y += GlobalVariables.MAPSIZE)
+//           }
+                for (byte x = 0; x < GlobalVariables.MAPSIZE; x++)
                 {
-                    NetBuffer msgBuffer = netServer.CreateBuffer();
-                    msgBuffer.Write((byte)InfiniminerMessage.BlockBulkTransfer);
-                    if (compressMaps())
+                    for (byte y = 0; y < GlobalVariables.MAPSIZE; y += GlobalVariables.MAPSIZE)
                     {
+                        NetBuffer msgBuffer = netServer.CreateBuffer();
+                        msgBuffer.Write((byte)InfiniminerMessage.BlockBulkTransfer);
+
                         //Compress the data so we don't use as much bandwith
                         var compressedstream = new System.IO.MemoryStream();
                         var uncompressed = new System.IO.MemoryStream();
@@ -1586,35 +1585,20 @@ namespace Infiniminer
                         uncompressed.WriteByte(x);
                         uncompressed.WriteByte(y);
                         for (byte dy = 0; dy < GlobalVariables.MAPSIZE; dy++)
-                        {
                             for (byte z = 0; z < GlobalVariables.MAPSIZE; z++)
-                            {
-                                if (compressMaps())
-                                {
-                                    uncompressed.WriteByte((byte)(blockList[x, y + dy, z]));
-                                }
-                            }
-                        }
+                                uncompressed.WriteByte((byte)(blockList[x, y + dy, z]));
+                        //Compress the input
+                        compresser.Write(uncompressed.ToArray(), 0, (int)uncompressed.Length);
+                        compresser.Close();
+
+                        //Send the compressed data
                         msgBuffer.Write(compressedstream.ToArray());
-                    }
-                    else
-                    {
-                        msgBuffer.Write(x);
-                        msgBuffer.Write(y);
-                        for (byte dy = 0; dy < GlobalVariables.MAPSIZE; dy++)
+                        if (client.Status == NetConnectionStatus.Connected)
                         {
-                            for (byte z = 0; z < GlobalVariables.MAPSIZE; z++)
-                            {
-                                msgBuffer.Write((byte)(blockList[x, y + dy, z]));
-                            }
+                            netServer.SendMessage(msgBuffer, client, NetChannel.ReliableUnordered);
                         }
-                    }
-                    if (client.Status == NetConnectionStatus.Connected)
-                    {
-                        netServer.SendMessage(msgBuffer, client, NetChannel.ReliableUnordered);
                     }
                 }
-            }
         }
 
         public void SendPlayerPing(uint playerId)
