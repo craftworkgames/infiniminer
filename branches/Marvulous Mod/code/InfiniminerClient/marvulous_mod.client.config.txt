@@ -25,3 +25,9 @@ msg_lava         = got deep-fried
 msg_shock        = failed his uncle fester impression
 msg_misadventure = was eaten by a grue
 msg_explosion    = was blown to itty bitty pieces. You bastards!
+
+# NON-COMPATIBLE FEATURES
+# If these values are set to true, you will likely have problems joining servers
+
+checkmapsize = true
+gzip = true
