@@ -103,28 +103,38 @@ namespace Infiniminer
         }
 
         const int REGIONSIZE = 16;
-        const int REGIONRATIO = GlobalVariables.MAPSIZE / REGIONSIZE;
-        const int NUMREGIONS = REGIONRATIO * REGIONRATIO * REGIONRATIO;
+        int REGIONRATIO;
+        int NUMREGIONS;
 
         public void DownloadComplete()
         {
-            for (ushort i = 0; i < GlobalVariables.MAPSIZE; i++)
-                for (ushort j = 0; j < GlobalVariables.MAPSIZE; j++)
-                    for (ushort k = 0; k < GlobalVariables.MAPSIZE; k++)
+            for (ushort i = 0; i < gameInstance.propertyBag.MapSize; i++)
+            {
+                for (ushort j = 0; j < gameInstance.propertyBag.MapSize; j++)
+                {
+                    for (ushort k = 0; k < gameInstance.propertyBag.MapSize; k++)
+                    {
                         if (downloadList[i, j, k] != BlockType.None)
+                        {
                             AddBlock(i, j, k, downloadList[i, j, k]);
+                        }
+                    }
+                }
+            }
         }
 
         public BlockEngine(InfiniminerGame gameInstance)
         {
             this.gameInstance = gameInstance;
+            REGIONRATIO = gameInstance.propertyBag.MapSize / REGIONSIZE;
+            NUMREGIONS = (int)Math.Pow(REGIONRATIO, 3);
 
             // Initialize the block list.
-            downloadList = new BlockType[GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE];
-            blockList = new BlockType[GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE];
-            for (ushort i = 0; i < GlobalVariables.MAPSIZE; i++)
-                for (ushort j = 0; j < GlobalVariables.MAPSIZE; j++)
-                    for (ushort k = 0; k < GlobalVariables.MAPSIZE; k++)
+            downloadList = new BlockType[gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize];
+            blockList = new BlockType[gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize];
+            for (ushort i = 0; i < gameInstance.propertyBag.MapSize; i++)
+                for (ushort j = 0; j < gameInstance.propertyBag.MapSize; j++)
+                    for (ushort k = 0; k < gameInstance.propertyBag.MapSize; k++)
                     {
                         downloadList[i, j, k] = BlockType.None;
                         blockList[i, j, k] = BlockType.None;
@@ -235,7 +245,7 @@ namespace Infiniminer
             ushort x = (ushort)point.X;
             ushort y = (ushort)point.Y;
             ushort z = (ushort)point.Z;
-            if (x < 0 || y < 0 || z < 0 || x >= GlobalVariables.MAPSIZE || y >= GlobalVariables.MAPSIZE || z >= GlobalVariables.MAPSIZE)
+            if (x < 0 || y < 0 || z < 0 || x >= gameInstance.propertyBag.MapSize || y >= gameInstance.propertyBag.MapSize || z >= gameInstance.propertyBag.MapSize)
                 return BlockType.None;
             return blockList[x, y, z]; 
         }
@@ -492,7 +502,7 @@ namespace Infiniminer
 
         public void AddBlock(ushort x, ushort y, ushort z, BlockType blockType)
         {
-            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (y + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (z + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0)
+            if (x <= 0 || y <= 0 || z <= 0 || x >= gameInstance.propertyBag.MapSize - 1 || y >= gameInstance.propertyBag.MapSize - 1 || z >= gameInstance.propertyBag.MapSize - 1)
                 return;
 
             blockList[x, y, z] = blockType;
@@ -517,7 +527,7 @@ namespace Infiniminer
 
         public void RemoveBlock(ushort x, ushort y, ushort z)
         {
-            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (y + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (z + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0)
+            if (x <= 0 || y <= 0 || z <= 0 || x >= gameInstance.propertyBag.MapSize - 1 || y >= gameInstance.propertyBag.MapSize - 1 || z >= gameInstance.propertyBag.MapSize - 1)
                 return;
 
             _RemoveBlock(x, y, z, BlockFaceDirection.XIncreasing, x + 1, y, z, BlockFaceDirection.XDecreasing);
@@ -533,17 +543,17 @@ namespace Infiniminer
         private uint EncodeBlockFace(ushort x, ushort y, ushort z, BlockFaceDirection faceDir)
         {
             //TODO: OPTIMIZE BY HARD CODING VALUES IN
-            return (uint)(x + y * GlobalVariables.MAPSIZE + z * GlobalVariables.MAPSIZE * GlobalVariables.MAPSIZE + (byte)faceDir * GlobalVariables.MAPSIZE * GlobalVariables.MAPSIZE * GlobalVariables.MAPSIZE);
+            return (uint)(x + y * gameInstance.propertyBag.MapSize + z * gameInstance.propertyBag.MapSize * gameInstance.propertyBag.MapSize + (byte)faceDir * gameInstance.propertyBag.MapSize * gameInstance.propertyBag.MapSize * gameInstance.propertyBag.MapSize);
         }
 
         private void DecodeBlockFace(uint faceCode, ref ushort x, ref ushort y, ref ushort z, ref BlockFaceDirection faceDir)
         {
-            x = (ushort)(faceCode % GlobalVariables.MAPSIZE);
-            faceCode = (faceCode - x) / GlobalVariables.MAPSIZE;
-            y = (ushort)(faceCode % GlobalVariables.MAPSIZE);
-            faceCode = (faceCode - y) / GlobalVariables.MAPSIZE;
-            z = (ushort)(faceCode % GlobalVariables.MAPSIZE);
-            faceCode = (faceCode - z) / GlobalVariables.MAPSIZE;
+            x = (ushort)(faceCode % gameInstance.propertyBag.MapSize);
+            faceCode = (faceCode - x) / gameInstance.propertyBag.MapSize;
+            y = (ushort)(faceCode % gameInstance.propertyBag.MapSize);
+            faceCode = (faceCode - y) / gameInstance.propertyBag.MapSize;
+            z = (ushort)(faceCode % gameInstance.propertyBag.MapSize);
+            faceCode = (faceCode - z) / gameInstance.propertyBag.MapSize;
             faceDir = (BlockFaceDirection)faceCode;
         }
 
@@ -556,10 +566,10 @@ namespace Infiniminer
         private Vector3 GetRegionCenter(uint regionNumber)
         {
             uint x, y, z;
-            x = regionNumber % REGIONRATIO;
-            regionNumber = (regionNumber - x) / REGIONRATIO;
-            y = regionNumber % REGIONRATIO;
-            regionNumber = (regionNumber - y) / REGIONRATIO;
+            x = (uint)(regionNumber % REGIONRATIO);
+            regionNumber = (uint)((regionNumber - x) / REGIONRATIO);
+            y = (uint)(regionNumber % REGIONRATIO);
+            regionNumber = (uint)((regionNumber - y) / REGIONRATIO);
             z = regionNumber;
             return new Vector3(x * REGIONSIZE + REGIONSIZE / 2, y * REGIONSIZE + REGIONSIZE / 2, z * REGIONSIZE + REGIONSIZE / 2);            
         }
