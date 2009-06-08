@@ -30,5 +30,5 @@ msg_explosion    = was blown to itty bitty pieces. You bastards!
 # NON-COMPATIBLE FEATURES
 # If these values are set to true, you will likely have problems joining servers
 
-checkmapsize = false
-gzip = false
+checkmapsize = true
+gzip = true
