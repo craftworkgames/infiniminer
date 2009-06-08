@@ -35,18 +35,18 @@ namespace Infiniminer
             SessionVariables.gZip = gzip;
 
             // setting up team configuration
-            string teamName = InfiniminerTeam.defaultTeams()[0].name;
+            string teamName = Team.defaultTeams()[(byte)PlayerTeam.A].name;
                 configHelper.stringTernaryConfig(ref teamName, "team_a", dataFile);
-                SessionVariables.teams[0].name = teamName;
-            Color teamColor = InfiniminerTeam.defaultTeams()[0].color;
+                SessionVariables.teams[(byte)PlayerTeam.A].name = teamName;
+            Color teamColor = Team.defaultTeams()[(byte)PlayerTeam.A].color;
                 configHelper.colorTernaryConfig(ref teamColor, "color_a", dataFile);
-                SessionVariables.teams[0].color = teamColor;
-            teamName = InfiniminerTeam.defaultTeams()[1].name;
+                SessionVariables.teams[(byte)PlayerTeam.A].color = teamColor;
+            teamName = Team.defaultTeams()[(byte)PlayerTeam.B].name;
                 configHelper.stringTernaryConfig(ref teamName, "team_b", dataFile);
-                SessionVariables.teams[1].name = teamName;
-            teamColor = InfiniminerTeam.defaultTeams()[1].color;
+                SessionVariables.teams[(byte)PlayerTeam.B].name = teamName;
+            teamColor = Team.defaultTeams()[(byte)PlayerTeam.B].color;
                 configHelper.colorTernaryConfig(ref teamColor, "color_b", dataFile);
-                SessionVariables.teams[1].color = teamColor;
+                SessionVariables.teams[(byte)PlayerTeam.B].color = teamColor;
             
             configHelper.boolTernaryConfig(ref autosave, "autosave", dataFile);
             configHelper.uintTernaryConfig(ref winningCashAmount, "winningcash", dataFile, 100, 999999999);
@@ -299,7 +299,7 @@ namespace Infiniminer
                         {
                             string teamIdent = "";
                             if (p.Team == PlayerTeam.A)
-                                teamIdent = " (R)";
+                                teamIdent = " (A)";
                             else if (p.Team == PlayerTeam.B)
                                 teamIdent = " (B)";
                             ConsoleWrite(p.Handle + teamIdent + " - " + p.IP);
@@ -396,7 +396,7 @@ namespace Infiniminer
                                 {
                                     LavaBlocks.Add(new Point3D() { X = (ushort)x, Y = (ushort)y, Z = (ushort)z }, 0);
                                 }
-                                blockCreatorTeam[x, y, z] = (PlayerTeam)int.Parse(fileArgs[1], System.Globalization.CultureInfo.InvariantCulture);
+                                blockCreatorTeam[x, y, z] = (PlayerTeam)byte.Parse(fileArgs[1], System.Globalization.CultureInfo.InvariantCulture);
                             }
                         }
                 sr.Close();
@@ -530,6 +530,7 @@ namespace Infiniminer
         public bool Start()
         {
             configure();
+            ConsoleWrite("TEAMS: " + Team.vs(SessionVariables.playableTeams()));
             // Load the ban-list.
             banList = LoadBanList();
             bool makeNewMap = (loadMapOnStart == "");
@@ -580,7 +581,6 @@ namespace Infiniminer
             //netServer.SimulatedLoss = 0.1f;
             //netServer.SimulatedDuplicates = 0.05f;
 
-            ConsoleWrite("TEAMS: " + configHelper.teamsVs(SessionVariables.teams));
             netServer.Start();
 
             // Initialize variables we'll use.
@@ -1378,7 +1378,7 @@ namespace Infiniminer
                     teamCashA += player.Cash;
                 else
                     teamCashB += player.Cash;
-                SendServerMessage("SERVER: " + player.Handle + " HAS EARNED $" + player.Cash + " FOR THE " + GetTeamName(player.Team) + " TEAM!");
+                SendServerMessage("SERVER: " + player.Handle + " HAS EARNED $" + player.Cash + " FOR THE " + SessionVariables.teams[(byte)player.Team].name + " TEAM!");
             }
 
             PlaySound(InfiniminerSound.CashDeposit, player.Position);
@@ -1389,17 +1389,6 @@ namespace Infiniminer
 
             foreach (Player p in playerList.Values)
                 SendResourceUpdate(p);
-        }
-        public string GetTeamName(PlayerTeam team)
-        {
-            switch (team)
-            {
-                case PlayerTeam.A:
-                    return SessionVariables.teams[0].name;
-                case PlayerTeam.B:
-                    return SessionVariables.teams[1].name;
-            }
-            return "";
         }
 
         public void SendServerMessage(string message)
@@ -1416,12 +1405,12 @@ namespace Infiniminer
         public void SendTeamConfig(NetConnection client)
         {
             NetBuffer msgBuffer;
-            uint i = 0;
+            byte i = 1;
             while (i < SessionVariables.teams.Length)
             {
                 msgBuffer = netServer.CreateBuffer();
                 msgBuffer.Write((byte)InfiniminerMessage.TeamConfig);
-                msgBuffer.Write((ushort)i);
+                msgBuffer.Write((byte)i);
                 msgBuffer.Write(SessionVariables.teams[i].name);
                 msgBuffer.Write(configHelper.color2String(SessionVariables.teams[i].color));
                 msgBuffer.Write(configHelper.color2String(SessionVariables.teams[i].blood));
@@ -1502,7 +1491,7 @@ namespace Infiniminer
                         msgBuffer.Write((byte)InfiniminerMessage.BlockBulkTransfer);
                         msgBuffer.Write(x);
                         msgBuffer.Write(y);
-                        for (byte dy = 0; dy < 16; dy++)
+                        for (byte dy = 0; dy < GlobalVariables.MAPSIZE; dy++)
                         {
                             for (byte z = 0; z < GlobalVariables.MAPSIZE; z++)
                             {

@@ -488,7 +488,7 @@ namespace Infiniminer
                                         {
                                             Player player = propertyBag.playerList[playerId];
                                             player.Alive = false;
-                                            propertyBag.particleEngine.CreateBloodSplatter(player.Position, player.Team == PlayerTeam.A ? SessionVariables.teams[0].blood : SessionVariables.teams[1].blood);
+                                            propertyBag.particleEngine.CreateBloodSplatter(player.Position, SessionVariables.teams[(byte)player.Team].blood);
                                             if (playerId != propertyBag.playerMyId)
                                                 propertyBag.PlaySound(InfiniminerSound.Death, player.Position);
                                         }
@@ -566,8 +566,8 @@ namespace Infiniminer
                                     break;
                                 case InfiniminerMessage.TeamConfig:
                                     {
-                                        ushort team = msgBuffer.ReadUInt16();
-                                        if (team < SessionVariables.teams.Length)
+                                        byte team = msgBuffer.ReadByte();
+                                        if (team > 0 && team < SessionVariables.teams.Length)
                                         {
                                             string name = msgBuffer.ReadString();
                                             Color teamColor = configHelper.string2Color(msgBuffer.ReadString());

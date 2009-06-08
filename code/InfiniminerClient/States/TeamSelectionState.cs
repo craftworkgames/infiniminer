@@ -82,8 +82,8 @@ namespace Infiniminer.States
             SpriteBatch spriteBatch = new SpriteBatch(graphicsDevice);
             spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Deferred, SaveStateMode.SaveState);
             spriteBatch.Draw(texMenu, drawRect, Color.White);
-            QuickDrawText(spriteBatch, "" + teamCountA + " PLAYERS", 360, SessionVariables.teams[0].color);
-            QuickDrawText(spriteBatch, "" + teamCountB + " PLAYERS", 620, SessionVariables.teams[1].color);
+            QuickDrawText(spriteBatch, "" + teamCountA + " PLAYERS", 360, SessionVariables.teams[(byte)PlayerTeam.A].color);
+            QuickDrawText(spriteBatch, "" + teamCountB + " PLAYERS", 620, SessionVariables.teams[(byte)PlayerTeam.B].color);
             spriteBatch.End();
         }
 
