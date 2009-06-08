@@ -22,64 +22,42 @@ namespace Infiniminer
         {
             // Read in from the config file.
             DatafileLoader dataFile = new DatafileLoader(InfiniminerServer.configFilename());
-            try
-            {
-                configHelper.ushortTernaryConfig(ref _connectionPort, "networkport", dataFile, InfiniminerGame.connectionPort(), (ushort)(InfiniminerGame.connectionPort() + 100));
-            }
-            catch (Exception) { }
-            ConsoleWrite("NETWORK PORT: " + InfiniminerServer.connectionPort().ToString());
-            try
-            {
-                configHelper.boolTernaryConfig(ref autosave, "autosave", dataFile);
-            }
-            catch (Exception) { }
-            try
-            {
-                configHelper.uintTernaryConfig(ref winningCashAmount, "winningcash", dataFile, 100, 999999999);
-            }
-            catch (Exception) { }
-            try
-            {
-                configHelper.ushortTernaryConfig(ref _lavaFlows, "lavaflows", dataFile, 0, 32);
-            }
-            catch (Exception) { }
-            try
-            {
-                configHelper.boolTernaryConfig(ref _lavaAtGroundLevel, "lavaground", dataFile);
-            }
-            catch (Exception) { }
-            includeLava = _lavaFlows > 0 || _lavaAtGroundLevel;
-            if (_lavaAtGroundLevel && _lavaFlows == 0)
-            {
-                _lavaFlows = 1;
-            }
-            try
-            {
-                configHelper.uintTernaryConfig(ref oreFactor, "orefactor", dataFile, 0, 999999999);
-            }
-            catch (Exception) { }
-            try
-            {
-                configHelper.uintTernaryConfig(ref maxPlayers, "maxplayers", dataFile, 1, 64);
-            }
-            catch (Exception) { }
-            try
-            {
-                configHelper.boolTernaryConfig(ref sandboxMode, "sandbox", dataFile);
-            }
-            catch (Exception) { }
-            try
-            {
-                configHelper.stringTernaryConfig(ref serverName, "servername", dataFile);
-            }
-            catch (Exception) { }
-            try
-            {
-                configHelper.stringTernaryConfig(ref publicServerList, "public", dataFile);
-            }
-            catch (Exception) { }
-            //          automatically configuring whether the server is public based on the presence of the publicserver string
-            //            configHelper.boolTernaryConfig(ref publicServer, "public", dataFile);
+            SessionVariables.reset();
+            // configuring connection port for session
+            ushort port = SessionVariables.connectionPort;
+            configHelper.ushortTernaryConfig(ref port, "networkport", dataFile, SessionVariables.connectionPort, (ushort)(SessionVariables.connectionPort + 100));
+            SessionVariables.connectionPort = port;
+            ConsoleWrite("NETWORK PORT: " + SessionVariables.connectionPort.ToString());
+
+            // configuring gZip compression for maps
+            bool gzip = SessionVariables.gZip;
+            configHelper.boolTernaryConfig(ref gzip, "gzip", dataFile);
+            SessionVariables.gZip = gzip;
+
+            // setting up team configuration
+            string teamName = InfiniminerTeam.defaultTeams()[0].name;
+                configHelper.stringTernaryConfig(ref teamName, "team_a", dataFile);
+                SessionVariables.teams[0].name = teamName;
+            Color teamColor = InfiniminerTeam.defaultTeams()[0].color;
+                configHelper.colorTernaryConfig(ref teamColor, "color_a", dataFile);
+                SessionVariables.teams[0].color = teamColor;
+            teamName = InfiniminerTeam.defaultTeams()[1].name;
+                configHelper.stringTernaryConfig(ref teamName, "team_b", dataFile);
+                SessionVariables.teams[1].name = teamName;
+            teamColor = InfiniminerTeam.defaultTeams()[1].color;
+                configHelper.colorTernaryConfig(ref teamColor, "color_b", dataFile);
+                SessionVariables.teams[1].color = teamColor;
+            
+            configHelper.boolTernaryConfig(ref autosave, "autosave", dataFile);
+            configHelper.uintTernaryConfig(ref winningCashAmount, "winningcash", dataFile, 100, 999999999);
+            configHelper.ushortTernaryConfig(ref _lavaFlows, "lavaflows", dataFile, 0, 32);
+            configHelper.boolTernaryConfig(ref _lavaAtGroundLevel, "lavaground", dataFile);
+            includeLava = _lavaFlows > 0;
+            configHelper.uintTernaryConfig(ref oreFactor, "orefactor", dataFile, 0, 999999999);
+            configHelper.uintTernaryConfig(ref maxPlayers, "maxplayers", dataFile, 1, 64);
+            configHelper.boolTernaryConfig(ref sandboxMode, "sandbox", dataFile);
+            configHelper.stringTernaryConfig(ref serverName, "servername", dataFile);
+            configHelper.stringTernaryConfig(ref publicServerList, "public", dataFile);
             try
             {
                 publicServer = bool.Parse(publicServerList);
@@ -96,84 +74,25 @@ namespace Infiniminer
             {
                 ConsoleWrite("PUBLIC LIST: SERVER IS PRIVATE");
             }
-            try
-            {
-                configHelper.boolTernaryConfig(ref authEnabled, "authenabled", dataFile);
-            }
-            catch (Exception) { }
-
-
-            try
-            {
-                configHelper.stringTernaryConfig(ref banListFile, "banlist", dataFile);
-            }
-            catch (Exception) { }
+            configHelper.boolTernaryConfig(ref authEnabled, "authenabled", dataFile);
+            configHelper.stringTernaryConfig(ref banListFile, "banlist", dataFile);
             loadMapOnStart = "";
-            try
-            {
-                configHelper.stringTernaryConfig(ref loadMapOnStart, "map", dataFile);
-            }
-            catch (Exception)
-            {
-                ConsoleWrite("ERROR: Could not load starting map");
-            }
-            try
-            {
-                configHelper.boolTernaryConfig(ref gzip, "gzip", dataFile);
-            }
-            catch (Exception) { }
-            
-            try
-            {
-                configHelper.stringTernaryConfig(ref _teamNameA, "team_a", dataFile);
-            }
-            catch (Exception) {
-                _teamNameA = "RED";
-            }
-            try
-            {
-                configHelper.colorTernaryConfig(ref _teamColorA, "color_a", dataFile);
-            }
-            catch (Exception) {
-                _teamColorA = new Color(222, 24, 24);
-            }
-
-            try
-            {
-                configHelper.stringTernaryConfig(ref _teamNameB, "team_b", dataFile);
-            }
-            catch (Exception) {
-                _teamNameB = "BLUE";
-            }
-            try
-            {
-                configHelper.colorTernaryConfig(ref _teamColorB, "color_b", dataFile);
-            }
-            catch (Exception)
-            {
-                _teamColorB = new Color(80, 150, 255);
-            }
+            configHelper.stringTernaryConfig(ref loadMapOnStart, "map", dataFile);
+            ConsoleWrite("ERROR: Could not load starting map");
         }
 
-        private static ushort _connectionPort = InfiniminerGame.connectionPort();
-        public static ushort connectionPort()
-        {
-            return _connectionPort;
-        }
-        private static bool gzip = false;
-        public static bool gZip
-        {
-            get { return gzip; }
-            private set
-            {
-                gzip = value;
-            }
-        }
 
         private static bool _lavaAtGroundLevel = false;
-        public static bool lavaAtGroundLevel()
+        public static bool lavaAtGroundLevel
         {
-            return _lavaAtGroundLevel;
+            get
+            {
+                return _lavaAtGroundLevel;
+            }
+            private set
+            {
+                _lavaAtGroundLevel = value;
+            }
         }
         bool autosave = true;
         uint oreFactor = 10;
@@ -198,43 +117,10 @@ namespace Infiniminer
 
         bool keepRunning = true;
 
-        private static string _teamNameA = "RED";
-        private static Color _teamColorA = new Color(222, 24, 24);
-        private static Color _teamBloodA = Color.Red;
         uint teamCashA = 0;
         uint teamOreA = 0;
-
-        private static string _teamNameB = "BLUE";
-        private static Color _teamColorB = new Color(80, 150, 255);
-        private static Color _teamBloodB = Color.Blue;
         uint teamCashB = 0;
         uint teamOreB = 0;
-
-        public static string teamNameA()
-        {
-            return _teamNameA;
-        }
-        public static Color teamColorA()
-        {
-            return _teamColorA;
-        }
-        public static Color teamBloodA()
-        {
-            return _teamBloodA;
-        }
-
-        public static string teamNameB()
-        {
-            return _teamNameB;
-        }
-        public static Color teamColorB()
-        {
-            return _teamColorB;
-        }
-        public static Color teamBloodB()
-        {
-            return _teamBloodB;
-        }
 
         uint winningCashAmount = 10000;
         PlayerTeam winningTeam = PlayerTeam.None;
@@ -292,7 +178,7 @@ namespace Infiniminer
             postDict["player_count"] = "" + playerList.Keys.Count;
             postDict["player_capacity"] = "" + maxPlayers;
             postDict["extra"] = GetExtraInfo();
-            postDict["post"] = _connectionPort.ToString();
+            postDict["post"] = SessionVariables.connectionPort.ToString();
 
             try
             {
@@ -686,14 +572,15 @@ namespace Infiniminer
             // Initialize the server.
             NetConfiguration netConfig = new NetConfiguration("InfiniminerPlus");
             netConfig.MaxConnections = (int)maxPlayers;
-            netConfig.Port = InfiniminerServer.connectionPort();
+            netConfig.Port = SessionVariables.connectionPort;
             netServer = new InfiniminerNetServer(netConfig);
             netServer.SetMessageTypeEnabled(NetMessageType.ConnectionApproval, true);
             //netServer.SimulatedMinimumLatency = 0.1f;
             //netServer.SimulatedLatencyVariance = 0.05f;
             //netServer.SimulatedLoss = 0.1f;
             //netServer.SimulatedDuplicates = 0.05f;
-            ConsoleWrite("TEAMS: " + teamNameA() + " vs. " + teamNameB());
+
+            ConsoleWrite("TEAMS: " + configHelper.teamsVs(SessionVariables.teams));
             netServer.Start();
 
             // Initialize variables we'll use.
@@ -1508,9 +1395,9 @@ namespace Infiniminer
             switch (team)
             {
                 case PlayerTeam.A:
-                    return InfiniminerGame.teamNameA();
+                    return SessionVariables.teams[0].name;
                 case PlayerTeam.B:
-                    return InfiniminerGame.teamNameB();
+                    return SessionVariables.teams[1].name;
             }
             return "";
         }
@@ -1528,27 +1415,22 @@ namespace Infiniminer
         }
         public void SendTeamConfig(NetConnection client)
         {
-            NetBuffer msgBuffer = netServer.CreateBuffer();
+            NetBuffer msgBuffer;
+            uint i = 0;
+            while (i < SessionVariables.teams.Length)
+            {
+                msgBuffer = netServer.CreateBuffer();
                 msgBuffer.Write((byte)InfiniminerMessage.TeamConfig);
-                msgBuffer.Write((byte)PlayerTeam.A);
-                msgBuffer.Write(teamNameA());
-                msgBuffer.Write(configHelper.color2String(teamColorA()));
-                msgBuffer.Write(configHelper.color2String(teamBloodA()));
-                    if (client.Status == NetConnectionStatus.Connected)
-                    {
-                        netServer.SendMessage(msgBuffer, client, NetChannel.ReliableInOrder1);
-                    }
-
-            msgBuffer = netServer.CreateBuffer();
-                msgBuffer.Write((byte)InfiniminerMessage.TeamConfig);
-                msgBuffer.Write((byte)PlayerTeam.B);
-                msgBuffer.Write(teamNameB());
-                msgBuffer.Write(configHelper.color2String(teamColorB()));
-                msgBuffer.Write(configHelper.color2String(teamBloodB()));
-                    if (client.Status == NetConnectionStatus.Connected)
-                    {
-                        netServer.SendMessage(msgBuffer, client, NetChannel.ReliableInOrder1);
-                    }
+                msgBuffer.Write((ushort)i);
+                msgBuffer.Write(SessionVariables.teams[i].name);
+                msgBuffer.Write(configHelper.color2String(SessionVariables.teams[i].color));
+                msgBuffer.Write(configHelper.color2String(SessionVariables.teams[i].blood));
+                if (client.Status == NetConnectionStatus.Connected)
+                {
+                    netServer.SendMessage(msgBuffer, client, NetChannel.ReliableInOrder1);
+                }
+                ++i;
+            }
         }
 
         // Lets a player know about their resources.
@@ -1573,7 +1455,7 @@ namespace Infiniminer
 
         public void SendCurrentMap(NetConnection client)
         {
-            if (gZip)
+            if (SessionVariables.gZip)
             {
                 ConsoleWrite("Gzip compressing map");
                 for (byte x = 0; x < GlobalVariables.MAPSIZE; x++)

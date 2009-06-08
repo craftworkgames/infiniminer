@@ -26,6 +26,16 @@ namespace Infiniminer
         private void configure()
         {
             DatafileLoader dataFile = new DatafileLoader(InfiniminerGame.configFilename());
+            SessionVariables.reset();
+            // configuring connection port for session
+            ushort port = SessionVariables.connectionPort;
+            configHelper.ushortTernaryConfig(ref port, "networkport", dataFile, SessionVariables.connectionPort, (ushort)(SessionVariables.connectionPort + 100));
+            SessionVariables.connectionPort = port;
+
+            // configuring gZip compression for maps
+            bool gzip = SessionVariables.gZip;
+            configHelper.boolTernaryConfig(ref gzip, "gzip", dataFile);
+            SessionVariables.gZip = gzip;
 
             bool fullscreen = false;
             int width = 1024;
@@ -38,9 +48,7 @@ namespace Infiniminer
             graphicsDeviceManager.IsFullScreen = fullscreen;
             configHelper.boolTernaryConfig(ref RenderPretty, "pretty", dataFile);
 
-            configHelper.ushortTernaryConfig(ref _connectionPort, "networkport", dataFile, InfiniminerGame.connectionPort(), (ushort)(InfiniminerGame.connectionPort() + 100));
             configHelper.stringTernaryConfig(ref _publicServerList, "public", dataFile);
-            configHelper.boolTernaryConfig(ref gzip, "gzip", dataFile);
             configHelper.boolTernaryConfig(ref checkmapsize, "checkmapsize", dataFile);
             configHelper.stringTernaryConfig(ref playerHandle, "handle", dataFile);
             configHelper.boolTernaryConfig(ref DrawFrameRate, "showfps", dataFile);
@@ -66,19 +74,6 @@ namespace Infiniminer
             configHelper.stringTernaryConfig(ref THEEARTHISFLAT, "msg_misadventure", dataFile);
             configHelper.stringTernaryConfig(ref DONTBEATNTDICK, "msg_explosion", dataFile);
         }
-
-        private static ushort _connectionPort = 5565;
-        public static ushort connectionPort()
-        {
-            return _connectionPort;
-        }
-
-        private static bool gzip = false;
-        public static bool gZip
-        {
-            get { return gzip; }
-            private set { gzip = value; }
-        }
         private static bool checkmapsize = false;
         public static bool checkMapSize
         {
@@ -95,40 +90,6 @@ namespace Infiniminer
 
         private const string song_filename = "song_title";
         private static bool noSong = false;
-
-        private static string _teamNameA  = "RED";
-        private static Color _teamColorA = new Color(222, 24, 24);
-        private static Color _teamBloodA = Color.Red;
-
-        private static string _teamNameB = "BLUE";
-        private static Color _teamColorB = new Color(80, 150, 255);
-        private static Color _teamBloodB = Color.Blue;
-
-        public static string teamNameA()
-        {
-            return _teamNameA;
-        }
-        public static Color teamColorA()
-        {
-            return _teamColorA;
-        }
-        public static Color teamBloodA()
-        {
-            return _teamBloodA;
-        }
-
-        public static string teamNameB()
-        {
-            return _teamNameB;
-        }
-        public static Color teamColorB()
-        {
-            return _teamColorB;
-        }
-        public static Color teamBloodB()
-        {
-            return _teamBloodB;
-        }
 
         public static float MOVESPEED = 3.5f;
             private const float minMOVESPEED = 1.0f; // any slower and things are going to be too slow to be useful
@@ -217,7 +178,7 @@ namespace Infiniminer
             List<ServerInformation> serverList = new List<ServerInformation>();
             
             // Discover local servers.
-            propertyBag.netClient.DiscoverLocalServers(InfiniminerGame.connectionPort());
+            propertyBag.netClient.DiscoverLocalServers(SessionVariables.connectionPort);
             NetBuffer msgBuffer = propertyBag.netClient.CreateBuffer();
             NetMessageType msgType;
             float timeTaken = 0;
@@ -329,7 +290,7 @@ namespace Infiniminer
                                     {
                                         byte x;
                                         byte y;
-                                        if (gZip)
+                                        if (SessionVariables.gZip)
                                         {
                                             //Decompress the sent data into its origonal size in decompressed stream
                                             var compressed = msgBuffer.ReadBytes(msgBuffer.LengthBytes - msgBuffer.Position / 8);
@@ -356,7 +317,6 @@ namespace Infiniminer
                                             x = msgBuffer.ReadByte();
                                             y = msgBuffer.ReadByte();
                                             propertyBag.mapLoadProgress[x, y] = true;
-                                            MessageBox.Show(msgBuffer.LengthBytes.ToString());
                                             for (byte dy = 0; dy < 16; dy++)
                                             {
                                                 for (byte z = 0; z < 64; z++)
@@ -528,7 +488,7 @@ namespace Infiniminer
                                         {
                                             Player player = propertyBag.playerList[playerId];
                                             player.Alive = false;
-                                            propertyBag.particleEngine.CreateBloodSplatter(player.Position, player.Team == PlayerTeam.A ? InfiniminerGame.teamBloodA() : InfiniminerGame.teamBloodB());
+                                            propertyBag.particleEngine.CreateBloodSplatter(player.Position, player.Team == PlayerTeam.A ? SessionVariables.teams[0].blood : SessionVariables.teams[1].blood);
                                             if (playerId != propertyBag.playerMyId)
                                                 propertyBag.PlaySound(InfiniminerSound.Death, player.Position);
                                         }
@@ -606,22 +566,15 @@ namespace Infiniminer
                                     break;
                                 case InfiniminerMessage.TeamConfig:
                                     {
-                                        PlayerTeam team = (PlayerTeam)msgBuffer.ReadByte();
-                                        string name = msgBuffer.ReadString();
-                                        Color teamColor = configHelper.string2Color(msgBuffer.ReadString());
-                                        Color bloodColor = configHelper.string2Color(msgBuffer.ReadString());
-                                        switch (team)
+                                        ushort team = msgBuffer.ReadUInt16();
+                                        if (team < SessionVariables.teams.Length)
                                         {
-                                            case PlayerTeam.A:
-                                                _teamNameA = name;
-                                                _teamColorA = teamColor;
-                                                _teamBloodA = bloodColor;
-                                            break;
-                                            case PlayerTeam.B:
-                                            _teamNameB = name;
-                                                _teamColorB = teamColor;
-                                                _teamBloodB = bloodColor;
-                                            break;
+                                            string name = msgBuffer.ReadString();
+                                            Color teamColor = configHelper.string2Color(msgBuffer.ReadString());
+                                            Color bloodColor = configHelper.string2Color(msgBuffer.ReadString());
+                                            SessionVariables.teams[team].name = name;
+                                            SessionVariables.teams[team].color = teamColor;
+                                            SessionVariables.teams[team].blood = bloodColor;
                                         }
                                     }
                                  break;
