@@ -297,7 +297,7 @@ namespace Infiniminer
 
             // Show the altimeter.
             int altitude = (int)(_P.playerPosition.Y - gameInstance.propertyBag.MapSize + InfiniminerGame.GROUND_LEVEL);
-            RenderMessageCenter(spriteBatch, String.Format("ALTITUDE: {0:00}", altitude), new Vector2(graphicsDevice.Viewport.Width - 90, graphicsDevice.Viewport.Height - 20), altitude >= 0 ? Color.Gray : SessionVariables.teams[0].color , Color.Black);
+            RenderMessageCenter(spriteBatch, String.Format("ALTITUDE: {0:00}", altitude), new Vector2(graphicsDevice.Viewport.Width - 90, graphicsDevice.Viewport.Height - 20), altitude >= 0 ? Color.Gray : SessionVariables.teams[(byte)PlayerTeam.A].color, Color.Black);
 
             // Draw bank instructions.
             if (_P.AtBankTerminal())
@@ -314,8 +314,8 @@ namespace Infiniminer
             spriteBatch.DrawString(uiFont, "LOOT: $" + _P.playerCash, new Vector2(textStart + 170, 2), Color.White);
             spriteBatch.DrawString(uiFont, "WEIGHT: " + _P.playerWeight + "/" + _P.playerWeightMax, new Vector2(textStart + 340, 2), Color.White);
             spriteBatch.DrawString(uiFont, "TEAM ORE: " + _P.teamOre, new Vector2(textStart + 515, 2), Color.White);
-            spriteBatch.DrawString(uiFont, SessionVariables.teams[0].name + ": $" + _P.teamACash, new Vector2(textStart + 700, 2), SessionVariables.teams[0].color);
-            spriteBatch.DrawString(uiFont, SessionVariables.teams[1].name + ": $" + _P.teamBCash, new Vector2(textStart + 860, 2), SessionVariables.teams[1].color);
+            spriteBatch.DrawString(uiFont, SessionVariables.teams[(byte)PlayerTeam.A].name + ": $" + _P.teamACash, new Vector2(textStart + 700, 2), SessionVariables.teams[(byte)PlayerTeam.A].color);
+            spriteBatch.DrawString(uiFont, SessionVariables.teams[(byte)PlayerTeam.B].name + ": $" + _P.teamBCash, new Vector2(textStart + 860, 2), SessionVariables.teams[(byte)PlayerTeam.B].color);
 
             // Draw player information.
             if ((Keyboard.GetState().IsKeyDown(Keys.Tab) && _P.screenEffect == ScreenEffect.None) || _P.teamWinners != PlayerTeam.None)
@@ -324,8 +324,8 @@ namespace Infiniminer
 
                 if (_P.teamWinners != PlayerTeam.None)
                 {
-                    string teamName = _P.teamWinners == PlayerTeam.A ? SessionVariables.teams[0].name: SessionVariables.teams[1].name;
-                    Color teamColor = _P.teamWinners == PlayerTeam.A ? SessionVariables.teams[0].color : SessionVariables.teams[1].color;
+                    string teamName = SessionVariables.teams[(byte)_P.teamWinners].name;
+                    Color teamColor = SessionVariables.teams[(byte)_P.teamWinners].color;
                     string gameOverMessage = "GAME OVER - " + teamName + " TEAM WINS!";
                     RenderMessageCenter(spriteBatch, gameOverMessage, new Vector2(graphicsDevice.Viewport.Width / 2, 150), teamColor, new Color(0, 0, 0, 0));
                 }
@@ -335,7 +335,7 @@ namespace Infiniminer
                 {
                     if (p.Team != PlayerTeam.A)
                         continue;
-                    RenderMessageCenter(spriteBatch, p.Handle + " ( $" + p.Score + " )", new Vector2(graphicsDevice.Viewport.Width / 4, drawY), SessionVariables.teams[0].color, new Color(0, 0, 0, 0));
+                    RenderMessageCenter(spriteBatch, p.Handle + " ( $" + p.Score + " )", new Vector2(graphicsDevice.Viewport.Width / 4, drawY), SessionVariables.teams[(byte)PlayerTeam.A].color, new Color(0, 0, 0, 0));
                     drawY += 35;
                 }
                 drawY = 200;
@@ -343,7 +343,7 @@ namespace Infiniminer
                 {
                     if (p.Team != PlayerTeam.B)
                         continue;
-                    RenderMessageCenter(spriteBatch, p.Handle + " ( $" + p.Score + " )", new Vector2(graphicsDevice.Viewport.Width * 3 / 4, drawY), SessionVariables.teams[1].color, new Color(0, 0, 0, 0));
+                    RenderMessageCenter(spriteBatch, p.Handle + " ( $" + p.Score + " )", new Vector2(graphicsDevice.Viewport.Width * 3 / 4, drawY), SessionVariables.teams[(byte)PlayerTeam.B].color, new Color(0, 0, 0, 0));
                     drawY += 35;
                 }
             }
@@ -363,9 +363,9 @@ namespace Infiniminer
             {
                 Color chatColor = Color.White;
                 if (_P.chatBuffer[i].type == ChatMessageType.SayTeamA)
-                    chatColor = SessionVariables.teams[0].color;
+                    chatColor = SessionVariables.teams[(byte)PlayerTeam.A].color;
                 if (_P.chatBuffer[i].type == ChatMessageType.SayTeamB)
-                    chatColor = SessionVariables.teams[1].color;
+                    chatColor = SessionVariables.teams[(byte)PlayerTeam.B].color;
                 spriteBatch.DrawString(uiFont, _P.chatBuffer[i].message, new Vector2(22, graphicsDevice.Viewport.Height - 114 - 16 * i), Color.Black);
                 spriteBatch.DrawString(uiFont, _P.chatBuffer[i].message, new Vector2(20, graphicsDevice.Viewport.Height - 116 - 16 * i), chatColor);
             }
@@ -374,7 +374,7 @@ namespace Infiniminer
             spriteBatch.Draw(texRadarBackground, new Vector2(10, 30), Color.White);
             foreach (Player p in _P.playerList.Values)
                 if (p.Team == _P.playerTeam && p.Alive)
-                    RenderRadarBlip(spriteBatch, p.ID == _P.playerMyId ? _P.playerPosition : p.Position, p.Team == PlayerTeam.A ? SessionVariables.teams[0].color : SessionVariables.teams[1].color, p.Ping > 0, "");
+                    RenderRadarBlip(spriteBatch, p.ID == _P.playerMyId ? _P.playerPosition : p.Position, SessionVariables.teams[(byte)p.Team].color, p.Ping > 0, "");
             foreach (KeyValuePair<Vector3, Beacon> bPair in _P.beaconList)
                 if (bPair.Value.Team == _P.playerTeam)
                     RenderRadarBlip(spriteBatch, bPair.Key, Color.White, false, bPair.Value.ID);

@@ -105,6 +105,8 @@
     <Compile Include="BloomEffect\BloomComponent.cs" />
     <Compile Include="BloomEffect\BloomSettings.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="Configuration\SessionVariables.cs" />
+    <Compile Include="Configuration\Team.cs" />
     <Compile Include="Engines\BlockEngine.cs" />
     <Compile Include="BlockInformation.cs" />
     <Compile Include="Camera.cs" />
