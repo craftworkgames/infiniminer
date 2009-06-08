@@ -135,7 +135,7 @@ namespace Infiniminer.States
                     }
                     if (connectIp != null)                   
                     {
-                        (_SM as InfiniminerGame).JoinGame(new IPEndPoint(connectIp, InfiniminerGame.connectionPort()));
+                        (_SM as InfiniminerGame).JoinGame(new IPEndPoint(connectIp, SessionVariables.connectionPort));
                         nextState = "Infiniminer.States.LoadingState";
                     }
                     directConnectIP = "";

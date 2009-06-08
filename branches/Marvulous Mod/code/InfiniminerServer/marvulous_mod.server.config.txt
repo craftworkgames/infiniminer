@@ -26,3 +26,14 @@ sandbox = false
 
 checkmapsize = true
 gzip = true
+
+# NON-BREAKING FEATURES
+# Values configured here make use of features that can be safely ignored by incompatible clients
+
+# Team Names
+# team_a = Pirates
+# team_b = Ninjas
+
+# Team Colors
+# color_a = 255,0,128
+# color_b = 0,255,0

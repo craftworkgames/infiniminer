@@ -24,7 +24,7 @@ namespace Infiniminer
 
         public ServerInformation(IPAddress ip, string name, string extra, string numPlayers, string maxPlayers)
         {
-            ipEndPoint = new IPEndPoint(ip, InfiniminerGame.connectionPort());
+            ipEndPoint = new IPEndPoint(ip, SessionVariables.connectionPort);
             serverName = name;
             serverExtra = extra;
             this.numPlayers = numPlayers;

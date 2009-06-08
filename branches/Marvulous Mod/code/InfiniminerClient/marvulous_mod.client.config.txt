@@ -19,7 +19,7 @@ volume = 0.7
 # If volume is set to 0.0, nosound will automatically be set to true
 nosound = false
 # Title music in Marvulous Mod is "80's" by Torley Wong (http://www.torley.com ) track is made available under CC-BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
-nosong = true
+nosong = false
 
 msg_splat        = went splat
 msg_lava         = got deep-fried

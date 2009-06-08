@@ -159,7 +159,7 @@ namespace Infiniminer
                 {
                     data[x, y, z] = BlockType.Rock;
                     data[x, y, z + 1] = BlockType.Lava;
-                    if (InfiniminerServer.lavaAtGroundLevel() && data[x, y, InfiniminerGame.GROUND_LEVEL] == BlockType.None)
+                    if (InfiniminerServer.lavaAtGroundLevel && data[x, y, InfiniminerGame.GROUND_LEVEL] == BlockType.None)
                     {
                         data[x, y, InfiniminerGame.GROUND_LEVEL] = BlockType.Lava;
                     }
