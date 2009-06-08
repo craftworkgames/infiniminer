@@ -391,9 +391,11 @@ namespace Infiniminer
                                         propertyBag.playerWeight = msgBuffer.ReadUInt32();
                                         propertyBag.playerOreMax = msgBuffer.ReadUInt32();
                                         propertyBag.playerWeightMax = msgBuffer.ReadUInt32();
-                                        propertyBag.teamOre = msgBuffer.ReadUInt32();
-                                        propertyBag.teamACash = msgBuffer.ReadUInt32();
-                                        propertyBag.teamBCash = msgBuffer.ReadUInt32();
+                                        SessionVariables.teams[(byte)propertyBag.playerTeam].oreCount = msgBuffer.ReadUInt32();
+                                        SessionVariables.teams[(byte)PlayerTeam.A].goldCount = msgBuffer.ReadUInt32();
+                                        SessionVariables.teams[(byte)PlayerTeam.A].diamondCount = msgBuffer.ReadUInt32();
+                                        SessionVariables.teams[(byte)PlayerTeam.B].goldCount = msgBuffer.ReadUInt32();
+                                        SessionVariables.teams[(byte)PlayerTeam.B].diamondCount = msgBuffer.ReadUInt32();
                                     }
                                     break;
 

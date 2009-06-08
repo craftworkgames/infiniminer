@@ -117,11 +117,6 @@ namespace Infiniminer
 
         bool keepRunning = true;
 
-        uint teamCashA = 0;
-        uint teamOreA = 0;
-        uint teamCashB = 0;
-        uint teamOreB = 0;
-
         uint winningCashAmount = 10000;
         PlayerTeam winningTeam = PlayerTeam.None;
 
@@ -787,7 +782,8 @@ namespace Infiniminer
                                         {
                                             ConsoleWrite("PLAYER_DEAD: " + player.Handle);
                                             player.Ore = 0;
-                                            player.Cash = 0;
+                                            player.goldCount = 0;
+                                            player.diamondCount = 0;
                                             player.Weight = 0;
                                             player.Alive = false;
                                             SendResourceUpdate(player);
@@ -811,7 +807,8 @@ namespace Infiniminer
                                         {
                                             ConsoleWrite("PLAYER_ALIVE: " + player.Handle);
                                             player.Ore = 0;
-                                            player.Cash = 0;
+                                            player.goldCount = 0;
+                                            player.diamondCount = 0;
                                             player.Weight = 0;
                                             player.Alive = true;
                                             SendResourceUpdate(player);
@@ -941,11 +938,20 @@ namespace Infiniminer
             }
 
             if (sandboxMode)
+            {
                 return;
-            if (teamCashB >= winningCashAmount && winningTeam == PlayerTeam.None)
-                winningTeam = PlayerTeam.B;
-            if (teamCashA >= winningCashAmount && winningTeam == PlayerTeam.None)
-                winningTeam = PlayerTeam.A;
+            }
+            if (winningTeam == PlayerTeam.None)
+            {
+                if (SessionVariables.teams[(byte)PlayerTeam.A].cash() >= winningCashAmount)
+                {
+                    winningTeam = PlayerTeam.A;
+                }
+                if (SessionVariables.teams[(byte)PlayerTeam.B].cash() >= winningCashAmount)
+                {
+                    winningTeam = PlayerTeam.B;
+                }
+            }
         }
 
         public bool DoLavaStuff()
@@ -1046,7 +1052,6 @@ namespace Infiniminer
             // Figure out what the result is.
             bool removeBlock = false;
             uint giveOre = 0;
-            uint giveCash = 0;
             uint giveWeight = 0;
             InfiniminerSound sound = InfiniminerSound.DigDirt;
 
@@ -1066,15 +1071,13 @@ namespace Infiniminer
 
                 case BlockType.Gold:
                     removeBlock = true;
-                    giveWeight = 1;
-                    giveCash = 100;
+                    giveWeight = SessionVariables.goldWeight;
                     sound = InfiniminerSound.DigMetal;
                     break;
 
                 case BlockType.Diamond:
                     removeBlock = true;
-                    giveWeight = 1;
-                    giveCash = 1000;
+                    giveWeight = SessionVariables.diamondWeight;
                     sound = InfiniminerSound.DigMetal;
                     break;
             }
@@ -1092,8 +1095,21 @@ namespace Infiniminer
             {
                 if (player.Weight < player.WeightMax)
                 {
+                    switch (BlockAtPoint(hitPoint))
+                    {
+                        case BlockType.Gold:
+                        {
+                            ++player.goldCount;
+                        }
+                        break;
+
+                        case BlockType.Diamond:
+                        {
+                            ++player.diamondCount;
+                        }
+                        break;
+                    }
                     player.Weight = Math.Min(player.Weight + giveWeight, player.WeightMax);
-                    player.Cash += giveCash;
                     SendResourceUpdate(player);
                 }
                 else
@@ -1344,47 +1360,51 @@ namespace Infiniminer
             uint depositAmount = Math.Min(50, player.Ore);
             player.Ore -= depositAmount;
             if (player.Team == PlayerTeam.A)
-                teamOreA = Math.Min(teamOreA + depositAmount, 9999);
+            {
+                SessionVariables.teams[(byte)PlayerTeam.A].oreCount = Math.Min(SessionVariables.teams[(byte)PlayerTeam.A].oreCount + depositAmount, 9999);
+            }
             else
-                teamOreB = Math.Min(teamOreB + depositAmount, 9999);
+            {
+                SessionVariables.teams[(byte)PlayerTeam.B].oreCount = Math.Min(SessionVariables.teams[(byte)PlayerTeam.B].oreCount + depositAmount, 9999);
+            }
         }
 
         public void WithdrawOre(Player player)
         {
+            uint withdrawAmount = 0;
             if (player.Team == PlayerTeam.A)
             {
-                uint withdrawAmount = Math.Min(player.OreMax - player.Ore, Math.Min(50, teamOreA));
-                player.Ore += withdrawAmount;
-                teamOreA -= withdrawAmount;
+                withdrawAmount = Math.Min(player.OreMax - player.Ore, Math.Min(50, SessionVariables.teams[(byte)PlayerTeam.A].oreCount));
+                SessionVariables.teams[(byte)PlayerTeam.A].oreCount -= withdrawAmount;
             }
             else
             {
-                uint withdrawAmount = Math.Min(player.OreMax - player.Ore, Math.Min(50, teamOreB));
-                player.Ore += withdrawAmount;
-                teamOreB -= withdrawAmount;
+                withdrawAmount = Math.Min(player.OreMax - player.Ore, Math.Min(50, SessionVariables.teams[(byte)PlayerTeam.B].oreCount));
+                SessionVariables.teams[(byte)PlayerTeam.B].oreCount -= withdrawAmount;
             }
+            player.Ore += withdrawAmount;
         }
 
         public void DepositCash(Player player)
         {
-            if (player.Cash <= 0)
+            if (player.goldCount <= 0 && player.diamondCount <= 0)
                 return;
 
-            player.Score += player.Cash;
+            player.Score += Player.cash(player);
 
             if (!sandboxMode)
             {
-                if (player.Team == PlayerTeam.A)
-                    teamCashA += player.Cash;
-                else
-                    teamCashB += player.Cash;
-                SendServerMessage("SERVER: " + player.Handle + " HAS EARNED $" + player.Cash + " FOR THE " + SessionVariables.teams[(byte)player.Team].name + " TEAM!");
+                SessionVariables.teams[(byte)player.Team].goldCount += player.goldCount;
+                SessionVariables.teams[(byte)player.Team].diamondCount += player.diamondCount;
+
+                SendServerMessage("SERVER: " + player.Handle + " HAS EARNED $" + Player.cash(player) + " FOR THE " + SessionVariables.teams[(byte)player.Team].name + " TEAM!");
             }
 
             PlaySound(InfiniminerSound.CashDeposit, player.Position);
-            ConsoleWrite("DEPOSIT_CASH: " + player.Handle + ", " + player.Cash);
-            
-            player.Cash = 0;
+            ConsoleWrite("DEPOSIT_CASH: " + player.Handle + ", " + Player.cash(player));
+
+            player.goldCount = 0;
+            player.diamondCount = 0;
             player.Weight = 0;
 
             foreach (Player p in playerList.Values)
@@ -1432,13 +1452,15 @@ namespace Infiniminer
             NetBuffer msgBuffer = netServer.CreateBuffer();
             msgBuffer.Write((byte)InfiniminerMessage.ResourceUpdate);
             msgBuffer.Write((uint)player.Ore);
-            msgBuffer.Write((uint)player.Cash);
+            msgBuffer.Write((uint)Player.cash(player));
             msgBuffer.Write((uint)player.Weight);
             msgBuffer.Write((uint)player.OreMax);
             msgBuffer.Write((uint)player.WeightMax);
-            msgBuffer.Write((uint)(player.Team == PlayerTeam.A ? teamOreA : teamOreB));
-            msgBuffer.Write((uint)teamCashA);
-            msgBuffer.Write((uint)teamCashB);
+            msgBuffer.Write((uint)SessionVariables.teams[(byte)player.Team].oreCount);
+            msgBuffer.Write((uint)SessionVariables.teams[(byte)PlayerTeam.A].goldCount);
+            msgBuffer.Write((uint)SessionVariables.teams[(byte)PlayerTeam.A].diamondCount);
+            msgBuffer.Write((uint)SessionVariables.teams[(byte)PlayerTeam.B].goldCount);
+            msgBuffer.Write((uint)SessionVariables.teams[(byte)PlayerTeam.B].diamondCount);
             netServer.SendMessage(msgBuffer, player.NetConn, NetChannel.ReliableInOrder1);
         }
 

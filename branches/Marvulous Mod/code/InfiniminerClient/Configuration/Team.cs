@@ -47,5 +47,28 @@ namespace Infiniminer
             get { return _blood; }
             set { _blood = value; }
         }
+
+        public uint cash()
+        {
+            return (goldCount * SessionVariables.goldCash) + (diamondCount + SessionVariables.diamondCash);
+        }
+        private uint _oreCount = 0;
+        public uint oreCount
+        {
+            get { return _oreCount; }
+            set { _oreCount = value; }
+        }
+        private uint _goldCount = 0;
+        public uint goldCount
+        {
+            get { return _goldCount; }
+            set { _goldCount = value; }
+        }
+        private uint _diamondCount = 0;
+        public uint diamondCount
+        {
+            get { return _diamondCount; }
+            set { _diamondCount = value; }
+        }
     }
 }

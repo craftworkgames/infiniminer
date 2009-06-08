@@ -23,7 +23,8 @@ namespace Infiniminer
         public uint WeightMax = 0;
         public uint Ore = 0;
         public uint Weight = 0;
-        public uint Cash = 0;
+        public byte goldCount = 0;
+        public byte diamondCount = 0;
         public bool Alive = false;
         public List<Vector3> ExplosiveList = new List<Vector3>();
         public uint ID;
@@ -211,6 +212,11 @@ namespace Infiniminer
         {
             uniqueId += 1;
             return uniqueId;
+        }
+
+        public static uint cash(Player player)
+        {
+            return (uint)(player.goldCount * SessionVariables.goldCash) + (uint)(player.diamondCount * SessionVariables.diamondCash);
         }
     }
 }

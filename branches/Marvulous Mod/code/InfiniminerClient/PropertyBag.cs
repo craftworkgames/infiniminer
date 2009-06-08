@@ -197,9 +197,6 @@ namespace Infiniminer
         public float constructionGunAnimation = 0;
 
         // Team variables.
-        public uint teamOre = 0;
-        public uint teamACash = 0;
-        public uint teamBCash = 0;
         public PlayerTeam teamWinners = PlayerTeam.None;
         public Dictionary<Vector3, Beacon> beaconList = new Dictionary<Vector3, Beacon>();
 
