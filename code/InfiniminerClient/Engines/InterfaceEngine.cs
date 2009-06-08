@@ -313,9 +313,9 @@ namespace Infiniminer
             spriteBatch.DrawString(uiFont, "ORE: " + _P.playerOre + "/" + _P.playerOreMax, new Vector2(textStart+3, 2), Color.White);
             spriteBatch.DrawString(uiFont, "LOOT: $" + _P.playerCash, new Vector2(textStart + 170, 2), Color.White);
             spriteBatch.DrawString(uiFont, "WEIGHT: " + _P.playerWeight + "/" + _P.playerWeightMax, new Vector2(textStart + 340, 2), Color.White);
-            spriteBatch.DrawString(uiFont, "TEAM ORE: " + _P.teamOre, new Vector2(textStart + 515, 2), Color.White);
-            spriteBatch.DrawString(uiFont, SessionVariables.teams[(byte)PlayerTeam.A].name + ": $" + _P.teamACash, new Vector2(textStart + 700, 2), SessionVariables.teams[(byte)PlayerTeam.A].color);
-            spriteBatch.DrawString(uiFont, SessionVariables.teams[(byte)PlayerTeam.B].name + ": $" + _P.teamBCash, new Vector2(textStart + 860, 2), SessionVariables.teams[(byte)PlayerTeam.B].color);
+            spriteBatch.DrawString(uiFont, "TEAM ORE: " + SessionVariables.teams[(byte)_P.playerTeam].oreCount, new Vector2(textStart + 515, 2), Color.White);
+            spriteBatch.DrawString(uiFont, SessionVariables.teams[(byte)PlayerTeam.A].name + ": $" + SessionVariables.teams[(byte)PlayerTeam.A].cash(), new Vector2(textStart + 700, 2), SessionVariables.teams[(byte)PlayerTeam.A].color);
+            spriteBatch.DrawString(uiFont, SessionVariables.teams[(byte)PlayerTeam.B].name + ": $" + SessionVariables.teams[(byte)PlayerTeam.B].cash(), new Vector2(textStart + 860, 2), SessionVariables.teams[(byte)PlayerTeam.B].color);
 
             // Draw player information.
             if ((Keyboard.GetState().IsKeyDown(Keys.Tab) && _P.screenEffect == ScreenEffect.None) || _P.teamWinners != PlayerTeam.None)
