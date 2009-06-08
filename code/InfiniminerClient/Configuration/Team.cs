@@ -50,7 +50,7 @@ namespace Infiniminer
 
         public uint cash()
         {
-            return (goldCount * SessionVariables.goldCash) + (diamondCount + SessionVariables.diamondCash);
+            return (goldCount * SessionVariables.goldCash) + (diamondCount * SessionVariables.diamondCash);
         }
         private uint _oreCount = 0;
         public uint oreCount
