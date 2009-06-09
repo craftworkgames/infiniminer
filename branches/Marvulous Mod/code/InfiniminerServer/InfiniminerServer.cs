@@ -1319,46 +1319,37 @@ namespace Infiniminer
 
             // Remove this from any explosive lists it may be in.
             foreach (Player p in playerList.Values)
+            {
                 p.ExplosiveList.Remove(new Vector3(x, y, z));
+            }
 
             // Detonate the block.
             for (short dx = -2; dx <= 2; dx++)
+            {
                 for (short dy = -2; dy <= 2; dy++)
+                {
                     for (short dz = -2; dz <= 2; dz++)
                     {
                         // Check that this is a sane block position.
                         if (x + dx <= 0 || y + dy <= 0 || z + dz <= 0 || x + dx >= GlobalVariables.MAPSIZE - 1 || y + dy >= GlobalVariables.MAPSIZE - 1 || z + dz >= GlobalVariables.MAPSIZE - 1)
+                        {
                             continue;
+                        }
 
                         // Chain reactions!
                         if (blockList[x + dx, y + dy, z + dz] == BlockType.Explosive)
-                            DetonateAtPoint((ushort)(x + dx), (ushort)(y + dy), (ushort)(z + dz));
-
-                        // Detonation of normal blocks.
-                        bool destroyBlock = false;
-                        switch (blockList[x + dx, y + dy, z + dz])
                         {
-                            case BlockType.Rock:
-                            case BlockType.Dirt:
-                            case BlockType.DirtSign:
-                            case BlockType.DirtGrass:
-                            case BlockType.Ore:
-                            case BlockType.SolidA:
-                            case BlockType.SolidB:
-                            case BlockType.TransA:
-                            case BlockType.TransB:
-                            case BlockType.Ladder:
-                            case BlockType.Shock:
-                            case BlockType.Jump:
-                            case BlockType.Explosive:
-                            case BlockType.Lava:
-                            case BlockType.Road:
-                                destroyBlock = true;
-                                break;
+                            DetonateAtPoint((ushort)(x + dx), (ushort)(y + dy), (ushort)(z + dz));
                         }
-                        if (destroyBlock)
+
+                        // Detonation of destructable blocks.
+                        if (BlockInformation.indestructable(blockList[x + dx, y + dy, z + dz]) == false)
+                        {
                             SetBlock((ushort)(x + dx), (ushort)(y + dy), (ushort)(z + dz), BlockType.None, PlayerTeam.None);
+                        }
                     }
+                }
+            }
 
             // Send off the explosion to clients.
             NetBuffer msgBuffer = netServer.CreateBuffer();

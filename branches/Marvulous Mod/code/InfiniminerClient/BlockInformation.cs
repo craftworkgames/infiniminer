@@ -108,7 +108,6 @@ namespace Infiniminer
                 case BlockType.Explosive:
                     return 100;
             }
-
             return 1000;
         }
 
@@ -232,6 +231,27 @@ namespace Infiniminer
             }
 
             return BlockTexture.None;
+        }
+
+        public static bool indestructable(BlockType block)
+        {
+            switch (block)
+            {
+                case BlockType.Gold:
+                case BlockType.Diamond:
+                case BlockType.BankA:
+                case BlockType.BankB:
+                case BlockType.BeaconA:
+                case BlockType.BeaconB:
+                case BlockType.Metal:
+                {
+                    return true;
+                }
+                default:
+                {
+                    return false;
+                }
+            }
         }
     }
 }
