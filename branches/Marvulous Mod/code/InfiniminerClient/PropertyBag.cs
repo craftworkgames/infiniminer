@@ -295,7 +295,7 @@ namespace Infiniminer
                 Vector3 startPos = new Vector3(randGen.Next(2, mapSize - 2), mapSize - 1, randGen.Next(2, mapSize - 2));
 
                 // See if this is a safe place to drop.
-                for (startPos.Y = mapSize - 1; startPos.Y >= mapSize - InfiniminerGame.GROUND_LEVEL; startPos.Y--)
+                for (startPos.Y = mapSize - 1; startPos.Y >= mapSize - GlobalVariables.GROUND_LEVEL; startPos.Y--)
                 {
                     BlockType blockType = blockEngine.BlockAtPoint(startPos);
                     if (blockType == BlockType.Lava)

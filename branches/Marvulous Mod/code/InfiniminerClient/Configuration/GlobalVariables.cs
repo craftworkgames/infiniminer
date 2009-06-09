@@ -3,6 +3,8 @@ namespace Infiniminer
     public class GlobalVariables
     {
         public const byte MAPSIZE = 64;
+        public const string INFINIMINER_VERSION = "v1.5";
+        public const int GROUND_LEVEL = 8;
 
         public const ushort goldCash = 100;
         public const ushort diamondCash = 1000;
