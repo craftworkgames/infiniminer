@@ -27,6 +27,7 @@ namespace Infiniminer
         Metal,
         DirtSign,
         Lava,
+        DirtGrass,
         TransA,
         TransB,
         MAXIMUM
@@ -70,7 +71,8 @@ namespace Infiniminer
         Road,
         BeaconA,
         BeaconB,
-        TransA,   // THESE MUST BE THE LAST TWO TEXTURES
+        Grass,
+        TransA,   // THESE MUST BE THE LAST TWO TEXTURES-- why ? ~ Marv.
         TransB,
         MAXIMUM
     }
@@ -118,6 +120,13 @@ namespace Infiniminer
                     return BlockTexture.Metal;
                 case BlockType.Dirt:
                     return BlockTexture.Dirt;
+                case BlockType.DirtGrass:
+                    switch (faceDir)
+                    {
+                        case BlockFaceDirection.YIncreasing:
+                            return BlockTexture.Grass;
+                        default: return BlockTexture.Dirt;
+                    }
                 case BlockType.Lava:
                     return BlockTexture.Lava;
                 case BlockType.Rock:

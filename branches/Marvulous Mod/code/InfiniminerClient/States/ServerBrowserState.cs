@@ -46,7 +46,7 @@ namespace Infiniminer.States
                                      1024,
                                      1024);
 
-            uiFont = _SM.Content.Load<SpriteFont>("font_04b08");
+            uiFont = _SM.Content.Load<SpriteFont>(GlobalVariables.fontUI);
             keyMap = new KeyMap();
             
             serverList = (_SM as InfiniminerGame).EnumerateServers(0.5f);

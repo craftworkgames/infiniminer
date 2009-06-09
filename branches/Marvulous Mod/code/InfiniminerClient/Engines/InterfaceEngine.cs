@@ -91,8 +91,8 @@ namespace Infiniminer
             blockIcons[BlockType.None] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_deconstruction");
 
             // Load fonts.
-            uiFont = gameInstance.Content.Load<SpriteFont>("font_04b08");
-            radarFont = gameInstance.Content.Load<SpriteFont>("font_04b03b");
+            uiFont = gameInstance.Content.Load<SpriteFont>(GlobalVariables.fontUI);
+            radarFont = gameInstance.Content.Load<SpriteFont>(GlobalVariables.fontRadar);
         }
 
         public void RenderMessageCenter(SpriteBatch spriteBatch, string text, Vector2 pointCenter, Color colorText, Color colorBackground)

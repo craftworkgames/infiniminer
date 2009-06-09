@@ -119,5 +119,12 @@
             get { return _oreFactor; }
             set { _oreFactor = value; }
         }
+
+        private static bool _naturalEnvironments = GlobalVariables.naturalEnvironments;
+        public static bool naturalEnvironments
+        {
+            get { return _naturalEnvironments; }
+            set { _naturalEnvironments = value; }
+        }
     }
 }
