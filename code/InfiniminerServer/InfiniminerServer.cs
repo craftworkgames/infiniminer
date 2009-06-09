@@ -126,7 +126,7 @@ namespace Infiniminer
 
         //All the lava blocks on the map
         //This could be a hashSet, but we're using .NET 2.0
-        Dictionary<Point3D, byte> LavaBlocks = new Dictionary<Point3D,byte>();
+        Dictionary<Point3D, PlayerTeam> LavaBlocks = new Dictionary<Point3D,PlayerTeam>();
         //3D point of 3 ushorts
         struct Point3D
         {
@@ -387,11 +387,22 @@ namespace Infiniminer
                             if (fileArgs.Length == 2)
                             {
                                 blockList[x, y, z] = (BlockType)int.Parse(fileArgs[0], System.Globalization.CultureInfo.InvariantCulture);
-                                if (blockList[x, y, z] == BlockType.Lava)
-                                {
-                                    LavaBlocks.Add(new Point3D() { X = (ushort)x, Y = (ushort)y, Z = (ushort)z }, 0);
-                                }
                                 blockCreatorTeam[x, y, z] = (PlayerTeam)byte.Parse(fileArgs[1], System.Globalization.CultureInfo.InvariantCulture);
+                                Point3D blockPosition = new Point3D() { X = (ushort)x, Y = (ushort)y, Z = (ushort)z };
+                                switch (blockList[x, y, z])
+                                {
+                                    case BlockType.Lava:
+                                    {
+                                        LavaBlocks.Add(blockPosition, blockCreatorTeam[x, y, z]);
+                                    }
+                                    break;
+                                    case BlockType.BeaconA:
+                                    case BlockType.BeaconB:
+                                    {
+                                        createBeacon(blockCreatorTeam[x, y, z], new Vector3(x, y, z));
+                                    }
+                                    break;
+                                }
                             }
                         }
                 sr.Close();
@@ -400,10 +411,6 @@ namespace Infiniminer
             catch (FileNotFoundException e)
             {
                 ConsoleWrite("ERROR: map file missing!:\n" + e.ToString());
-            }
-            catch (Exception e)
-            {
-                ConsoleWrite("ERROR: Could not load map file! :" + e.ToString());
             }
             ConsoleWrite("DONE LOADING MAP");
         }
@@ -472,6 +479,14 @@ namespace Infiniminer
             beaconIDList.Add(newId);
             return newId;
         }
+        public Beacon createBeacon(PlayerTeam team, Vector3 pos)
+        {
+            Beacon newBeacon = new Beacon();
+            newBeacon.ID = GenerateBeaconID();
+            newBeacon.Team = team;
+            beaconList[pos] = newBeacon;
+            return newBeacon;
+        }
 
         public void SetBlock(ushort x, ushort y, ushort z, BlockType blockType, PlayerTeam team)
         {
@@ -483,10 +498,7 @@ namespace Infiniminer
 
             if (blockType == BlockType.BeaconA || blockType == BlockType.BeaconB)
             {
-                Beacon newBeacon = new Beacon();
-                newBeacon.ID = GenerateBeaconID();
-                newBeacon.Team = blockType == BlockType.BeaconA ? PlayerTeam.A : PlayerTeam.B;
-                beaconList[new Vector3(x, y, z)] = newBeacon;
+                Beacon newBeacon = createBeacon(team, new Vector3(x, y, z));
                 SendSetBeacon(new Vector3(x, y+1, z), newBeacon.ID, newBeacon.Team);
             }
 
@@ -518,7 +530,7 @@ namespace Infiniminer
             }
             else if (blockType == BlockType.Lava && oldBlockType != BlockType.Lava)
             {
-                LavaBlocks.Add(lavaBlockPoint3D, 0);
+                LavaBlocks.Add(lavaBlockPoint3D, PlayerTeam.None);
             }
             //ConsoleWrite("BLOCKSET: " + x + " " + y + " " + z + " " + blockType.ToString());
         }
@@ -557,7 +569,7 @@ namespace Infiniminer
                             blockList[x, (ushort)(GlobalVariables.MAPSIZE - 1 - z), y] = worldData[x, y, z];
                             if (blockList[x, (ushort)(GlobalVariables.MAPSIZE - 1 - z), y] == BlockType.Lava)
                             {
-                                LavaBlocks.Add(new Point3D() { X = (ushort)x, Y = (ushort)(GlobalVariables.MAPSIZE - 1 - z), Z = (ushort)y }, 0);
+                                LavaBlocks.Add(new Point3D() { X = (ushort)x, Y = (ushort)(GlobalVariables.MAPSIZE - 1 - z), Z = (ushort)y }, PlayerTeam.None);
                             }
                             blockCreatorTeam[x, y, z] = PlayerTeam.None;
                         }

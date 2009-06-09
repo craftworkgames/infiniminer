@@ -49,7 +49,7 @@ namespace Infiniminer
         Detonator,
     }
 
-    public enum PlayerTeam
+    public enum PlayerTeam : byte
     {
         None,
         A,
