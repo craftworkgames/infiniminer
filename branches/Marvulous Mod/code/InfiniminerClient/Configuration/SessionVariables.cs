@@ -23,6 +23,9 @@
             goldWeight = GlobalVariables.goldWeight;
             diamondCash = GlobalVariables.diamondCash;
             diamondWeight = GlobalVariables.diamondWeight;
+
+            oreFactor = GlobalVariables.oreFactor;
+            sandboxMode = GlobalVariables.sandboxMode;
         }
 
         private static bool gzip = false;
@@ -101,6 +104,20 @@
         {
             get { return _diamondWeight; }
             set { _diamondWeight = value; }
+        }
+
+        private static bool _sandboxMode = GlobalVariables.sandboxMode;
+        public static bool sandboxMode
+        {
+            get { return _sandboxMode; }
+            set { _sandboxMode = value; }
+        }
+
+        private static uint _oreFactor = GlobalVariables.oreFactor;
+        public static uint oreFactor
+        {
+            get { return _oreFactor; }
+            set { _oreFactor = value; }
         }
     }
 }

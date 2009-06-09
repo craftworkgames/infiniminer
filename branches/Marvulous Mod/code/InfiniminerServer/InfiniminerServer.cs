@@ -51,11 +51,19 @@ namespace Infiniminer
             configHelper.boolTernaryConfig(ref autosave, "autosave", dataFile);
             configHelper.uintTernaryConfig(ref winningCashAmount, "winningcash", dataFile, 100, 999999999);
             configHelper.ushortTernaryConfig(ref _lavaFlows, "lavaflows", dataFile, 0, 32);
-            configHelper.boolTernaryConfig(ref _lavaAtGroundLevel, "lavaground", dataFile);
+            configHelper.byteTernaryConfig(ref _lavaAtGroundLevel, "lavaground", dataFile);
             includeLava = _lavaFlows > 0;
+
+            uint oreFactor = SessionVariables.oreFactor;
             configHelper.uintTernaryConfig(ref oreFactor, "orefactor", dataFile, 0, 999999999);
+            SessionVariables.oreFactor = oreFactor;
+
             configHelper.uintTernaryConfig(ref maxPlayers, "maxplayers", dataFile, 1, 64);
+
+            bool sandboxMode = SessionVariables.sandboxMode;
             configHelper.boolTernaryConfig(ref sandboxMode, "sandbox", dataFile);
+            SessionVariables.sandboxMode = sandboxMode;
+
             configHelper.stringTernaryConfig(ref serverName, "servername", dataFile);
             configHelper.stringTernaryConfig(ref publicServerList, "public", dataFile);
             try
@@ -82,8 +90,8 @@ namespace Infiniminer
         }
 
 
-        private static bool _lavaAtGroundLevel = false;
-        public static bool lavaAtGroundLevel
+        private static byte _lavaAtGroundLevel = 0;
+        public static byte lavaAtGroundLevel
         {
             get
             {
@@ -95,11 +103,9 @@ namespace Infiniminer
             }
         }
         bool autosave = true;
-        uint oreFactor = 10;
         bool publicServer = false;
         uint maxPlayers = 16;
         string serverName = "Unnamed Server";
-        bool sandboxMode = false;
         bool includeLava = true;
         private static ushort _lavaFlows = 0;
         private static string publicServerList = "http://apps.keithholman.net/post";
@@ -151,7 +157,7 @@ namespace Infiniminer
         public string GetExtraInfo()
         {
             string extraInfo = "";
-            if (sandboxMode)
+            if (SessionVariables.sandboxMode)
                 extraInfo += "sandbox";
             else
                 extraInfo += string.Format("{0:#.##k}", winningCashAmount / 1000);
@@ -559,7 +565,7 @@ namespace Infiniminer
             {
                 ConsoleWrite("MAKING NEW MAP");
                 // Create our block world, translating the coordinates out of the cave generator (where Z points down)
-                BlockType[, ,] worldData = CaveGenerator.GenerateCaveSystem(GlobalVariables.MAPSIZE, includeLava, oreFactor);
+                BlockType[, ,] worldData = CaveGenerator.GenerateCaveSystem(GlobalVariables.MAPSIZE, includeLava);
                 for (ushort x = 0; x < GlobalVariables.MAPSIZE; x++)
                 {
                     for (ushort y = 0; y < GlobalVariables.MAPSIZE; y++)
@@ -949,7 +955,7 @@ namespace Infiniminer
                     DepositCash(p);
             }
 
-            if (sandboxMode)
+            if (SessionVariables.sandboxMode)
             {
                 return;
             }
@@ -1161,7 +1167,7 @@ namespace Infiniminer
 
             // If the block is too expensive, bail.
             uint blockCost = BlockInformation.GetCost(blockType);
-            if (sandboxMode && blockCost <= player.OreMax)
+            if (SessionVariables.sandboxMode && blockCost <= player.OreMax)
                 blockCost = 0;
             if (blockCost > player.Ore)
                 actionFailed = true;
@@ -1404,7 +1410,7 @@ namespace Infiniminer
 
             player.Score += Player.cash(player);
 
-            if (!sandboxMode)
+            if (!SessionVariables.sandboxMode)
             {
                 SessionVariables.teams[(byte)player.Team].goldCount += player.goldCount;
                 SessionVariables.teams[(byte)player.Team].diamondCount += player.diamondCount;

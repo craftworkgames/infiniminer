@@ -1,8 +1,5 @@
 # Before making your server public, MAKE SURE THAT PORT 5565 (TCP/UDP) IS ACCESSIBLE FROM THE OUTSIDE OF YOUR NETWORK!
 # For most users, this means setting the port to be forwarded by your router through your router control interface.
-# public = http://apps.keithholman.net/post # default
-public = false
-networkport = 5565
 servername = Unnamed Server
 maxplayers = 2
 
@@ -10,8 +7,8 @@ maxplayers = 2
 # This value specifies the amount of cash required for a team to win the game.
 winningcash = 25000
 
-# This flag specifies whether or not generated levels will include lava.
-lavaground  = false
+# This flag specifies how many lava flows will be included in generated levels.
+# Setting lavaflows to 0 will disable lava
 lavaflows   = 16
 
 
@@ -21,9 +18,27 @@ orefactor = 20
 # If this flag is true, all blocks will be free and the game will be unwinnable.
 sandbox = false
 
+# COMPATIBLE FEATURES
+# If these features are configured, they won't break compatibility with vanilla clients
+
+# This setting configures which map to load when the server starts or is restarted
+# map = maps/infiniminer-marv.lvl
+
+# This setting configures the public server list the server announces itself to.
+# When set to false, the server will be set to "private", not listing itself in any public servers
+# public = http://apps.keithholman.net/post
+public = false
+
+# This setting configures how lava at ground level should be handled.
+# 0 disables spawning of lava at ground level
+# 1 spawns lava blocks at ground level above lava flows
+# 2 fills ground level entirely with lava, since mode 1 can leave some ground-level spots empty
+lavaground  = 0
+
 # NON-COMPATIBLE FEATURES
 # If these values are set to true, incompatible clients will likely be unable to join
 
+networkport = 5565
 checkmapsize = true
 gzip = true
 
