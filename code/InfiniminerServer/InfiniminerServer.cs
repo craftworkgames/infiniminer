@@ -455,7 +455,7 @@ namespace Infiniminer
         public void ConsoleRedraw()
         {
             Console.Clear();
-            ConsoleDrawCentered("INFINIMINER SERVER (Marvulous Mod) " + InfiniminerGame.INFINIMINER_VERSION, 0);
+            ConsoleDrawCentered("INFINIMINER SERVER (Marvulous Mod) " + GlobalVariables.INFINIMINER_VERSION, 0);
             ConsoleDraw("================================================================================", 0, 1);
             for (int i = 0; i < consoleText.Count; i++)
                 ConsoleDraw(consoleText[i], 0, i + 2);
@@ -649,9 +649,9 @@ namespace Infiniminer
                                 }
 
                                 string clientVersion = msgBuffer.ReadString();
-                                if (clientVersion != InfiniminerGame.INFINIMINER_VERSION)
+                                if (clientVersion != GlobalVariables.INFINIMINER_VERSION)
                                 {
-                                    msgSender.Disapprove("VER;" + InfiniminerGame.INFINIMINER_VERSION);
+                                    msgSender.Disapprove("VER;" + GlobalVariables.INFINIMINER_VERSION);
                                 }
                                 else if (banList.Contains(newPlayer.IP))
                                 {
@@ -959,7 +959,7 @@ namespace Infiniminer
         {
             foreach (Player p in playerList.Values)
             {
-                if (p.Position.Y > GlobalVariables.MAPSIZE - InfiniminerGame.GROUND_LEVEL)
+                if (p.Position.Y > GlobalVariables.MAPSIZE - GlobalVariables.GROUND_LEVEL)
                     DepositCash(p);
             }
 
