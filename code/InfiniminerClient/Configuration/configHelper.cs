@@ -92,6 +92,19 @@ namespace Infiniminer
             catch (Exception) { return false; }
 #endif
         }
+        public static bool byteTernaryConfig(ref byte var, string key, DatafileLoader data)
+        {
+#if !DEBUG
+            try
+            {
+#endif
+                var = data.Data.ContainsKey(key) ? byte.Parse(data.Data[key]) : var;
+                return true;
+#if !DEBUG
+            }
+            catch (Exception) { return false; }
+#endif
+        }
         public static bool colorTernaryConfig(ref Color var, string key, DatafileLoader data)
         {
 #if !DEBUG
