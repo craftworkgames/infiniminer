@@ -183,7 +183,8 @@ namespace Infiniminer
                 return;
 
             string textureName = "sprites/";
-            textureName += (team == PlayerTeam.A) ? "A/" : "B/";
+//            textureName += (team == PlayerTeam.A) ? "A/" : "B/";
+            textureName += "B/";
 
             switch (tool)
             {
@@ -204,7 +205,15 @@ namespace Infiniminer
                     textureName += "pickaxe";
                     break;
             }
-            this.SpriteModel.SetSpriteTexture(gameInstance.Content.Load<Texture2D>(textureName));
+//            this.SpriteModel.SetSpriteTexture(gameInstance.Content.Load<Texture2D>(textureName));
+            Texture2D orig = gameInstance.Content.Load<Texture2D>(textureName);
+            Color[] data = new Color[orig.Width * orig.Height];
+            orig.GetData<Color>(data);
+            Texture2D temp = new Texture2D(orig.GraphicsDevice, orig.Width, orig.Height);
+            temp.SetData<Color>(data);
+
+            spriteSwap.generateShadedTexture(SessionVariables.teams[(byte)team].color, orig, ref temp);
+            this.SpriteModel.SetSpriteTexture(temp);
         }
 
         static uint uniqueId = 0;

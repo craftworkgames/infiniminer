@@ -38,11 +38,11 @@ namespace Infiniminer
             SessionVariables.gZip = gzip;
 
             bool fullscreen = false;
-            int width = 1024;
-            int height = 768;
-            configHelper.intTernaryConfig(ref width, "width", dataFile, minScreenWidth, maxScreenWidth);
+            ushort width = 1024;
+            ushort height = 768;
+            configHelper.ushortTernaryConfig(ref width, "width", dataFile, GlobalVariables.minScreenWidth, GlobalVariables.maxScreenWidth);
             graphicsDeviceManager.PreferredBackBufferWidth = width;
-            configHelper.intTernaryConfig(ref height, "height", dataFile, minScreenHeight, maxScreenHeight);
+            configHelper.ushortTernaryConfig(ref height, "height", dataFile, GlobalVariables.minScreenHeight, GlobalVariables.maxScreenHeight);
             graphicsDeviceManager.PreferredBackBufferHeight = height;
             configHelper.boolTernaryConfig(ref fullscreen, "fullscreen", dataFile);
             graphicsDeviceManager.IsFullScreen = fullscreen;
@@ -122,11 +122,6 @@ namespace Infiniminer
         float volumeLevel = 1.0f;
         NetBuffer msgBuffer = null;
         Song songTitle = null;
-
-        private static int minScreenWidth  = 320;
-        private static int maxScreenWidth  = 1440;
-        private static int minScreenHeight = 240;
-        private static int maxScreenHeight = 1080;
 
         public bool RenderPretty = true;
         public bool DrawFrameRate = false;
