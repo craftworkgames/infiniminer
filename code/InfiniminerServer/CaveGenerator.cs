@@ -79,7 +79,15 @@ namespace Infiniminer
 
             // Add lava.
             if (includeLava)
+            {
                 AddLava(ref caveData, size);
+            }
+
+            // Add/replace blocks for "Natural Environments" mod
+            if (SessionVariables.naturalEnvironments)
+            {
+                AddGrass(ref caveData, size);
+            }
 
             // Add starting positions.
             //AddStartingPosition(ref caveData, size, size - 5, size - 5, InfiniminerGame.GROUND_LEVEL, BlockType.HomeA);
@@ -179,6 +187,20 @@ namespace Infiniminer
                         {
                             data[x, y, InfiniminerGame.GROUND_LEVEL] = BlockType.Lava;
                         }
+                    }
+                }
+            }
+        }
+
+        public static void AddGrass(ref BlockType[, ,] data, int size)
+        {
+            for (ushort x = 0; x < size; ++x)
+            {
+                for (ushort y = 0; y < size; ++y)
+                {
+                    if (data[x, y, InfiniminerGame.GROUND_LEVEL + 1] == BlockType.Dirt && data[x, y, InfiniminerGame.GROUND_LEVEL] == BlockType.None)
+                    {
+                        data[x, y, InfiniminerGame.GROUND_LEVEL + 1] = BlockType.DirtGrass;
                     }
                 }
             }

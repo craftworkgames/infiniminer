@@ -81,8 +81,8 @@ namespace Infiniminer
         {
             this.gameInstance = gameInstance;
             this.graphicsDevice = gameInstance.GraphicsDevice;
-            this.effect = gameInstance.Content.Load<Effect>("effect_spritemodel");
-            this.nameFont = gameInstance.Content.Load<SpriteFont>("font_04b08");
+            this.effect = gameInstance.Content.Load<Effect>(GlobalVariables.fx__effect_spritemodel);
+            this.nameFont = gameInstance.Content.Load<SpriteFont>(GlobalVariables.fontName);
 
             this.numColumns = numFrames;
 

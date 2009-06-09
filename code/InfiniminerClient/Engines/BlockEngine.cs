@@ -156,6 +156,7 @@ namespace Infiniminer
             blockTextures = new IMTexture[(byte)BlockTexture.MAXIMUM];
             blockTextures[(byte)BlockTexture.None] = new IMTexture(null);
             blockTextures[(byte)BlockTexture.Dirt] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_dirt"));
+            blockTextures[(byte)BlockTexture.Grass] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_grass"));
             blockTextures[(byte)BlockTexture.Rock] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_rock"));
             blockTextures[(byte)BlockTexture.Ore] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_ore"));
             blockTextures[(byte)BlockTexture.Gold] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_gold"));
@@ -196,7 +197,7 @@ namespace Infiniminer
             blockTextures[(byte)BlockTexture.TransB] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/B/tex_block_trans"));
 
             // Load our effects.
-            basicEffect = gameInstance.Content.Load<Effect>("effect_basic");
+            basicEffect = gameInstance.Content.Load<Effect>(GlobalVariables.fx__effect_basic);
 
             // Build vertex lists.
             vertexBuffers = new DynamicVertexBuffer[(byte)BlockTexture.MAXIMUM, NUMREGIONS];

@@ -37,6 +37,11 @@ namespace Infiniminer
             configHelper.boolTernaryConfig(ref gzip, "gzip", dataFile);
             SessionVariables.gZip = gzip;
 
+//            bool naturalEnvironments = SessionVariables.naturalEnvironments;
+//            configHelper.boolTernaryConfig(ref gzip, "naturalenvironments", dataFile);
+//            SessionVariables.naturalEnvironments = naturalEnvironments;
+
+
             bool fullscreen = false;
             ushort width = 1024;
             ushort height = 768;

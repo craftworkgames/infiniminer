@@ -34,6 +34,14 @@ namespace Infiniminer
             configHelper.boolTernaryConfig(ref gzip, "gzip", dataFile);
             SessionVariables.gZip = gzip;
 
+            bool naturalEnvironments = SessionVariables.naturalEnvironments;
+            configHelper.boolTernaryConfig(ref naturalEnvironments, "naturalenvironments", dataFile);
+            SessionVariables.naturalEnvironments = naturalEnvironments;
+            if (SessionVariables.naturalEnvironments)
+            {
+                ConsoleWrite("MOD: Natural Environments are enabled!");
+            }
+
             // setting up team configuration
             string teamName = Team.defaultTeams()[(byte)PlayerTeam.A].name;
                 configHelper.stringTernaryConfig(ref teamName, "team_a", dataFile);
@@ -1077,6 +1085,7 @@ namespace Infiniminer
             {
                 case BlockType.Dirt:
                 case BlockType.DirtSign:
+                case BlockType.DirtGrass:
                     removeBlock = true;
                     sound = InfiniminerSound.DigDirt;
                     break;
@@ -1289,12 +1298,14 @@ namespace Infiniminer
             ushort y = (ushort)hitPoint.Y;
             ushort z = (ushort)hitPoint.Z;
 
-            if (blockList[x, y, z] == BlockType.Dirt)
+            BlockType paintingThis = blockList[x, y, z];
+
+            if (paintingThis == BlockType.Dirt || paintingThis == BlockType.DirtGrass)
             {
                 SetBlock(x, y, z, BlockType.DirtSign, PlayerTeam.None);
                 PlaySound(InfiniminerSound.ConstructionGun, player.Position);
             }
-            else if (blockList[x, y, z] == BlockType.DirtSign)
+            else if (paintingThis == BlockType.DirtSign)
             {
                 SetBlock(x, y, z, BlockType.Dirt, PlayerTeam.None);
                 PlaySound(InfiniminerSound.ConstructionGun, player.Position);
@@ -1330,6 +1341,7 @@ namespace Infiniminer
                             case BlockType.Rock:
                             case BlockType.Dirt:
                             case BlockType.DirtSign:
+                            case BlockType.DirtGrass:
                             case BlockType.Ore:
                             case BlockType.SolidA:
                             case BlockType.SolidB:
