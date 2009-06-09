@@ -107,6 +107,7 @@
     <Compile Include="Configuration\GlobalVariables.cs" />
     <Compile Include="Configuration\configHelper.cs" />
     <Compile Include="Configuration\SessionVariables.cs" />
+    <Compile Include="Configuration\spriteSwap.cs" />
     <Compile Include="Configuration\Team.cs" />
     <Compile Include="Engines\BlockEngine.cs" />
     <Compile Include="BlockInformation.cs" />
