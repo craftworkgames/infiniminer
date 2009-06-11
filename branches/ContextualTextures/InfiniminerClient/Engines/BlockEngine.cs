@@ -559,7 +559,7 @@ namespace Infiniminer
 
         private void ShowQuad(ushort x, ushort y, ushort z, BlockFaceDirection faceDir, BlockType blockType)
         {
-            BlockTexture blockTexture = Contexts.Texture(x, y, z, faceDir, downloadList, blockTextureMap);
+            BlockTexture blockTexture = Contexts.Texture(x, y, z, faceDir, blockType, downloadList, blockTextureMap);
             uint blockFace = EncodeBlockFace(x, y, z, faceDir);
             uint region = GetRegion(x, y, z);
             if (!faceMap[(byte)blockTexture, region].ContainsKey(blockFace))
@@ -569,7 +569,7 @@ namespace Infiniminer
 
         private void HideQuad(ushort x, ushort y, ushort z, BlockFaceDirection faceDir, BlockType blockType)
         {
-            BlockTexture blockTexture = Contexts.Texture(x, y, z, faceDir,downloadList,blockTextureMap);
+            BlockTexture blockTexture = Contexts.Texture(x, y, z, faceDir, blockType, downloadList, blockTextureMap);
             uint blockFace = EncodeBlockFace(x, y, z, faceDir);
             uint region = GetRegion(x, y, z);
             if (faceMap[(byte)blockTexture, region].ContainsKey(blockFace))

@@ -14,11 +14,10 @@
         public const byte tunnelNWS         = 128;
         public const ushort tunnelCrossroad = 256;
 
-        public static BlockTexture Texture(ushort x, ushort y, ushort z, BlockFaceDirection faceDir,BlockType[,,] downloadList, BlockTexture[,] blockTextureMap)
+        public static BlockTexture Texture(ushort x, ushort y, ushort z, BlockFaceDirection faceDir, BlockType type, BlockType[, ,] downloadList, BlockTexture[,] blockTextureMap)
         {
-            BlockType blockType = downloadList[x, y, z];
-            BlockTexture blockTexture = blockTextureMap[(byte)blockType, (byte)faceDir];
-            switch (blockType)
+            BlockTexture blockTexture = blockTextureMap[(byte)type, (byte)faceDir];
+            switch (type)
             {
                 case BlockType.Dirt:
                     {
