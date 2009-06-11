@@ -106,6 +106,7 @@
     <Compile Include="BloomEffect\BloomSettings.cs" />
     <Compile Include="Configuration\GlobalVariables.cs" />
     <Compile Include="Configuration\configHelper.cs" />
+    <Compile Include="Configuration\Messages.cs" />
     <Compile Include="Configuration\SessionVariables.cs" />
     <Compile Include="Configuration\spriteSwap.cs" />
     <Compile Include="Configuration\Team.cs" />
