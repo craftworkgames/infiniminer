@@ -51,37 +51,6 @@ namespace Infiniminer
         public static int SizeInBytes { get { return sizeof(float) * 6; } }
     }
 
-    public class IMTexture
-    {
-        public Texture2D Texture = null;
-        public Color LODColor = Color.Black;
-
-        public IMTexture(Texture2D texture)
-        {
-            Texture = texture;
-            LODColor = Color.Black;
-
-            // If this is a null texture, use a black LOD color.
-            if (Texture == null)
-                return;
-
-            // Calculate the load color dynamically.
-            float r = 0, g = 0, b = 0;
-            Color[] pixelData = new Color[texture.Width * texture.Height];
-            texture.GetData<Color>(pixelData);
-            for (int i = 0; i < texture.Width; i++)
-                for (int j = 0; j < texture.Height; j++)
-                {
-                    r += pixelData[i + j * texture.Width].R;
-                    g += pixelData[i + j * texture.Width].G;
-                    b += pixelData[i + j * texture.Width].B;
-                }
-            r /= texture.Width * texture.Height;
-            g /= texture.Width * texture.Height;
-            b /= texture.Width * texture.Height;
-            LODColor = new Color(r / 256, g / 256, b / 256);
-        }
-    }
 
     public class BlockEngine
     {
@@ -133,12 +102,16 @@ namespace Infiniminer
             downloadList = new BlockType[gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize];
             blockList = new BlockType[gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize];
             for (ushort i = 0; i < gameInstance.propertyBag.MapSize; i++)
+            {
                 for (ushort j = 0; j < gameInstance.propertyBag.MapSize; j++)
+                {
                     for (ushort k = 0; k < gameInstance.propertyBag.MapSize; k++)
                     {
                         downloadList[i, j, k] = BlockType.None;
                         blockList[i, j, k] = BlockType.None;
                     }
+                }
+            }
 
             // Initialize the face lists.
             faceMap = new Dictionary<uint,bool>[(byte)BlockTexture.MAXIMUM, NUMREGIONS];
@@ -149,8 +122,12 @@ namespace Infiniminer
             // Initialize the texture map.
             blockTextureMap = new BlockTexture[(byte)BlockType.MAXIMUM, 6];
             for (BlockType blockType = BlockType.None; blockType < BlockType.MAXIMUM; blockType++)
+            {
                 for (BlockFaceDirection faceDir = BlockFaceDirection.XIncreasing; faceDir < BlockFaceDirection.MAXIMUM; faceDir++)
-                    blockTextureMap[(byte)blockType,(byte)faceDir] = BlockInformation.GetTexture(blockType, faceDir);
+                {
+                    blockTextureMap[(byte)blockType, (byte)faceDir] = BlockInformation.GetTexture(blockType, faceDir);
+                }
+            }
 
             // Load the textures we'll use.
             blockTextures = new IMTexture[(byte)BlockTexture.MAXIMUM];
@@ -204,8 +181,12 @@ namespace Infiniminer
             vertexBuffers = new DynamicVertexBuffer[(byte)BlockTexture.MAXIMUM, NUMREGIONS];
             vertexListDirty = new bool[(byte)BlockTexture.MAXIMUM, NUMREGIONS];
             for (int i = 0; i < (byte)BlockTexture.MAXIMUM; i++)
+            {
                 for (int j = 0; j < NUMREGIONS; j++)
+                {
                     vertexListDirty[i, j] = true;
+                }
+            }
 
             // Initialize any graphics stuff.
             vertexDeclaration = new VertexDeclaration(gameInstance.GraphicsDevice, VertexPositionTextureShade.VertexElements);
@@ -578,7 +559,7 @@ namespace Infiniminer
 
         private void ShowQuad(ushort x, ushort y, ushort z, BlockFaceDirection faceDir, BlockType blockType)
         {
-            BlockTexture blockTexture = blockTextureMap[(byte)blockType, (byte)faceDir];
+            BlockTexture blockTexture = Contexts.Texture(x, y, z, faceDir, downloadList, blockTextureMap);
             uint blockFace = EncodeBlockFace(x, y, z, faceDir);
             uint region = GetRegion(x, y, z);
             if (!faceMap[(byte)blockTexture, region].ContainsKey(blockFace))
@@ -588,7 +569,7 @@ namespace Infiniminer
 
         private void HideQuad(ushort x, ushort y, ushort z, BlockFaceDirection faceDir, BlockType blockType)
         {
-            BlockTexture blockTexture = blockTextureMap[(byte)blockType, (byte)faceDir];
+            BlockTexture blockTexture = Contexts.Texture(x, y, z, faceDir,downloadList,blockTextureMap);
             uint blockFace = EncodeBlockFace(x, y, z, faceDir);
             uint region = GetRegion(x, y, z);
             if (faceMap[(byte)blockTexture, region].ContainsKey(blockFace))
