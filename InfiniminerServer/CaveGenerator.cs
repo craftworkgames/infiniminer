@@ -45,8 +45,8 @@ namespace Infiniminer
             mountainNoise = InterpolateData(ref mountainNoise, 32, size);
             for (int x = 0; x < size; x++)
                 for (int y = 0; y < size; y++)
-                    for (int z = 0; z <= InfiniminerGame.GROUND_LEVEL*2; z++)
-                        mountainNoise[x, y, z] = z < 3 ? 0 : Math.Min(1, z / (InfiniminerGame.GROUND_LEVEL * 2));
+                    for (int z = 0; z <= GlobalVariables.GROUND_LEVEL*2; z++)
+                        mountainNoise[x, y, z] = z < 3 ? 0 : Math.Min(1, z / (GlobalVariables.GROUND_LEVEL * 2));
             float[, ,] gradient = CaveGenerator.GenerateGradient(size);
             CaveGenerator.AddDataTo(ref mountainNoise, ref gradient, size, 0.1f, 0.9f);
             BlockType[, ,] mountainData = CaveGenerator.GenerateConstant(size, BlockType.None);
@@ -55,7 +55,7 @@ namespace Infiniminer
                 CaveGenerator.PaintWithRandomWalk(ref mountainData, ref mountainNoise, size, randGen.Next(2, 3), BlockType.Dirt, false);
             for (int x = 0; x < size; x++)
                 for (int y = 0; y < size; y++)
-                    for (int z = 0; z <= InfiniminerGame.GROUND_LEVEL; z++)
+                    for (int z = 0; z <= GlobalVariables.GROUND_LEVEL; z++)
                         if (mountainData[x, y, z] == BlockType.None)
                             caveData[x, y, z] = BlockType.None;
             
@@ -79,11 +79,13 @@ namespace Infiniminer
 
             // Add lava.
             if (includeLava)
+            {
                 AddLava(ref caveData, size);
+            }
 
             // Add starting positions.
-            //AddStartingPosition(ref caveData, size, size - 5, size - 5, InfiniminerGame.GROUND_LEVEL, BlockType.HomeA);
-            //AddStartingPosition(ref caveData, size, 5, 5, InfiniminerGame.GROUND_LEVEL, BlockType.HomeB);
+            //AddStartingPosition(ref caveData, size, size - 5, size - 5, GlobalVariables.GROUND_LEVEL, BlockType.HomeA);
+            //AddStartingPosition(ref caveData, size, 5, 5, GlobalVariables.GROUND_LEVEL, BlockType.HomeB);
 
             caveNoise = null;
             gradient = null;
@@ -162,9 +164,9 @@ namespace Infiniminer
                 {
                     data[x, y, z] = BlockType.Rock;
                     data[x, y, z + 1] = BlockType.Lava;
-                    if (InfiniminerServer.lavaAtGroundLevel == 1 && data[x, y, InfiniminerGame.GROUND_LEVEL] == BlockType.None)
+                    if (InfiniminerServer.lavaAtGroundLevel == 1 && data[x, y, GlobalVariables.GROUND_LEVEL] == BlockType.None)
                     {
-                        data[x, y, InfiniminerGame.GROUND_LEVEL] = BlockType.Lava;
+                        data[x, y, GlobalVariables.GROUND_LEVEL] = BlockType.Lava;
                     }
                     numFlows -= 1;
                 }
@@ -175,9 +177,9 @@ namespace Infiniminer
                 {
                     for (ushort y = 0; y < size; ++y)
                     {
-                        if (data[x, y, InfiniminerGame.GROUND_LEVEL] == BlockType.None)
+                        if (data[x, y, GlobalVariables.GROUND_LEVEL] == BlockType.None)
                         {
-                            data[x, y, InfiniminerGame.GROUND_LEVEL] = BlockType.Lava;
+                            data[x, y, GlobalVariables.GROUND_LEVEL] = BlockType.Lava;
                         }
                     }
                 }

@@ -447,7 +447,7 @@ namespace Infiniminer
         public void ConsoleRedraw()
         {
             Console.Clear();
-            ConsoleDrawCentered("INFINIMINER SERVER (Marvulous Mod) " + InfiniminerGame.INFINIMINER_VERSION, 0);
+            ConsoleDrawCentered("INFINIMINER SERVER (" + GlobalVariables.INFINIMINER_BRANCH + ") " + GlobalVariables.INFINIMINER_VERSION, 0);
             ConsoleDraw("================================================================================", 0, 1);
             for (int i = 0; i < consoleText.Count; i++)
                 ConsoleDraw(consoleText[i], 0, i + 2);
@@ -641,9 +641,9 @@ namespace Infiniminer
                                 }
 
                                 string clientVersion = msgBuffer.ReadString();
-                                if (clientVersion != InfiniminerGame.INFINIMINER_VERSION)
+                                if (clientVersion != GlobalVariables.INFINIMINER_VERSION)
                                 {
-                                    msgSender.Disapprove("VER;" + InfiniminerGame.INFINIMINER_VERSION);
+                                    msgSender.Disapprove("VER;" + GlobalVariables.INFINIMINER_VERSION);
                                 }
                                 else if (banList.Contains(newPlayer.IP))
                                 {
@@ -951,7 +951,7 @@ namespace Infiniminer
         {
             foreach (Player p in playerList.Values)
             {
-                if (p.Position.Y > GlobalVariables.MAPSIZE - InfiniminerGame.GROUND_LEVEL)
+                if (p.Position.Y > GlobalVariables.MAPSIZE - GlobalVariables.GROUND_LEVEL)
                     DepositCash(p);
             }
 
@@ -1289,12 +1289,14 @@ namespace Infiniminer
             ushort y = (ushort)hitPoint.Y;
             ushort z = (ushort)hitPoint.Z;
 
-            if (blockList[x, y, z] == BlockType.Dirt)
+            BlockType paintingThis = blockList[x, y, z];
+
+            if (paintingThis == BlockType.Dirt)
             {
                 SetBlock(x, y, z, BlockType.DirtSign, PlayerTeam.None);
                 PlaySound(InfiniminerSound.ConstructionGun, player.Position);
             }
-            else if (blockList[x, y, z] == BlockType.DirtSign)
+            else if (paintingThis == BlockType.DirtSign)
             {
                 SetBlock(x, y, z, BlockType.Dirt, PlayerTeam.None);
                 PlaySound(InfiniminerSound.ConstructionGun, player.Position);
@@ -1308,45 +1310,37 @@ namespace Infiniminer
 
             // Remove this from any explosive lists it may be in.
             foreach (Player p in playerList.Values)
+            {
                 p.ExplosiveList.Remove(new Vector3(x, y, z));
+            }
 
             // Detonate the block.
             for (short dx = -2; dx <= 2; dx++)
+            {
                 for (short dy = -2; dy <= 2; dy++)
+                {
                     for (short dz = -2; dz <= 2; dz++)
                     {
                         // Check that this is a sane block position.
                         if (x + dx <= 0 || y + dy <= 0 || z + dz <= 0 || x + dx >= GlobalVariables.MAPSIZE - 1 || y + dy >= GlobalVariables.MAPSIZE - 1 || z + dz >= GlobalVariables.MAPSIZE - 1)
+                        {
                             continue;
+                        }
 
                         // Chain reactions!
                         if (blockList[x + dx, y + dy, z + dz] == BlockType.Explosive)
-                            DetonateAtPoint((ushort)(x + dx), (ushort)(y + dy), (ushort)(z + dz));
-
-                        // Detonation of normal blocks.
-                        bool destroyBlock = false;
-                        switch (blockList[x + dx, y + dy, z + dz])
                         {
-                            case BlockType.Rock:
-                            case BlockType.Dirt:
-                            case BlockType.DirtSign:
-                            case BlockType.Ore:
-                            case BlockType.SolidA:
-                            case BlockType.SolidB:
-                            case BlockType.TransA:
-                            case BlockType.TransB:
-                            case BlockType.Ladder:
-                            case BlockType.Shock:
-                            case BlockType.Jump:
-                            case BlockType.Explosive:
-                            case BlockType.Lava:
-                            case BlockType.Road:
-                                destroyBlock = true;
-                                break;
+                            DetonateAtPoint((ushort)(x + dx), (ushort)(y + dy), (ushort)(z + dz));
                         }
-                        if (destroyBlock)
+
+                        // Detonation of destructable blocks.
+                        if (BlockInformation.indestructable(blockList[x + dx, y + dy, z + dz]) == false)
+                        {
                             SetBlock((ushort)(x + dx), (ushort)(y + dy), (ushort)(z + dz), BlockType.None, PlayerTeam.None);
+                        }
                     }
+                }
+            }
 
             // Send off the explosion to clients.
             NetBuffer msgBuffer = netServer.CreateBuffer();

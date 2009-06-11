@@ -446,7 +446,7 @@ namespace Infiniminer.States
                 }
 
                 // Change class.
-                if (key == Keys.M && _P.playerPosition.Y > (_SM as InfiniminerGame).propertyBag.MapSize - InfiniminerGame.GROUND_LEVEL)
+                if (key == Keys.M && _P.playerPosition.Y > (_SM as InfiniminerGame).propertyBag.MapSize - GlobalVariables.GROUND_LEVEL)
                     nextState = "Infiniminer.States.ClassSelectionState";
 
                 // Change team.
@@ -454,7 +454,7 @@ namespace Infiniminer.States
                     nextState = "Infiniminer.States.TeamSelectionState";
 
                 // Randomly Teleport
-                if (key == Keys.T && _P.playerPosition.Y > 64 - InfiniminerGame.GROUND_LEVEL)
+                if (key == Keys.T && _P.playerPosition.Y > 64 - GlobalVariables.GROUND_LEVEL)
                     _P.RespawnPlayer();
             }
         }

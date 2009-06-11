@@ -35,7 +35,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="effect_basic.fx">
+    <Compile Include="effects\effect_basic.fx">
       <Name>effect_basic</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
@@ -94,13 +94,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="04b08.spritefont">
-      <Name>font_04b08</Name>
-      <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="blocks\tex_block_explosive.png">
       <Name>tex_block_explosive</Name>
       <Importer>TextureImporter</Importer>
@@ -122,21 +115,21 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="effect_skyplane.fx">
+    <Compile Include="effects\effect_skyplane.fx">
       <Name>effect_skyplane</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="effect_spritemodel.fx">
+    <Compile Include="effects\effect_spritemodel.fx">
       <Name>effect_spritemodel</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="effect_particle.fx">
+    <Compile Include="effects\effect_particle.fx">
       <Name>effect_particle</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
@@ -441,13 +434,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="04b03b.spritefont">
-      <Name>font_04b03b</Name>
-      <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="ui\tex_radar_north.png">
       <Name>tex_radar_north</Name>
       <Importer>TextureImporter</Importer>
@@ -455,17 +441,17 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BloomCombine.fx">
+    <Compile Include="effects\BloomCombine.fx">
       <Name>BloomCombine</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
-    <Compile Include="BloomExtract.fx">
+    <Compile Include="effects\BloomExtract.fx">
       <Name>BloomExtract</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
-    <Compile Include="GaussianBlur.fx">
+    <Compile Include="effects\GaussianBlur.fx">
       <Name>GaussianBlur</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
@@ -737,6 +723,25 @@
       <Name>song_title</Name>
       <Importer>Mp3Importer</Importer>
       <Processor>SongProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="fonts\04b03b.spritefont">
+      <Name>04b03b</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
+    <Compile Include="fonts\04b08.spritefont">
+      <Name>04b08</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="blocks\tex_grass.png">
+      <Name>tex_grass</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\v3.0\Microsoft.Xna.GameStudio.ContentPipeline.targets" />

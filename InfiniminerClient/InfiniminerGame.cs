@@ -128,9 +128,6 @@ namespace Infiniminer
         public bool InvertMouseYAxis = false;
         public bool NoSound = false;
 
-        public const string INFINIMINER_VERSION = "v1.5";
-        public const int GROUND_LEVEL = 8;
-
         public InfiniminerGame(string[] args)
         {
         }
@@ -162,7 +159,7 @@ namespace Infiniminer
             // Create our connect message.
             NetBuffer connectBuffer = propertyBag.netClient.CreateBuffer();
             connectBuffer.Write(propertyBag.playerHandle);
-            connectBuffer.Write(INFINIMINER_VERSION);
+            connectBuffer.Write(GlobalVariables.INFINIMINER_VERSION);
 
             // Connect to the server.
             propertyBag.netClient.Connect(serverEndPoint, connectBuffer.ToArray());
@@ -269,7 +266,7 @@ namespace Infiniminer
                         {
                             string[] reason = msgBuffer.ReadString().Split(";".ToCharArray());
                             if (reason.Length < 2 || reason[0] == "VER")
-                                MessageBox.Show("Error: client/server version incompability!\r\nServer: " + msgBuffer.ReadString() + "\r\nClient: " + INFINIMINER_VERSION);
+                                MessageBox.Show("Error: client/server version incompability!\r\nServer: " + msgBuffer.ReadString() + "\r\nClient: " + GlobalVariables.INFINIMINER_VERSION);
                             else
                                 MessageBox.Show("Error: you are banned from this server!");
                             ChangeState("Infiniminer.States.ServerBrowserState");

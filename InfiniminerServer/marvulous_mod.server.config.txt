@@ -36,11 +36,14 @@ public = false
 lavaground  = 0
 
 # NON-COMPATIBLE FEATURES
-# If these values are set to true, incompatible clients will likely be unable to join
+# If these values are used, incompatible clients will likely be unable to join
 
 networkport = 5565
 checkmapsize = true
+# enables the server to use gZip compression on the map updates
 gzip = true
+# enables the "Natural Environments" mod
+naturalenvironments = false
 
 # NON-BREAKING FEATURES
 # Values configured here make use of features that can be safely ignored by incompatible clients
