@@ -7,7 +7,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Infiniminer</RootNamespace>
-    <AssemblyName>Infiniminer Marvulous Mod %28Client%29</AssemblyName>
+    <AssemblyName>Infiniminer ContextualTextures %28Client%29</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <XnaFrameworkVersion>v3.0</XnaFrameworkVersion>
     <XnaPlatform>Windows</XnaPlatform>
@@ -106,6 +106,7 @@
     <Compile Include="BloomEffect\BloomSettings.cs" />
     <Compile Include="Configuration\GlobalVariables.cs" />
     <Compile Include="Configuration\configHelper.cs" />
+    <Compile Include="Configuration\Messages.cs" />
     <Compile Include="Configuration\SessionVariables.cs" />
     <Compile Include="Configuration\spriteSwap.cs" />
     <Compile Include="Configuration\Team.cs" />

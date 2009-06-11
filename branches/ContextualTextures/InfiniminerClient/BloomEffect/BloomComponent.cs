@@ -74,9 +74,9 @@ namespace Infiniminer
 
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            bloomExtractEffect = content.Load<Effect>("BloomExtract");
-            bloomCombineEffect = content.Load<Effect>("BloomCombine");
-            gaussianBlurEffect = content.Load<Effect>("GaussianBlur");
+            bloomExtractEffect = content.Load<Effect>(GlobalVariables.fx__BloomExtract);
+            bloomCombineEffect = content.Load<Effect>(GlobalVariables.fx__BloomCombine);
+            gaussianBlurEffect = content.Load<Effect>(GlobalVariables.fx__GaussianBlur);
 
 
             // Look up the resolution and format of our main backbuffer.
