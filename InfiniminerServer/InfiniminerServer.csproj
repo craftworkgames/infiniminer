@@ -9,7 +9,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>InfiniminerServer</RootNamespace>
-    <AssemblyName>Infiniminer Marvulous Mod %28Server%29</AssemblyName>
+    <AssemblyName>Infiniminer ContextualTextures %28Server%29</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ApplicationIcon>Server.ico</ApplicationIcon>

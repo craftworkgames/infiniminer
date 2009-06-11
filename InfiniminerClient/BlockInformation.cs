@@ -32,50 +32,6 @@ namespace Infiniminer
         MAXIMUM
     }
 
-    public enum BlockTexture : byte
-    {
-        None,
-        Dirt,
-        Ore,
-        Gold,
-        Diamond,
-        Rock,
-        Jump,
-        JumpTop,
-        Ladder,
-        LadderTop,
-        Explosive,
-        Spikes,
-        HomeA,
-        HomeB,
-        BankTopA,
-        BankTopB,
-        BankFrontA,
-        BankFrontB,
-        BankLeftA,
-        BankLeftB,
-        BankRightA,
-        BankRightB,
-        BankBackA,
-        BankBackB,
-        TeleTop,
-        TeleBottom,
-        TeleSideA,
-        TeleSideB,
-        SolidA,
-        SolidB,
-        Metal,
-        DirtSign,
-        Lava,
-        Road,
-        BeaconA,
-        BeaconB,
-        Grass,
-        TransA,   // THESE MUST BE THE LAST TWO TEXTURES-- why ? ~ Marv.
-        TransB,
-        MAXIMUM
-    }
-
     public class BlockInformation
     {
         public static uint GetCost(BlockType blockType)

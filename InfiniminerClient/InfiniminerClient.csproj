@@ -110,6 +110,8 @@
     <Compile Include="Configuration\SessionVariables.cs" />
     <Compile Include="Configuration\spriteSwap.cs" />
     <Compile Include="Configuration\Team.cs" />
+    <Compile Include="Configuration\Textures\BlockTexture.cs" />
+    <Compile Include="Configuration\Textures\Contexts.cs" />
     <Compile Include="Engines\BlockEngine.cs" />
     <Compile Include="BlockInformation.cs" />
     <Compile Include="Camera.cs" />

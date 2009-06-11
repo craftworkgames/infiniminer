@@ -151,5 +151,13 @@ namespace Infiniminer
         {
             return _color.R + "," + _color.G + "," + _color.B;
         }
+        public static bool isAboveGround(ushort x, ushort y, ushort z)
+        {
+            return y >= (ushort)(
+                    GlobalVariables.MAPSIZE - (
+                    GlobalVariables.GROUND_LEVEL + 2
+                )
+            );
+        }
     }
 }
