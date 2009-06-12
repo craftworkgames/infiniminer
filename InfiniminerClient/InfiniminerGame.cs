@@ -299,7 +299,8 @@ namespace Infiniminer
                                                     BlockType blockType = (BlockType)decompresser.ReadByte();
                                                     if (blockType != BlockType.None)
                                                     {
-                                                        propertyBag.blockEngine.downloadList[x, y + dy, z] = blockType;
+                                                        PlayerTeam team = (PlayerTeam)decompresser.ReadByte();
+                                                        propertyBag.blockEngine.downloadList[x, y + dy, z] = new BlockInfo(new Point3D{ X = x, Y = (ushort)(y + dy), Z =z},blockType,team);
                                                     }
                                                 }
                                             }
@@ -316,7 +317,8 @@ namespace Infiniminer
                                                     BlockType blockType = (BlockType)msgBuffer.ReadByte();
                                                     if (blockType != BlockType.None)
                                                     {
-                                                        propertyBag.blockEngine.downloadList[x, y + dy, z] = blockType;
+                                                        PlayerTeam team = (PlayerTeam)msgBuffer.ReadByte();
+                                                        propertyBag.blockEngine.downloadList[x, y + dy, z] = new BlockInfo(new Point3D { X = x, Y = (ushort)(y + dy), Z = z }, blockType, team);
                                                     }
                                                 }
                                             }
@@ -398,16 +400,25 @@ namespace Infiniminer
                                         byte y = msgBuffer.ReadByte();
                                         byte z = msgBuffer.ReadByte();
                                         BlockType blockType = (BlockType)msgBuffer.ReadByte();
+                                        PlayerTeam team = (PlayerTeam)msgBuffer.ReadByte();
+                                        BlockInfo block = propertyBag.blockEngine.BlockAtPoint(new Vector3(x, y, z));
                                         if (blockType == BlockType.None)
                                         {
-                                            if (propertyBag.blockEngine.BlockAtPoint(new Vector3(x, y, z)) != BlockType.None)
-                                                propertyBag.blockEngine.RemoveBlock(x, y, z);
+                                            if (block.type != BlockType.None)
+                                            {
+                                                propertyBag.blockEngine.RemoveBlock(block);
+                                            }
                                         }
                                         else
                                         {
-                                            if (propertyBag.blockEngine.BlockAtPoint(new Vector3(x, y, z)) != BlockType.None)
-                                                propertyBag.blockEngine.RemoveBlock(x, y, z);
-                                            propertyBag.blockEngine.AddBlock(x, y, z, blockType);
+                                            if (block.type != BlockType.None)
+                                            {
+                                                propertyBag.blockEngine.RemoveBlock(block);
+                                            }
+                                            else
+                                            {
+                                                propertyBag.blockEngine.AddBlock(block);
+                                            }
                                             CheckForStandingInLava();                                          
                                         }
                                     }
@@ -609,10 +620,10 @@ namespace Infiniminer
             Vector3 movePosition = propertyBag.playerPosition;
             Vector3 midBodyPoint = movePosition + new Vector3(0, -0.7f, 0);
             Vector3 lowerBodyPoint = movePosition + new Vector3(0, -1.4f, 0);
-            BlockType lowerBlock = propertyBag.blockEngine.BlockAtPoint(lowerBodyPoint);
-            BlockType midBlock = propertyBag.blockEngine.BlockAtPoint(midBodyPoint);
-            BlockType upperBlock = propertyBag.blockEngine.BlockAtPoint(movePosition);
-            if (upperBlock == BlockType.Lava || lowerBlock == BlockType.Lava || midBlock == BlockType.Lava)
+            BlockInfo lowerBlock = propertyBag.blockEngine.BlockAtPoint(lowerBodyPoint);
+            BlockInfo midBlock = propertyBag.blockEngine.BlockAtPoint(midBodyPoint);
+            BlockInfo upperBlock = propertyBag.blockEngine.BlockAtPoint(movePosition);
+            if (upperBlock.type == BlockType.Lava || lowerBlock.type == BlockType.Lava || midBlock.type == BlockType.Lava)
             {
                 propertyBag.KillPlayer("WAS INCINERATED BY LAVA!");
             }

@@ -13,8 +13,7 @@ namespace Infiniminer
     public class InfiniminerServer
     {
         InfiniminerNetServer netServer = null;
-        BlockType[, ,] blockList = null;    // In game coordinates, where Y points up.
-        PlayerTeam[, ,] blockCreatorTeam = null;
+        BlockInfo[, ,] blockList = null;    // In game coordinates, where Y points up.
         Dictionary<NetConnection, Player> playerList = new Dictionary<NetConnection, Player>();
 
         private const string config_filename = "marvulous_mod.server.config.txt";
@@ -132,12 +131,7 @@ namespace Infiniminer
 
         //All the lava blocks on the map
         //This could be a hashSet, but we're using .NET 2.0
-        Dictionary<Point3D, PlayerTeam> LavaBlocks = new Dictionary<Point3D,PlayerTeam>();
-        //3D point of 3 ushorts
-        struct Point3D
-        {
-            public ushort X, Y, Z;
-        }
+        Dictionary<Point3D, PlayerTeam> LavaBlocks = new Dictionary<Point3D, PlayerTeam>();
 
         public InfiniminerServer()
         {
@@ -384,33 +378,38 @@ namespace Infiniminer
                     ConsoleWrite(sr.ReadLine());
                 }
                 LavaBlocks.Clear();
-                for (int x = 0; x < GlobalVariables.MAPSIZE; x++)
-                    for (int y = 0; y < GlobalVariables.MAPSIZE; y++)
-                        for (int z = 0; z < GlobalVariables.MAPSIZE; z++)
+                for (ushort x = 0; x < GlobalVariables.MAPSIZE; x++)
+                {
+                    for (ushort y = 0; y < GlobalVariables.MAPSIZE; y++)
+                    {
+                        for (ushort z = 0; z < GlobalVariables.MAPSIZE; z++)
                         {
                             string line = sr.ReadLine();
                             string[] fileArgs = line.Split(",".ToCharArray());
                             if (fileArgs.Length == 2)
                             {
-                                blockList[x, y, z] = (BlockType)int.Parse(fileArgs[0], System.Globalization.CultureInfo.InvariantCulture);
-                                blockCreatorTeam[x, y, z] = (PlayerTeam)byte.Parse(fileArgs[1], System.Globalization.CultureInfo.InvariantCulture);
+                                BlockType type = (BlockType)int.Parse(fileArgs[0], System.Globalization.CultureInfo.InvariantCulture);
+                                PlayerTeam team = (PlayerTeam)byte.Parse(fileArgs[1], System.Globalization.CultureInfo.InvariantCulture);
+                                blockList[x, y, z] = new BlockInfo(new Point3D { X = x, Y = y, Z = z }, type, team);
                                 Point3D blockPosition = new Point3D() { X = (ushort)x, Y = (ushort)y, Z = (ushort)z };
-                                switch (blockList[x, y, z])
+                                switch (blockList[x, y, z].type)
                                 {
                                     case BlockType.Lava:
-                                    {
-                                        LavaBlocks.Add(blockPosition, blockCreatorTeam[x, y, z]);
-                                    }
-                                    break;
+                                        {
+                                            LavaBlocks.Add(blockPosition, team);
+                                        }
+                                        break;
                                     case BlockType.BeaconA:
                                     case BlockType.BeaconB:
-                                    {
-                                        createBeacon(blockCreatorTeam[x, y, z], new Vector3(x, y, z));
-                                    }
-                                    break;
+                                        {
+                                            createBeacon(blockList[x, y, z]);
+                                        }
+                                        break;
                                 }
                             }
                         }
+                    }
+                }
                 sr.Close();
                 fs.Close();
             }
@@ -425,10 +424,17 @@ namespace Infiniminer
         {
             FileStream fs = new FileStream(filename, FileMode.Create);
             StreamWriter sw = new StreamWriter(fs);
-            for (int x = 0; x < GlobalVariables.MAPSIZE; x++)
-                for (int y = 0; y < GlobalVariables.MAPSIZE; y++)
-                    for (int z = 0; z < GlobalVariables.MAPSIZE; z++)
-                        sw.WriteLine((byte)blockList[x, y, z] + "," + (byte)blockCreatorTeam[x, y, z]);
+            for (ushort x = 0; x < GlobalVariables.MAPSIZE; x++)
+            {
+                for (ushort y = 0; y < GlobalVariables.MAPSIZE; y++)
+                {
+                    for (ushort z = 0; z < GlobalVariables.MAPSIZE; z++)
+                    {
+                        BlockInfo block = blockList[x, y, z];
+                        sw.WriteLine((byte)block.type + "," + (byte)block.team);
+                    }
+                }
+            }
             sw.Close();
             fs.Close();
         }
@@ -468,7 +474,7 @@ namespace Infiniminer
         }
 
         List<string> beaconIDList = new List<string>();
-        Dictionary<Vector3, Beacon> beaconList = new Dictionary<Vector3, Beacon>();
+        Dictionary<Point3D, Beacon> beaconList = new Dictionary<Point3D, Beacon>();
         Random randGen = new Random();
         public string _GenerateBeaconID()
         {
@@ -485,38 +491,42 @@ namespace Infiniminer
             beaconIDList.Add(newId);
             return newId;
         }
-        public Beacon createBeacon(PlayerTeam team, Vector3 pos)
+        public Beacon createBeacon(BlockInfo block)
         {
             Beacon newBeacon = new Beacon();
             newBeacon.ID = GenerateBeaconID();
-            newBeacon.Team = team;
-            beaconList[pos] = newBeacon;
+            newBeacon.Team = block.team;
+            beaconList[block.pos] = newBeacon;
             return newBeacon;
         }
 
         public void SetBlock(ushort x, ushort y, ushort z, BlockType blockType, PlayerTeam team)
         {
-            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (y + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (z + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0)
+            if (configHelper.isOutOfBounds(x,y,z,GlobalVariables.MAPSIZE))
             {
                 return;
             }
-            var oldBlockType = blockList[x, y, z];
+            BlockInfo oldBlock = blockList[x, y, z];
+            Point3D pos = new Point3D { X = x, Y = y, Z = z };
+            BlockInfo newBlock = new BlockInfo(pos, blockType, team);
 
-            if (blockType == BlockType.BeaconA || blockType == BlockType.BeaconB)
+
+            if (BlockInfo.isBeacon(newBlock))
             {
-                Beacon newBeacon = createBeacon(team, new Vector3(x, y, z));
+                Beacon newBeacon = createBeacon(newBlock);
                 SendSetBeacon(new Vector3(x, y+1, z), newBeacon.ID, newBeacon.Team);
             }
 
-            if (blockType == BlockType.None && (blockList[x, y, z] == BlockType.BeaconA || blockList[x, y, z] == BlockType.BeaconB))
+            if (blockType == BlockType.None && BlockInfo.isBeacon(blockList[x,y,z]))
             {
-                if (beaconList.ContainsKey(new Vector3(x,y,z)))
-                    beaconList.Remove(new Vector3(x,y,z));
+                if (beaconList.ContainsKey(pos))
+                {
+                    beaconList.Remove(pos);
+                }
                 SendSetBeacon(new Vector3(x, y+1, z), "", PlayerTeam.None);
             }
             
-            blockList[x, y, z] = blockType;
-            blockCreatorTeam[x, y, z] = team;
+            blockList[x, y, z] = newBlock;
 
             // x, y, z, type, all bytes
             NetBuffer msgBuffer = netServer.CreateBuffer();
@@ -524,21 +534,27 @@ namespace Infiniminer
             msgBuffer.Write((byte)x);
             msgBuffer.Write((byte)y);
             msgBuffer.Write((byte)z);
-            msgBuffer.Write((byte)blockType);
+            msgBuffer.Write((byte)newBlock.type);
+            msgBuffer.Write((byte)newBlock.team);
             foreach (NetConnection netConn in playerList.Keys)
+            {
                 if (netConn.Status == NetConnectionStatus.Connected)
+                {
                     netServer.SendMessage(msgBuffer, netConn, NetChannel.ReliableUnordered);
+                }
+            }
 
-            var lavaBlockPoint3D = new Point3D() { X = (ushort)x, Y = (ushort)y, Z = (ushort)z };
-            if (oldBlockType == BlockType.Lava && blockType != BlockType.Lava)
+            if (oldBlock.type == BlockType.Lava && newBlock.type != BlockType.Lava)
             {
-                LavaBlocks.Remove(lavaBlockPoint3D);
+                LavaBlocks.Remove(pos);
             }
-            else if (blockType == BlockType.Lava && oldBlockType != BlockType.Lava)
+            else if (newBlock.type == BlockType.Lava && oldBlock.type != BlockType.Lava)
             {
-                LavaBlocks.Add(lavaBlockPoint3D, PlayerTeam.None);
+                LavaBlocks.Add(pos, PlayerTeam.None);
             }
-            //ConsoleWrite("BLOCKSET: " + x + " " + y + " " + z + " " + blockType.ToString());
+#if DEBUG
+            ConsoleWrite("BLOCKSET: " + x + " " + y + " " + z + " " + blockType.ToString());
+#endif
         }
         public bool Start()
         {
@@ -547,8 +563,7 @@ namespace Infiniminer
             // Load the ban-list.
             banList = LoadBanList();
             bool makeNewMap = (loadMapOnStart == "");
-            blockList = new BlockType[GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE];
-            blockCreatorTeam = new PlayerTeam[GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE];
+            blockList = new BlockInfo[GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE, GlobalVariables.MAPSIZE];
             if (makeNewMap == false)
             {
                 try
@@ -565,7 +580,7 @@ namespace Infiniminer
             {
                 ConsoleWrite("MAKING NEW MAP");
                 // Create our block world, translating the coordinates out of the cave generator (where Z points down)
-                BlockType[, ,] worldData = CaveGenerator.GenerateCaveSystem(GlobalVariables.MAPSIZE, includeLava);
+                BlockInfo[, ,] worldData = CaveGenerator.GenerateCaveSystem(GlobalVariables.MAPSIZE, includeLava);
                 for (ushort x = 0; x < GlobalVariables.MAPSIZE; x++)
                 {
                     for (ushort y = 0; y < GlobalVariables.MAPSIZE; y++)
@@ -573,11 +588,10 @@ namespace Infiniminer
                         for (ushort z = 0; z < GlobalVariables.MAPSIZE; z++)
                         {
                             blockList[x, (ushort)(GlobalVariables.MAPSIZE - 1 - z), y] = worldData[x, y, z];
-                            if (blockList[x, (ushort)(GlobalVariables.MAPSIZE - 1 - z), y] == BlockType.Lava)
+                            if (blockList[x, (ushort)(GlobalVariables.MAPSIZE - 1 - z), y].type == BlockType.Lava)
                             {
                                 LavaBlocks.Add(new Point3D() { X = (ushort)x, Y = (ushort)(GlobalVariables.MAPSIZE - 1 - z), Z = (ushort)y }, PlayerTeam.None);
                             }
-                            blockCreatorTeam[x, y, z] = PlayerTeam.None;
                         }
                     }
                 }
@@ -988,20 +1002,20 @@ namespace Infiniminer
                 // if the block below is something solid, add lava to the sides
                 if (j == 0)
                     continue;
-                BlockType typeBelow = blockList[i, j - 1, k];
+                BlockType typeBelow = blockList[i, j - 1, k].type;
                 if (typeBelow == BlockType.None)
                 {
                     tempLava.Add(new Point3D() { X = i, Y = (ushort)(j - 1), Z = k });
                 }
                 else if (typeBelow != BlockType.Lava)
                 {
-                    if (i > 0 && blockList[i - 1, j, k] == BlockType.None)
+                    if (i > 0 && blockList[i - 1, j, k].type == BlockType.None)
                         tempLava.Add(new Point3D() { X = (ushort)(i - 1), Y = j, Z = k });
-                    if (k > 0 && blockList[i, j, k - 1] == BlockType.None)
+                    if (k > 0 && blockList[i, j, k - 1].type == BlockType.None)
                         tempLava.Add(new Point3D() { X = i, Y = j, Z = (ushort)(k - 1) });
-                    if ((i + 1).CompareTo(GlobalVariables.MAPSIZE) < 0 && blockList[i + 1, j, k] == BlockType.None)
+                    if ((i + 1).CompareTo(GlobalVariables.MAPSIZE) < 0 && blockList[i + 1, j, k].type == BlockType.None)
                         tempLava.Add(new Point3D() { X = (ushort)(i + 1), Y = j, Z = k });
-                    if ((k + 1).CompareTo(GlobalVariables.MAPSIZE) < 0 && blockList[i, j, k + 1] == BlockType.None)
+                    if ((k + 1).CompareTo(GlobalVariables.MAPSIZE) < 0 && blockList[i, j, k + 1].type == BlockType.None)
                         tempLava.Add(new Point3D() { X = i, Y = j, Z = (ushort)(k + 1) });
                 }
             }
@@ -1025,14 +1039,11 @@ namespace Infiniminer
 
         public BlockType BlockAtPoint(Vector3 point)
         {
-            ushort x = (ushort)point.X;
-            ushort y = (ushort)point.Y;
-            ushort z = (ushort)point.Z;
-            if (x <= 0 || y <= 0 || z <= 0 || (x + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (y + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0 || (z + 1).CompareTo(GlobalVariables.MAPSIZE) >= 0)
+            if (configHelper.isOutOfBounds((int)point.X, (int)point.Y, (int)point.Z, GlobalVariables.MAPSIZE))
             {
                 return BlockType.None;
             }
-            return blockList[x, y, z];
+            return blockList[(ushort)point.X, (ushort)point.Y, (ushort)point.Z].type;
         }
 
         public bool RayCollision(Vector3 startPosition, Vector3 rayDirection, float distance, int searchGranularity, ref Vector3 hitPoint, ref Vector3 buildPoint)
@@ -1191,8 +1202,10 @@ namespace Infiniminer
             //    actionFailed = true;
 
             // If it's lava, don't let them build off of lava.
-            if (blockList[(ushort)hitPoint.X, (ushort)hitPoint.Y, (ushort)hitPoint.Z] == BlockType.Lava)
+            if (blockList[(ushort)hitPoint.X, (ushort)hitPoint.Y, (ushort)hitPoint.Z].type == BlockType.Lava)
+            {
                 actionFailed = true;
+            }
 
             if (actionFailed)
             {
@@ -1232,23 +1245,14 @@ namespace Infiniminer
             ushort z = (ushort)hitPoint.Z;
 
             // If this is another team's block, bail.
-            if (blockCreatorTeam[x, y, z] != player.Team)
+            if (blockList[x, y, z].team != player.Team)
+            {
                 actionFailed = true;
-
-            BlockType blockType = blockList[x, y, z];
-            if (!(blockType == BlockType.SolidB ||
-                blockType == BlockType.SolidA ||
-                blockType == BlockType.BankB ||
-                blockType == BlockType.BankA ||
-                blockType == BlockType.Jump ||
-                blockType == BlockType.Ladder ||
-                blockType == BlockType.Road ||
-                blockType == BlockType.Shock ||
-                blockType == BlockType.BeaconA ||
-                blockType == BlockType.BeaconB ||
-                blockType == BlockType.TransB ||
-                blockType == BlockType.TransA))
-                actionFailed = true;
+            }
+            else
+            {
+                actionFailed = BlockInformation.indestructable(blockList[x, y, z].type);
+            }
 
             if (actionFailed)
             {
@@ -1289,7 +1293,7 @@ namespace Infiniminer
             ushort y = (ushort)hitPoint.Y;
             ushort z = (ushort)hitPoint.Z;
 
-            BlockType paintingThis = blockList[x, y, z];
+            BlockType paintingThis = blockList[x, y, z].type;
 
             if (paintingThis == BlockType.Dirt)
             {
@@ -1328,13 +1332,13 @@ namespace Infiniminer
                         }
 
                         // Chain reactions!
-                        if (blockList[x + dx, y + dy, z + dz] == BlockType.Explosive)
+                        if (blockList[x + dx, y + dy, z + dz].type == BlockType.Explosive)
                         {
                             DetonateAtPoint((ushort)(x + dx), (ushort)(y + dy), (ushort)(z + dz));
                         }
 
                         // Detonation of destructable blocks.
-                        if (BlockInformation.indestructable(blockList[x + dx, y + dy, z + dz]) == false)
+                        if (BlockInformation.invulnerable(blockList[x + dx, y + dy, z + dz].type) == false)
                         {
                             SetBlock((ushort)(x + dx), (ushort)(y + dy), (ushort)(z + dz), BlockType.None, PlayerTeam.None);
                         }
@@ -1360,7 +1364,7 @@ namespace Infiniminer
                 ushort y = (ushort)blockPos.Y;
                 ushort z = (ushort)blockPos.Z;
 
-                if (blockList[x, y, z] != BlockType.Explosive)
+                if (blockList[x, y, z].type != BlockType.Explosive)
                     player.ExplosiveList.RemoveAt(0);
                 else
                     DetonateAtPoint(x, y, z);
@@ -1499,7 +1503,8 @@ namespace Infiniminer
                         {
                             for (byte z = 0; z < GlobalVariables.MAPSIZE; z++)
                             {
-                                uncompressed.WriteByte((byte)(blockList[x, y + dy, z]));
+                                uncompressed.WriteByte((byte)(blockList[x, y + dy, z].type));
+                                uncompressed.WriteByte((byte)(blockList[x, y + dy, z].team));
                             }
                         }
                         //Compress the input
@@ -1529,7 +1534,8 @@ namespace Infiniminer
                         {
                             for (byte z = 0; z < GlobalVariables.MAPSIZE; z++)
                             {
-                                msgBuffer.Write((byte)(blockList[x, y + dy, z]));
+                                msgBuffer.Write((byte)(blockList[x, y + dy, z].type));
+                                msgBuffer.Write((byte)(blockList[x, y + dy, z].team));
                             }
                         }
                         if (client.Status == NetConnectionStatus.Connected)
@@ -1613,13 +1619,13 @@ namespace Infiniminer
             }
 
             // Let this player know about all placed beacons.
-            foreach (KeyValuePair<Vector3, Beacon> bPair in beaconList)
+            foreach (KeyValuePair<Point3D, Beacon> bPair in beaconList)
             {
-                Vector3 position = bPair.Key;
+                Point3D position = bPair.Key;
                 position.Y += 1; // beacon is shown a block below its actually position to make altitude show up right
                 msgBuffer = netServer.CreateBuffer();
                 msgBuffer.Write((byte)InfiniminerMessage.SetBeacon);
-                msgBuffer.Write(position);
+                msgBuffer.Write(configHelper.Point3DtoVector3(position));
                 msgBuffer.Write(bPair.Value.ID);
                 msgBuffer.Write((byte)bPair.Value.Team);
                 netServer.SendMessage(msgBuffer, player.NetConn, NetChannel.ReliableInOrder2);

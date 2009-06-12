@@ -28,7 +28,7 @@ namespace Infiniminer
         Texture2D texToolDetonatorDownA, texToolDetonatorUpA, texToolDetonatorDownB, texToolDetonatorUpB;
         Texture2D texToolBuild, texToolBuildCharge, texToolBuildBlast, texToolBuildSmoke;
 
-        Dictionary<BlockType, Texture2D> blockIcons = new Dictionary<BlockType, Texture2D>();
+        Texture2D[,] blockIcons = new Texture2D[(byte)BlockType.MAXIMUM,Team.numTeams()];
 
         public InterfaceEngine(InfiniminerGame gameInstance)
         {
@@ -73,22 +73,22 @@ namespace Infiniminer
                                      1024);
 
             // Load icons.
-            blockIcons[BlockType.BankA] = gameInstance.Content.Load<Texture2D>("icons/A/tex_icon_bank");
-            blockIcons[BlockType.SolidA] = gameInstance.Content.Load<Texture2D>("icons/A/tex_icon_solid");
-            blockIcons[BlockType.TransA] = gameInstance.Content.Load<Texture2D>("icons/A/tex_icon_translucent");
-            blockIcons[BlockType.BeaconA] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_beacon");
+            blockIcons[(byte)BlockType.Bank, (byte)PlayerTeam.A] = gameInstance.Content.Load<Texture2D>("icons/A/tex_icon_bank");
+            blockIcons[(byte)BlockType.SolidA, (byte)PlayerTeam.A] = gameInstance.Content.Load<Texture2D>("icons/A/tex_icon_solid");
+            blockIcons[(byte)BlockType.TransA, (byte)PlayerTeam.A] = gameInstance.Content.Load<Texture2D>("icons/A/tex_icon_translucent");
+            blockIcons[(byte)BlockType.BeaconA, (byte)PlayerTeam.A] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_beacon");
 
-            blockIcons[BlockType.BankB] = gameInstance.Content.Load<Texture2D>("icons/B/tex_icon_bank");
-            blockIcons[BlockType.SolidB] = gameInstance.Content.Load<Texture2D>("icons/B/tex_icon_solid");
-            blockIcons[BlockType.TransB] = gameInstance.Content.Load<Texture2D>("icons/B/tex_icon_translucent");
-            blockIcons[BlockType.BeaconB] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_beacon");
+            blockIcons[(byte)BlockType.BankB, (byte)PlayerTeam.B] = gameInstance.Content.Load<Texture2D>("icons/B/tex_icon_bank");
+            blockIcons[(byte)BlockType.SolidB, (byte)PlayerTeam.B] = gameInstance.Content.Load<Texture2D>("icons/B/tex_icon_solid");
+            blockIcons[(byte)BlockType.TransB, (byte)PlayerTeam.B] = gameInstance.Content.Load<Texture2D>("icons/B/tex_icon_translucent");
+            blockIcons[(byte)BlockType.BeaconB, (byte)PlayerTeam.B] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_beacon");
 
-            blockIcons[BlockType.Explosive] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_explosive");
-            blockIcons[BlockType.Jump] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_jump");
-            blockIcons[BlockType.Ladder] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_ladder");
-            blockIcons[BlockType.Shock] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_spikes");
-            blockIcons[BlockType.Road] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_road");
-            blockIcons[BlockType.None] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_deconstruction");
+            blockIcons[(byte)BlockType.Explosive, (byte)PlayerTeam.A] = blockIcons[(byte)BlockType.Explosive, (byte)PlayerTeam.B] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_explosive");
+            blockIcons[(byte)BlockType.Jump, (byte)PlayerTeam.A] = blockIcons[(byte)BlockType.Jump, (byte)PlayerTeam.B] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_jump");
+            blockIcons[(byte)BlockType.Ladder, (byte)PlayerTeam.A] = blockIcons[(byte)BlockType.Ladder, (byte)PlayerTeam.B] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_ladder");
+            blockIcons[(byte)BlockType.Shock, (byte)PlayerTeam.A] = blockIcons[(byte)BlockType.Shock, (byte)PlayerTeam.B] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_spikes");
+            blockIcons[(byte)BlockType.Road, (byte)PlayerTeam.A] = blockIcons[(byte)BlockType.Road, (byte)PlayerTeam.B] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_road");
+            blockIcons[(byte)BlockType.None, (byte)PlayerTeam.A] = blockIcons[(byte)BlockType.None, (byte)PlayerTeam.B] = gameInstance.Content.Load<Texture2D>("icons/tex_icon_deconstruction");
 
             // Load fonts.
             uiFont = gameInstance.Content.Load<SpriteFont>(GlobalVariables.fontUI);
@@ -232,7 +232,6 @@ namespace Infiniminer
 
             int drawX = screenWidth / 2 - 60 * 3;
             int drawY = screenHeight - 91 * 3;
-
             Texture2D gunSprite = texToolBuild;
             if (_P.constructionGunAnimation < -0.001)
                 gunSprite = texToolBuildCharge;
@@ -241,7 +240,7 @@ namespace Infiniminer
             else if (_P.constructionGunAnimation > 0.001)
                 gunSprite = texToolBuildSmoke;
             spriteBatch.Draw(gunSprite, new Rectangle(drawX, drawY, 120 * 3, 126 * 3), Color.White);
-            spriteBatch.Draw(blockIcons[blockType], new Rectangle(drawX+37*3, drawY+50*3, 117, 63), Color.White);
+            spriteBatch.Draw(blockIcons[(byte)blockType, (byte)_P.playerTeam], new Rectangle(drawX + 37 * 3, drawY + 50 * 3, 117, 63), Color.White);
         }
 
         public void Render(GraphicsDevice graphicsDevice)
