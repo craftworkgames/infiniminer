@@ -1,0 +1,29 @@
+﻿namespace Infiniminer
+{
+    public enum BlockType : byte
+    {
+        None,
+        Dirt,
+        Ore,
+        Gold,
+        Diamond,
+        Rock,
+        Ladder,
+        Explosive,
+        Jump,
+        Shock,
+        Bank,
+        BankB,
+        BeaconA,
+        BeaconB,
+        Road,
+        SolidA,
+        SolidB,
+        Metal,
+        DirtSign,
+        Lava,
+        TransA,
+        TransB,
+        MAXIMUM
+    }
+}

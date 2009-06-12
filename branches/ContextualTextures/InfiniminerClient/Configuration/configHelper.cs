@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 namespace Infiniminer
 {
@@ -159,18 +158,6 @@ namespace Infiniminer
                     GlobalVariables.GROUND_LEVEL + 2
                 )
             );
-        }
-        public static bool isOutOfBounds(int x, int y, int z, byte size)
-        {
-            return (x <= 0 || y <= 0 || z <= 0 || x >= size - 1 || y >= size - 1 || z >= size - 1);
-        }
-        public static Point3D Vector3toPoint3D(Vector3 pos)
-        {
-            return new Point3D { X = (ushort)pos.X, Y = (ushort)pos.Y, Z = (ushort)pos.Z };
-        }
-        public static Vector3 Point3DtoVector3(Point3D pos)
-        {
-            return new Vector3 { X = pos.X, Y = pos.Y, Z = pos.Z };
         }
     }
 }

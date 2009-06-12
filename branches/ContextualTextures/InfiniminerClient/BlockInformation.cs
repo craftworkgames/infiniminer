@@ -5,13 +5,41 @@ using System.Text;
 
 namespace Infiniminer
 {
+    public enum BlockType : byte
+    {
+        None,
+        Dirt,
+        Ore,
+        Gold,
+        Diamond,
+        Rock,
+        Ladder,
+        Explosive,
+        Jump,
+        Shock,
+        BankA,
+        BankB,
+        BeaconA,
+        BeaconB,
+        Road,
+        SolidA,
+        SolidB,
+        Metal,
+        DirtSign,
+        Lava,
+        TransA,
+        TransB,
+        MAXIMUM
+    }
+
     public class BlockInformation
     {
         public static uint GetCost(BlockType blockType)
         {
             switch (blockType)
             {
-                case BlockType.Bank:
+                case BlockType.BankA:
+                case BlockType.BankB:
                 case BlockType.BeaconA:
                 case BlockType.BeaconB:
                     return 50;
@@ -38,7 +66,7 @@ namespace Infiniminer
             return 1000;
         }
 
-        public static BlockTexture GetTexture(BlockType blockType, PlayerTeam team, BlockFaceDirection faceDir)
+        public static BlockTexture GetTexture(BlockType blockType, BlockFaceDirection faceDir)
         {
             switch (blockType)
             {
@@ -59,35 +87,25 @@ namespace Infiniminer
                 case BlockType.DirtSign:
                     return BlockTexture.DirtSign;
 
-                case BlockType.Bank:
-                {
-                    switch (team)
+                case BlockType.BankA:
+                    switch (faceDir)
                     {
-                        case PlayerTeam.A:
-                        {
-                            switch (faceDir)
-                            {
-                                case BlockFaceDirection.XIncreasing: return BlockTexture.BankFrontA;
-                                case BlockFaceDirection.XDecreasing: return BlockTexture.BankBackA;
-                                case BlockFaceDirection.ZIncreasing: return BlockTexture.BankLeftA;
-                                case BlockFaceDirection.ZDecreasing: return BlockTexture.BankRightA;
-                                default: return BlockTexture.BankTopA;
-                            }
-                        }
-                        case PlayerTeam.B:
-                        {
-                            switch (faceDir)
-                            {
-                                case BlockFaceDirection.XIncreasing: return BlockTexture.BankFrontB;
-                                case BlockFaceDirection.XDecreasing: return BlockTexture.BankBackB;
-                                case BlockFaceDirection.ZIncreasing: return BlockTexture.BankLeftB;
-                                case BlockFaceDirection.ZDecreasing: return BlockTexture.BankRightB;
-                                default: return BlockTexture.BankTopB;
-                            }
-                        }
+                        case BlockFaceDirection.XIncreasing: return BlockTexture.BankFrontA;
+                        case BlockFaceDirection.XDecreasing: return BlockTexture.BankBackA;
+                        case BlockFaceDirection.ZIncreasing: return BlockTexture.BankLeftA;
+                        case BlockFaceDirection.ZDecreasing: return BlockTexture.BankRightA;
+                        default: return BlockTexture.BankTopA;
                     }
-                }
-                break;
+
+                case BlockType.BankB:
+                    switch (faceDir)
+                    {
+                        case BlockFaceDirection.XIncreasing: return BlockTexture.BankFrontB;
+                        case BlockFaceDirection.XDecreasing: return BlockTexture.BankBackB;
+                        case BlockFaceDirection.ZIncreasing: return BlockTexture.BankLeftB;
+                        case BlockFaceDirection.ZDecreasing: return BlockTexture.BankRightB;
+                        default: return BlockTexture.BankTopB;
+                    }
 
                 case BlockType.BeaconA:
                 case BlockType.BeaconB:
@@ -163,13 +181,14 @@ namespace Infiniminer
             return BlockTexture.None;
         }
 
-        public static bool invulnerable(BlockType type)
+        public static bool indestructable(BlockType block)
         {
-            switch (type)
+            switch (block)
             {
                 case BlockType.Gold:
                 case BlockType.Diamond:
-                case BlockType.Bank:
+                case BlockType.BankA:
+                case BlockType.BankB:
                 case BlockType.BeaconA:
                 case BlockType.BeaconB:
                 case BlockType.Metal:
@@ -179,30 +198,6 @@ namespace Infiniminer
                 default:
                 {
                     return false;
-                }
-            }
-        }
-        public static bool indestructable(BlockType type)
-        {
-            switch (type)
-            {
-                case BlockType.SolidB:
-                case BlockType.SolidA:
-                case BlockType.Bank:
-                case BlockType.Jump:
-                case BlockType.Ladder:
-                case BlockType.Road:
-                case BlockType.Shock:
-                case BlockType.BeaconA:
-                case BlockType.BeaconB:
-                case BlockType.TransB:
-                case BlockType.TransA:
-                {
-                    return false;
-                }
-                default:
-                {
-                    return true;
                 }
             }
         }

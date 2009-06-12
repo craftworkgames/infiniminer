@@ -49,6 +49,13 @@ namespace Infiniminer
         Detonator,
     }
 
+    public enum PlayerTeam : byte
+    {
+        None,
+        A,
+        B
+    }
+
     public enum ScreenEffect
     {
         None,
@@ -260,12 +267,10 @@ namespace Infiniminer
                 // See if this is a safe place to drop.
                 for (startPos.Y = mapSize - 1; startPos.Y >= mapSize - GlobalVariables.GROUND_LEVEL; startPos.Y--)
                 {
-                    BlockInfo block = blockEngine.BlockAtPoint(startPos);
-                    if (block.type == BlockType.Lava)
-                    {
+                    BlockType blockType = blockEngine.BlockAtPoint(startPos);
+                    if (blockType == BlockType.Lava)
                         break;
-                    }
-                    else if (block.type != BlockType.None)
+                    else if (blockType != BlockType.None)
                     {
                         // We have found a valid place to spawn, so spawn a few above it.
                         playerPosition = startPos + Vector3.UnitY * 5;
@@ -475,7 +480,7 @@ namespace Infiniminer
                                                         BlockType.Jump,
                                                         BlockType.Shock,
                                                         playerTeam == PlayerTeam.A ? BlockType.BeaconA : BlockType.BeaconB,
-                                                        BlockType.Bank  };
+                                                        playerTeam == PlayerTeam.A ? BlockType.BankA : BlockType.BankB  };
                     break;
 
                 case PlayerClass.Sapper:
@@ -592,16 +597,16 @@ namespace Infiniminer
                     Vector3 lookVector = Vector3.Transform(playerCamera.GetLookVector(), rotation);
                     for (int k = 0; k < 60; k++)
                     {
-                        BlockInfo block = blockEngine.BlockAtPoint(scanPoint);
-                        if (block.type == BlockType.Gold)
+                        BlockType blockType = blockEngine.BlockAtPoint(scanPoint);
+                        if (blockType == BlockType.Gold)
                         {
                             distanceReading = Math.Min(distanceReading, 0.5f * k);
-                            valueReading = Math.Max(valueReading, SessionVariables.goldCash);
+                            valueReading = Math.Max(valueReading, 200);
                         }
-                        else if (block.type == BlockType.Diamond)
+                        else if (blockType == BlockType.Diamond)
                         {
                             distanceReading = Math.Min(distanceReading, 0.5f * k);
-                            valueReading = Math.Max(valueReading, SessionVariables.diamondCash);
+                            valueReading = Math.Max(valueReading, 1000);
                         }
                         scanPoint += 0.5f * lookVector;
                     }
@@ -618,8 +623,12 @@ namespace Infiniminer
                 return false;
 
             // If it's a valid bank object, we're good!
-            BlockInfo block = blockEngine.BlockAtPoint(hitPoint);
-            return (block.type == BlockType.Bank && playerTeam == block.team);
+            BlockType blockType = blockEngine.BlockAtPoint(hitPoint);
+            if (blockType == BlockType.BankA && playerTeam == PlayerTeam.A)
+                return true;
+            if (blockType == BlockType.BankB && playerTeam == PlayerTeam.B)
+                return true;
+            return false;
         }
 
         public float GetToolCooldown(PlayerTools tool)

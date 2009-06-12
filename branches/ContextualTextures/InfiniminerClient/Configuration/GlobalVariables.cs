@@ -1,10 +1,5 @@
 namespace Infiniminer
 {
-    //3D point of 3 ushorts
-    public struct Point3D
-    {
-        public ushort X, Y, Z;
-    }
     public class GlobalVariables
     {
         public const byte MAPSIZE = 64;
