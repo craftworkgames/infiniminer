@@ -1,10 +1,10 @@
-Content\effects\effect_basic.xnb
-Content\effects\effect_skyplane.xnb
-Content\effects\effect_spritemodel.xnb
-Content\effects\effect_particle.xnb
-Content\effects\BloomCombine.xnb
-Content\effects\BloomExtract.xnb
-Content\effects\GaussianBlur.xnb
+Content\effect_basic.xnb
+Content\effect_skyplane.xnb
+Content\effect_spritemodel.xnb
+Content\effect_particle.xnb
+Content\BloomCombine.xnb
+Content\BloomExtract.xnb
+Content\GaussianBlur.xnb
 Content\blocks\tex_block_ore.xnb
 Content\blocks\tex_block_rock.xnb
 Content\blocks\tex_block_dirt.xnb
@@ -100,7 +100,8 @@ Content\tools\B\tex_tool_radar.xnb
 Content\icons\B\tex_icon_bank.xnb
 Content\icons\B\tex_icon_solid.xnb
 Content\icons\B\tex_icon_translucent.xnb
-Content\blocks\tex_grass.xnb
+Content\font_04b08.xnb
+Content\font_04b03b.xnb
 Content\sounds\build.xnb
 Content\sounds\cash.xnb
 Content\sounds\click-loud.xnb
@@ -117,7 +118,5 @@ Content\sounds\teleport.xnb
 Content\sounds\radar-high.xnb
 Content\sounds\radar-low.xnb
 Content\song_title.xnb
-Content\fonts\04b03b.xnb
-Content\fonts\04b08.xnb
 Content\song_title.wma
 marvulous_mod.client.config.txt

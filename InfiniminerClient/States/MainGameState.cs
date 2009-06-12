@@ -138,11 +138,11 @@ namespace Infiniminer.States
             Vector3 headPosition = _P.playerPosition + new Vector3(0f, 0.1f, 0f);
             if (_P.blockEngine.SolidAtPointForPlayer(footPosition) || _P.blockEngine.SolidAtPointForPlayer(headPosition))
             {
-                BlockInfo standingOnBlock = _P.blockEngine.BlockAtPoint(footPosition);
-                BlockInfo hittingHeadOnBlock = _P.blockEngine.BlockAtPoint(headPosition);
+                BlockType standingOnBlock = _P.blockEngine.BlockAtPoint(footPosition);
+                BlockType hittingHeadOnBlock = _P.blockEngine.BlockAtPoint(headPosition);
                 
-                // If we're hitting the ground with a high velocity, die!
-                if (standingOnBlock.type != BlockType.None && _P.playerVelocity.Y < 0)
+                // If we"re hitting the ground with a high velocity, die!
+                if (standingOnBlock != BlockType.None && _P.playerVelocity.Y < 0)
                 {
                     float fallDamage = Math.Abs(_P.playerVelocity.Y) / InfiniminerGame.DIEVELOCITY;
                     if (fallDamage >= 1)
@@ -179,7 +179,7 @@ namespace Infiniminer.States
                 _P.playerVelocity.Y = 0;
 
                 // Logic for standing on a block.
-                switch (standingOnBlock.type)
+                switch (standingOnBlock)
                 {
                     case BlockType.Jump:
                         _P.playerVelocity.Y = 2.5f * InfiniminerGame.JUMPVELOCITY;
@@ -208,7 +208,7 @@ namespace Infiniminer.States
                 }
 
                 // Logic for bumping your head on a block.
-                switch (hittingHeadOnBlock.type)
+                switch (hittingHeadOnBlock)
                 {
                     case BlockType.Shock:
                         _P.KillPlayer(InfiniminerGame.SHOCKMSG);
@@ -279,9 +279,9 @@ namespace Infiniminer.States
             }
 
             // It"s solid there, so while we can"t move we have officially collided with it.
-            BlockInfo lowerBlock = _P.blockEngine.BlockAtPoint(lowerBodyPoint);
-            BlockInfo midBlock = _P.blockEngine.BlockAtPoint(midBodyPoint);
-            BlockInfo upperBlock = _P.blockEngine.BlockAtPoint(movePosition);
+            BlockType lowerBlock = _P.blockEngine.BlockAtPoint(lowerBodyPoint);
+            BlockType midBlock = _P.blockEngine.BlockAtPoint(midBodyPoint);
+            BlockType upperBlock = _P.blockEngine.BlockAtPoint(movePosition);
 
             //// It"s solid there, so see if it"s a spike block. If so, touching it will kill us!
             //if (upperBlock == BlockType.Shock || lowerBlock == BlockType.Shock || midBlock == BlockType.Shock)
@@ -291,7 +291,7 @@ namespace Infiniminer.States
             //}
 
             // It"s solid there, so see if it"s a lava block. If so, touching it will kill us!
-            if (upperBlock.type == BlockType.Lava || lowerBlock.type == BlockType.Lava || midBlock.type == BlockType.Lava)
+            if (upperBlock == BlockType.Lava || lowerBlock == BlockType.Lava || midBlock == BlockType.Lava)
             {
                 _P.KillPlayer(InfiniminerGame.LAVAMSG);
                 return true;
@@ -304,7 +304,7 @@ namespace Infiniminer.States
             //    _P.DepositLoot();
 
             // If it"s a ladder, move up.
-            if (upperBlock.type == BlockType.Ladder || lowerBlock.type == BlockType.Ladder || midBlock.type == BlockType.Ladder)
+            if (upperBlock == BlockType.Ladder || lowerBlock == BlockType.Ladder || midBlock == BlockType.Ladder)
             {
                 _P.playerVelocity.Y = InfiniminerGame.CLIMBVELOCITY;
                 Vector3 footPosition = _P.playerPosition + new Vector3(0f, -1.5f, 0f);

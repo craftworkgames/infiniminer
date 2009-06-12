@@ -54,10 +54,10 @@ namespace Infiniminer
 
     public class BlockEngine
     {
-        BlockInfo[, ,] blockList = null;
-        public BlockInfo[, ,] downloadList = null;
+        BlockType[,,] blockList = null;
+        public BlockType[, ,] downloadList = null;
         Dictionary<uint,bool>[,] faceMap = null;
-        BlockTexture[,,] blockTextureMap = null;
+        BlockTexture[,] blockTextureMap = null;
         IMTexture[] blockTextures = null;
         Effect basicEffect;
         InfiniminerGame gameInstance;
@@ -83,9 +83,9 @@ namespace Infiniminer
                 {
                     for (ushort k = 0; k < gameInstance.propertyBag.MapSize; k++)
                     {
-                        if (downloadList[i, j, k].type != BlockType.None)
+                        if (downloadList[i, j, k] != BlockType.None)
                         {
-                            AddBlock(downloadList[i, j, k]);
+                            AddBlock(i, j, k, downloadList[i, j, k]);
                         }
                     }
                 }
@@ -99,17 +99,16 @@ namespace Infiniminer
             NUMREGIONS = (int)Math.Pow(REGIONRATIO, 3);
 
             // Initialize the block list.
-            downloadList = new BlockInfo[gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize];
-            blockList = new BlockInfo[gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize];
+            downloadList = new BlockType[gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize];
+            blockList = new BlockType[gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize, gameInstance.propertyBag.MapSize];
             for (ushort i = 0; i < gameInstance.propertyBag.MapSize; i++)
             {
                 for (ushort j = 0; j < gameInstance.propertyBag.MapSize; j++)
                 {
                     for (ushort k = 0; k < gameInstance.propertyBag.MapSize; k++)
                     {
-                        BlockInfo info = new BlockInfo(new Point3D { X = i, Y = j, Z = k }, BlockType.None, PlayerTeam.None);
-                        downloadList[i, j, k] = info;
-                        blockList[i, j, k] = info;
+                        downloadList[i, j, k] = BlockType.None;
+                        blockList[i, j, k] = BlockType.None;
                     }
                 }
             }
@@ -121,15 +120,12 @@ namespace Infiniminer
                     faceMap[(byte)blockTexture, r] = new Dictionary<uint, bool>();
 
             // Initialize the texture map.
-            blockTextureMap = new BlockTexture[(byte)BlockType.MAXIMUM, Team.numTeams(), 6];
+            blockTextureMap = new BlockTexture[(byte)BlockType.MAXIMUM, 6];
             for (BlockType blockType = BlockType.None; blockType < BlockType.MAXIMUM; blockType++)
             {
                 for (BlockFaceDirection faceDir = BlockFaceDirection.XIncreasing; faceDir < BlockFaceDirection.MAXIMUM; faceDir++)
                 {
-                    foreach (PlayerTeam team in Team.playerTeams)
-                    {
-                        blockTextureMap[(byte)blockType, (byte)team, (byte)faceDir] = BlockInformation.GetTexture(blockType, PlayerTeam.None, faceDir);
-                    }
+                    blockTextureMap[(byte)blockType, (byte)faceDir] = BlockInformation.GetTexture(blockType, faceDir);
                 }
             }
 
@@ -208,7 +204,7 @@ namespace Infiniminer
         // Returns true if we are solid at this point.
         public bool SolidAtPoint(Vector3 point)
         {
-            return BlockAtPoint(point) != BlockInfo.typeNone(configHelper.Vector3toPoint3D(point)); 
+            return BlockAtPoint(point) != BlockType.None; 
         }
 
         public bool SolidAtPointForPlayer(Vector3 point)
@@ -216,35 +212,25 @@ namespace Infiniminer
             return !BlockPassibleForPlayer(BlockAtPoint(point));
         }
 
-        private bool BlockPassibleForPlayer(BlockInfo block)
+        private bool BlockPassibleForPlayer(BlockType blockType)
         {
-            if (block.type == BlockType.None)
-            {
+            if (blockType == BlockType.None)
                 return true;
-            }
-            else if (gameInstance.propertyBag.playerTeam == block.team && (block.type == BlockType.TransA || block.type == BlockType.TransB))
-            {
+            if (gameInstance.propertyBag.playerTeam == PlayerTeam.A && blockType == BlockType.TransA)
                 return true;
-            }
-            else
-            {
-                return false;
-            }
+            if (gameInstance.propertyBag.playerTeam == PlayerTeam.B && blockType == BlockType.TransB)
+                return true;
+            return false;
         }
 
-        public BlockInfo BlockAtPoint(Vector3 point)
+        public BlockType BlockAtPoint(Vector3 point)
         {
             ushort x = (ushort)point.X;
             ushort y = (ushort)point.Y;
             ushort z = (ushort)point.Z;
-            if (configHelper.isOutOfBounds(x, y, z, gameInstance.propertyBag.MapSize))
-            {
-                return BlockInfo.typeNone(new Point3D { X = x, Y = y, Z = z });
-            }
-            else
-            {
-                return blockList[x, y, z];
-            }
+            if (x < 0 || y < 0 || z < 0 || x >= gameInstance.propertyBag.MapSize || y >= gameInstance.propertyBag.MapSize || z >= gameInstance.propertyBag.MapSize)
+                return BlockType.None;
+            return blockList[x, y, z]; 
         }
 
         public bool RayCollision(Vector3 startPosition, Vector3 rayDirection, float distance, int searchGranularity, ref Vector3 hitPoint, ref Vector3 buildPoint)
@@ -254,8 +240,8 @@ namespace Infiniminer
             for (int i=0; i<searchGranularity; i++)
             {
                 testPos += rayDirection * distance / searchGranularity;
-                BlockInfo testBlock = BlockAtPoint(testPos);
-                if (testBlock.type != BlockType.None)
+                BlockType testBlock = BlockAtPoint(testPos);
+                if (testBlock != BlockType.None)
                 {
                     hitPoint = testPos;
                     buildPoint = buildPos;
@@ -488,67 +474,53 @@ namespace Infiniminer
             }
         }
 
-        private void _AddBlock(BlockInfo block, BlockFaceDirection dir, int x2, int y2, int z2, BlockFaceDirection dir2)
+        private void _AddBlock(ushort x, ushort y, ushort z, BlockFaceDirection dir, BlockType type, int x2, int y2, int z2, BlockFaceDirection dir2)
         {
-            BlockInfo block2 = blockList[x2, y2, z2];
-            if (block2.type != BlockType.None && block.type != BlockType.TransA && block.type != BlockType.TransB && block2.type != BlockType.TransA && block2.type != BlockType.TransB)
-            {
-                HideQuad(block2, dir2);
-            }
+            BlockType type2 = blockList[x2, y2, z2];
+            if (type2 != BlockType.None && type != BlockType.TransA && type != BlockType.TransB && type2 != BlockType.TransA && type2 != BlockType.TransB)
+                HideQuad((ushort)x2, (ushort)y2, (ushort)z2, dir2, type2);
             else
-            {
-                ShowQuad(block, dir);
-            }
+                ShowQuad(x, y, z, dir, type);
         }
 
-        public void AddBlock(BlockInfo block)
+        public void AddBlock(ushort x, ushort y, ushort z, BlockType blockType)
         {
-            ushort x = block.pos.X;
-            ushort y = block.pos.Y;
-            ushort z = block.pos.Z;
-            if (configHelper.isOutOfBounds(x, y, z, gameInstance.propertyBag.MapSize))
-            {
+            if (x <= 0 || y <= 0 || z <= 0 || x >= gameInstance.propertyBag.MapSize - 1 || y >= gameInstance.propertyBag.MapSize - 1 || z >= gameInstance.propertyBag.MapSize - 1)
                 return;
-            }
 
-            blockList[x, y, z] = block;
+            blockList[x, y, z] = blockType;
 
-            _AddBlock(block, BlockFaceDirection.XIncreasing, x + 1, y, z, BlockFaceDirection.XDecreasing);
-            _AddBlock(block, BlockFaceDirection.XDecreasing, x - 1, y, z, BlockFaceDirection.XIncreasing);
-            _AddBlock(block, BlockFaceDirection.YIncreasing, x, y + 1, z, BlockFaceDirection.YDecreasing);
-            _AddBlock(block, BlockFaceDirection.YDecreasing, x, y - 1, z, BlockFaceDirection.YIncreasing);
-            _AddBlock(block, BlockFaceDirection.ZIncreasing, x, y, z + 1, BlockFaceDirection.ZDecreasing);
-            _AddBlock(block, BlockFaceDirection.ZDecreasing, x, y, z - 1, BlockFaceDirection.ZIncreasing);
+            _AddBlock(x, y, z, BlockFaceDirection.XIncreasing, blockType, x + 1, y, z, BlockFaceDirection.XDecreasing);
+            _AddBlock(x, y, z, BlockFaceDirection.XDecreasing, blockType, x - 1, y, z, BlockFaceDirection.XIncreasing);
+            _AddBlock(x, y, z, BlockFaceDirection.YIncreasing, blockType, x, y + 1, z, BlockFaceDirection.YDecreasing);
+            _AddBlock(x, y, z, BlockFaceDirection.YDecreasing, blockType, x, y - 1, z, BlockFaceDirection.YIncreasing);
+            _AddBlock(x, y, z, BlockFaceDirection.ZIncreasing, blockType, x, y, z + 1, BlockFaceDirection.ZDecreasing);
+            _AddBlock(x, y, z, BlockFaceDirection.ZDecreasing, blockType, x, y, z - 1, BlockFaceDirection.ZIncreasing);
         }
 
-        private void _RemoveBlock(BlockInfo block, BlockFaceDirection dir, int x2, int y2, int z2, BlockFaceDirection dir2)
+        private void _RemoveBlock(ushort x, ushort y, ushort z, BlockFaceDirection dir, int x2, int y2, int z2, BlockFaceDirection dir2)
         {
-            BlockInfo block2 = blockList[x2, y2, z2];
-            if (block2.type != BlockType.None && block.type != BlockType.TransA && block.type != BlockType.TransB && block2.type != BlockType.TransA && block2.type != BlockType.TransB)
-                ShowQuad(block2, dir2);
+            BlockType type = blockList[x, y, z];
+            BlockType type2 = blockList[x2, y2, z2];
+            if (type2 != BlockType.None && type != BlockType.TransA && type != BlockType.TransB && type2 != BlockType.TransA && type2 != BlockType.TransB)
+                ShowQuad((ushort)x2, (ushort)y2, (ushort)z2, dir2, type2);
             else
-                HideQuad(block, dir);
+                HideQuad(x, y, z, dir, type);
         }
 
-        public void RemoveBlock(BlockInfo block)
+        public void RemoveBlock(ushort x, ushort y, ushort z)
         {
-            ushort x = block.pos.X;
-            ushort y = block.pos.Y;
-            ushort z = block.pos.Z;
-            if (configHelper.isOutOfBounds(x, y, z, gameInstance.propertyBag.MapSize))
-            {
+            if (x <= 0 || y <= 0 || z <= 0 || x >= gameInstance.propertyBag.MapSize - 1 || y >= gameInstance.propertyBag.MapSize - 1 || z >= gameInstance.propertyBag.MapSize - 1)
                 return;
-            }
 
+            _RemoveBlock(x, y, z, BlockFaceDirection.XIncreasing, x + 1, y, z, BlockFaceDirection.XDecreasing);
+            _RemoveBlock(x, y, z, BlockFaceDirection.XDecreasing, x - 1, y, z, BlockFaceDirection.XIncreasing);
+            _RemoveBlock(x, y, z, BlockFaceDirection.YIncreasing, x, y + 1, z, BlockFaceDirection.YDecreasing);
+            _RemoveBlock(x, y, z, BlockFaceDirection.YDecreasing, x, y - 1, z, BlockFaceDirection.YIncreasing);
+            _RemoveBlock(x, y, z, BlockFaceDirection.ZIncreasing, x, y, z + 1, BlockFaceDirection.ZDecreasing);
+            _RemoveBlock(x, y, z, BlockFaceDirection.ZDecreasing, x, y, z - 1, BlockFaceDirection.ZIncreasing);
 
-            _RemoveBlock(block, BlockFaceDirection.XIncreasing, x + 1, y, z, BlockFaceDirection.XDecreasing);
-            _RemoveBlock(block, BlockFaceDirection.XDecreasing, x - 1, y, z, BlockFaceDirection.XIncreasing);
-            _RemoveBlock(block, BlockFaceDirection.YIncreasing, x, y + 1, z, BlockFaceDirection.YDecreasing);
-            _RemoveBlock(block, BlockFaceDirection.YDecreasing, x, y - 1, z, BlockFaceDirection.YIncreasing);
-            _RemoveBlock(block, BlockFaceDirection.ZIncreasing, x, y, z + 1, BlockFaceDirection.ZDecreasing);
-            _RemoveBlock(block, BlockFaceDirection.ZDecreasing, x, y, z - 1, BlockFaceDirection.ZIncreasing);
-
-            blockList[x, y, z] = BlockInfo.typeNone(block.pos);
+            blockList[x, y, z] = BlockType.None;
         }
 
         private uint EncodeBlockFace(ushort x, ushort y, ushort z, BlockFaceDirection faceDir)
@@ -585,17 +557,9 @@ namespace Infiniminer
             return new Vector3(x * REGIONSIZE + REGIONSIZE / 2, y * REGIONSIZE + REGIONSIZE / 2, z * REGIONSIZE + REGIONSIZE / 2);            
         }
 
-        private void ShowQuad(BlockInfo block, BlockFaceDirection faceDir)
+        private void ShowQuad(ushort x, ushort y, ushort z, BlockFaceDirection faceDir, BlockType blockType)
         {
-            BlockTexture blockTexture = Contexts.Texture(
-                block,
-                faceDir,
-                downloadList,
-                blockTextureMap
-            );
-            ushort x = block.pos.X;
-            ushort y = block.pos.Y;
-            ushort z = block.pos.Z;
+            BlockTexture blockTexture = Contexts.Texture(x, y, z, faceDir, blockType, downloadList, blockTextureMap);
             uint blockFace = EncodeBlockFace(x, y, z, faceDir);
             uint region = GetRegion(x, y, z);
             if (!faceMap[(byte)blockTexture, region].ContainsKey(blockFace))
@@ -603,12 +567,9 @@ namespace Infiniminer
             vertexListDirty[(byte)blockTexture, region] = true;
         }
 
-        private void HideQuad(BlockInfo block, BlockFaceDirection faceDir)
+        private void HideQuad(ushort x, ushort y, ushort z, BlockFaceDirection faceDir, BlockType blockType)
         {
-            ushort x = block.pos.X;
-            ushort y = block.pos.Y;
-            ushort z = block.pos.Z;
-            BlockTexture blockTexture = Contexts.Texture(block, faceDir, downloadList, blockTextureMap);
+            BlockTexture blockTexture = Contexts.Texture(x, y, z, faceDir, blockType, downloadList, blockTextureMap);
             uint blockFace = EncodeBlockFace(x, y, z, faceDir);
             uint region = GetRegion(x, y, z);
             if (faceMap[(byte)blockTexture, region].ContainsKey(blockFace))

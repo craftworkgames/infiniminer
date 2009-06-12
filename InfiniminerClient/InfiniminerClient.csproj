@@ -104,8 +104,6 @@
   <ItemGroup>
     <Compile Include="BloomEffect\BloomComponent.cs" />
     <Compile Include="BloomEffect\BloomSettings.cs" />
-    <Compile Include="Configuration\Blocks\BlockTypes.cs" />
-    <Compile Include="Configuration\Blocks\Info.cs" />
     <Compile Include="Configuration\GlobalVariables.cs" />
     <Compile Include="Configuration\configHelper.cs" />
     <Compile Include="Configuration\Messages.cs" />
