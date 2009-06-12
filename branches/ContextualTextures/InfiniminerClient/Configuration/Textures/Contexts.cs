@@ -14,14 +14,17 @@
         public const byte tunnelNWS         = 128;
         public const ushort tunnelCrossroad = 256;
 
-        public static BlockTexture Texture(ushort x, ushort y, ushort z, BlockFaceDirection faceDir, BlockType type, BlockType[, ,] downloadList, BlockTexture[,] blockTextureMap)
+        public static BlockTexture Texture(BlockInfo block, BlockFaceDirection faceDir, BlockInfo[, ,] downloadList, BlockTexture[,,] blockTextureMap)
         {
-            BlockTexture blockTexture = blockTextureMap[(byte)type, (byte)faceDir];
-            switch (type)
+            ushort x = block.pos.X;
+            ushort y = block.pos.Y;
+            ushort z = block.pos.Z;
+            BlockTexture blockTexture = blockTextureMap[(byte)block.type, (byte)block.team, (byte)faceDir];
+            switch (block.type)
             {
                 case BlockType.Dirt:
                     {
-                        if (configHelper.isAboveGround(x, y, z) && faceDir == BlockFaceDirection.YIncreasing && downloadList[x, y + 1, z] == BlockType.None)
+                        if (configHelper.isAboveGround(x, y, z) && faceDir == BlockFaceDirection.YIncreasing && downloadList[x, y + 1, z].type == BlockType.None)
                         {
                             blockTexture = BlockTexture.Grass;
                         }

@@ -1,6 +1,12 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 namespace Infiniminer
 {
+    public enum PlayerTeam : byte
+    {
+        None,
+        A,
+        B
+    }
     public class Team
     {
         private static Team[] _defaultTeams = new Team[3] {
@@ -11,6 +17,26 @@ namespace Infiniminer
         public static Team[] defaultTeams()
         {
             return _defaultTeams;
+        }
+        public static byte numTeams()
+        {
+            return (byte)PlayerTeam.B + 1;
+        }
+        private static PlayerTeam[] _playerTeams = null;
+        public static PlayerTeam[] playerTeams
+        {
+            get
+            {
+                if (_playerTeams == null)
+                {
+                    _playerTeams = new PlayerTeam[numTeams()];
+                    for (byte x = 0; x < numTeams(); ++x)
+                    {
+                        _playerTeams.SetValue((PlayerTeam)x, x);
+                    }
+                }
+                return _playerTeams;
+            }
         }
         public static string vs(Team[] teams)
         {

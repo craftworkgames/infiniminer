@@ -21,10 +21,10 @@ namespace Infiniminer
         private static Random randGen = new Random();
 
         // Create a cave system.
-        public static BlockType[, ,] GenerateCaveSystem(int size, bool includeLava)
+        public static BlockInfo[, ,] GenerateCaveSystem(byte size, bool includeLava)
         {
             float gradientStrength = (float)randGen.NextDouble();
-            BlockType[, ,] caveData = CaveGenerator.GenerateConstant(size, BlockType.Dirt);
+            BlockInfo[, ,] caveData = CaveGenerator.GenerateConstant(size, BlockType.Dirt);
 
             if (SessionVariables.sandboxMode == false)
             {
@@ -49,15 +49,25 @@ namespace Infiniminer
                         mountainNoise[x, y, z] = z < 3 ? 0 : Math.Min(1, z / (GlobalVariables.GROUND_LEVEL * 2));
             float[, ,] gradient = CaveGenerator.GenerateGradient(size);
             CaveGenerator.AddDataTo(ref mountainNoise, ref gradient, size, 0.1f, 0.9f);
-            BlockType[, ,] mountainData = CaveGenerator.GenerateConstant(size, BlockType.None);
+            BlockInfo[, ,] mountainData = CaveGenerator.GenerateConstant(size, BlockType.None);
             int numMountains = randGen.Next(size, size * 3);
             for (int i = 0; i < numMountains; i++)
-                CaveGenerator.PaintWithRandomWalk(ref mountainData, ref mountainNoise, size, randGen.Next(2, 3), BlockType.Dirt, false);
+            {
+                CaveGenerator.PaintWithRandomWalk(ref mountainData, ref mountainNoise, size, (byte)randGen.Next(2, 3), BlockType.Dirt, false);
+            }
             for (int x = 0; x < size; x++)
+            {
                 for (int y = 0; y < size; y++)
+                {
                     for (int z = 0; z <= GlobalVariables.GROUND_LEVEL; z++)
-                        if (mountainData[x, y, z] == BlockType.None)
-                            caveData[x, y, z] = BlockType.None;
+                    {
+                        if (mountainData[x, y, z].type == BlockType.None)
+                        {
+                            caveData[x, y, z] = mountainData[x, y, z];
+                        }
+                    }
+                }
+            }
             
             // Carve some caves into the ground.
             float[, ,] caveNoise = CaveGenerator.GeneratePerlinNoise(32);
@@ -66,13 +76,13 @@ namespace Infiniminer
             CaveGenerator.AddDataTo(ref caveNoise, ref gradient, size, 1 - gradientStrength, gradientStrength);
             int cavesToCarve = randGen.Next(size / 8, size / 2);
             for (int i = 0; i < cavesToCarve; i++)
-                CaveGenerator.PaintWithRandomWalk(ref caveData, ref caveNoise, size, randGen.Next(1, 2), BlockType.None, false);
+                CaveGenerator.PaintWithRandomWalk(ref caveData, ref caveNoise, size, (byte)randGen.Next(1, 2), BlockType.None, false);
 
             // Carve the map into a sphere.
             float[, ,] sphereGradient = CaveGenerator.GenerateRadialGradient(size);
             cavesToCarve = randGen.Next(size / 8, size / 2);
             for (int i = 0; i < cavesToCarve; i++)
-                CaveGenerator.PaintWithRandomWalk(ref caveData, ref sphereGradient, size, randGen.Next(1, 2), BlockType.None, true);
+                CaveGenerator.PaintWithRandomWalk(ref caveData, ref sphereGradient, size, (byte)randGen.Next(1, 2), BlockType.None, true);
 
             // Add rocks.
             AddRocks(ref caveData, size);
@@ -114,14 +124,14 @@ namespace Infiniminer
         //    data[x, y, z] = blockType;
         //}
 
-        public static void AddRocks(ref BlockType[, ,] data, int size)
+        public static void AddRocks(ref BlockInfo[, ,] data, ushort size)
         {
             int numRocks = randGen.Next(size, 2*size);
             CaveInfo += " numRocks=" + numRocks;
             for (int i = 0; i < numRocks; i++)
             {
-                int x = randGen.Next(0, size);
-                int y = randGen.Next(0, size);
+                ushort x = (ushort)randGen.Next(0, size);
+                ushort y = (ushort)randGen.Next(0, size);
 
                 // generate a random z-value weighted toward a deep depth
                 float zf = 0;
@@ -129,20 +139,20 @@ namespace Infiniminer
                     zf += (float)randGen.NextDouble();
                 zf /= 2;
                 zf = 1 - Math.Abs(zf - 1);
-                int z = (int)(zf * size);
+                ushort z = (ushort)(zf * size);
 
-                int rockSize = (int)((randGen.NextDouble() + randGen.NextDouble() + randGen.NextDouble() + randGen.NextDouble()) / 4 * 8);
+                ushort rockSize = (ushort)((randGen.NextDouble() + randGen.NextDouble() + randGen.NextDouble() + randGen.NextDouble()) / 4 * 8);
 
-                PaintAtPoint(ref data, x, y, z, size, rockSize, BlockType.Rock);
+                PaintAtPoint(ref data, x, y, z, size, (byte)rockSize, BlockType.Rock);
             }
         }
-        public static void AddLava(ref BlockType[, ,] data, int size)
+        public static void AddLava(ref BlockInfo[, ,] data, ushort size)
         {
             int numFlows = randGen.Next(size / 16, size / 2);
             while (numFlows > 0)
             {
-                int x = randGen.Next(0, size);
-                int y = randGen.Next(0, size);
+                ushort x = (ushort)randGen.Next(0, size);
+                ushort y = (ushort)randGen.Next(0, size);
 
                 //switch (randGen.Next(0, 4))
                 //{
@@ -158,15 +168,15 @@ namespace Infiniminer
                     zf += (float)randGen.NextDouble();
                 zf /= 2;
                 zf = 1 - Math.Abs(zf - 1);
-                int z = (int)(zf * size);
+                ushort z = (ushort)(zf * size);
 
-                if (data[x, y, z] == BlockType.None && z+1 < size-1)
+                if (data[x, y, z].type == BlockType.None && z+1 < size-1)
                 {
-                    data[x, y, z] = BlockType.Rock;
-                    data[x, y, z + 1] = BlockType.Lava;
-                    if (InfiniminerServer.lavaAtGroundLevel == 1 && data[x, y, GlobalVariables.GROUND_LEVEL] == BlockType.None)
+                    BlockInfo.changeType(ref data[x, y, z], BlockType.Rock);
+                    BlockInfo.changeType(ref data[x, y, z + 1], BlockType.Lava);
+                    if (InfiniminerServer.lavaAtGroundLevel == 1 && data[x, y, GlobalVariables.GROUND_LEVEL].type == BlockType.None)
                     {
-                        data[x, y, GlobalVariables.GROUND_LEVEL] = BlockType.Lava;
+                        BlockInfo.changeType(ref data[x, y, GlobalVariables.GROUND_LEVEL], BlockType.Lava);
                     }
                     numFlows -= 1;
                 }
@@ -177,9 +187,9 @@ namespace Infiniminer
                 {
                     for (ushort y = 0; y < size; ++y)
                     {
-                        if (data[x, y, GlobalVariables.GROUND_LEVEL] == BlockType.None)
+                        if (data[x, y, GlobalVariables.GROUND_LEVEL].type == BlockType.None)
                         {
-                            data[x, y, GlobalVariables.GROUND_LEVEL] = BlockType.Lava;
+                            BlockInfo.changeType(ref data[x, y, GlobalVariables.GROUND_LEVEL], BlockType.Lava);
                         }
                     }
                 }
@@ -187,7 +197,7 @@ namespace Infiniminer
         }
 
 
-        public static void AddDiamond(ref BlockType[, ,] data, int size)
+        public static void AddDiamond(ref BlockInfo[, ,] data, ushort size)
         {
             CaveInfo += "diamond";
 
@@ -205,12 +215,12 @@ namespace Infiniminer
                 zf = 1 - Math.Abs(zf - 1);
                 int z = (int)(zf * size);
 
-                data[x, y, z] = BlockType.Diamond;
+                BlockInfo.changeType(ref data[x, y, z], BlockType.Diamond);
             }
         }
 
         // Gold appears in fairly numerous streaks, located at medium depths.
-        public static void AddGold(ref BlockType[, ,] data, int size)
+        public static void AddGold(ref BlockInfo[, ,] data, byte size)
         {
             CaveInfo += "gold";
 
@@ -240,8 +250,10 @@ namespace Infiniminer
                     x += dx;
                     y += dy;
                     z += dz;
-                    if (x >= 0 && y >= 0 && z >= 0 && x < size && y < size && z < size)
-                        data[(int)x, (int)y, (int)z] = BlockType.Gold;
+                    if (configHelper.isOutOfBounds((int)x, (int)y, (int)z, size) == false)
+                    {
+                        BlockInfo.changeType(ref data[(ushort)x, (ushort)y, (ushort)z], BlockType.Gold);
+                    }
                     int tx = 0, ty = 0, tz = 0;
                     switch (randGen.Next(0, 3))
                     {
@@ -255,8 +267,10 @@ namespace Infiniminer
                             tz += 1;
                             break;
                     }
-                    if (x + tx >= 0 && y + ty>= 0 && z+tz >= 0 && x+tx < size && y+ty < size && z+tz < size)
-                        data[(int)x+tx, (int)y+ty, (int)z+tz] = BlockType.Gold;
+                    if (configHelper.isOutOfBounds((int)(x + tx), (int)(y + ty), (int)(z + tz), size) == false)
+                    {
+                        BlockInfo.changeType(ref data[(ushort)(x + tx), (ushort)(y + ty), (ushort)(z + tz)], BlockType.Gold);
+                    }
                 }
             }
         }
@@ -290,7 +304,7 @@ namespace Infiniminer
         }
 
         // Does a random walk of noiseData, setting cells to 0 in caveData in the process.
-        public static void PaintWithRandomWalk(ref BlockType[, ,] caveData, ref float[, ,] noiseData, int size, int paintRadius, BlockType paintValue, bool dontStopAtEdge)
+        public static void PaintWithRandomWalk(ref BlockInfo[, ,] caveData, ref float[, ,] noiseData, byte size, byte paintRadius, BlockType paintValue, bool dontStopAtEdge)
         {
             int x = randGen.Next(0, size);
             int y = randGen.Next(0, size);
@@ -305,7 +319,7 @@ namespace Infiniminer
             {
                 float oldNoise = noiseData[x, y, z];
 
-                PaintAtPoint(ref caveData, x, y, z, size, paintRadius+1, paintValue);
+                PaintAtPoint(ref caveData, (ushort)x, (ushort)y, (ushort)z, size, (byte)(paintRadius+1), paintValue);
                 int dx = randGen.Next(0, paintRadius * 2 + 1) - paintRadius;
                 int dy = randGen.Next(0, paintRadius * 2 + 1) - paintRadius;
                 int dz = randGen.Next(0, paintRadius * 2 + 1) - paintRadius;
@@ -338,7 +352,7 @@ namespace Infiniminer
                 // If we're jumping to a higher value on the noise gradient, move twice as far.
                 if (newNoise > oldNoise)
                 {
-                    PaintAtPoint(ref caveData, x, y, z, size, paintRadius+1, paintValue);
+                    PaintAtPoint(ref caveData, (ushort)x, (ushort)y, (ushort)z, size, (byte)(paintRadius + 1), paintValue);
                     x += dx;
                     y += dy;
                     z += dz;
@@ -365,24 +379,44 @@ namespace Infiniminer
             }
         }
 
-        public static void PaintAtPoint(ref BlockType[, ,] caveData, int x, int y, int z, int size, int paintRadius, BlockType paintValue)
+        public static void PaintAtPoint(ref BlockInfo[, ,] caveData, ushort x, ushort y, ushort z, ushort size, byte paintRadius, BlockType paintValue)
         {
+            Point3D pos = new Point3D { X = 0, Y = 0, Z = 0 };
             for (int dx = -paintRadius; dx <= paintRadius; dx++)
+            {
                 for (int dy = -paintRadius; dy <= paintRadius; dy++)
+                {
                     for (int dz = -paintRadius; dz <= paintRadius; dz++)
-                        if (x+dx >= 0 && y+dy>= 0 && z+dz >= 0 && x+dx < size && y+dy < size && z+dz < size)
-                            if (dx*dx+dy*dy+dz*dz<paintRadius*paintRadius)
-                                caveData[x + dx, y + dy, z + dz] = paintValue;
+                    {
+                        if (x + dx >= 0 && y + dy >= 0 && z + dz >= 0 && x + dx < size && y + dy < size && z + dz < size)
+                        {
+                            if (dx * dx + dy * dy + dz * dz < paintRadius * paintRadius)
+                            {
+                                pos = new Point3D { X = (ushort)(x + dx), Y = (ushort)(y + dy), Z = (ushort)(z + dz) };
+                                caveData[x + dx, y + dy, z + dz] = new BlockInfo(pos,paintValue,PlayerTeam.None);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         // Generates a set of constant values.
-        public static BlockType[, ,] GenerateConstant(int size, BlockType value)
+        public static BlockInfo[, ,] GenerateConstant(ushort size, BlockType value)
         {
-            BlockType[, ,] data = new BlockType[size, size, size];
-            for (int x = 0; x < size; x++)
-                for (int y = 0; y < size; y++)
-                    for (int z = 0; z < size; z++)
-                        data[x, y, z] = value;
+            BlockInfo[, ,] data = new BlockInfo[size, size, size];
+            Point3D pos = new Point3D{X=0,Y=0,Z=0};
+            for (ushort x = 0; x < size; x++)
+            {
+                for (ushort y = 0; y < size; y++)
+                {
+                    for (ushort z = 0; z < size; z++)
+                    {
+                        pos = new Point3D{X=x,Y=y,Z=z};
+                        data[x, y, z] = (value == BlockType.Dirt) ? BlockInfo.typeDirt(pos) : BlockInfo.typeNone(pos);
+                    }
+                }
+            }
             return data;
         }
 
