@@ -40,6 +40,7 @@ namespace Infiniminer
         BeaconA,
         BeaconB,
         Grass,
+        DirtGrass,
         TransA,   // THESE MUST BE THE LAST TWO TEXTURES-- why ? ~ Marv.
         TransB,
         MAXIMUM

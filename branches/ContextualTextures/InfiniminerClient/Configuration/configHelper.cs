@@ -153,11 +153,15 @@ namespace Infiniminer
         }
         public static bool isAboveGround(ushort x, ushort y, ushort z)
         {
-            return y >= (ushort)(
-                    GlobalVariables.MAPSIZE - (
-                    GlobalVariables.GROUND_LEVEL + 2
-                )
-            );
+            return (y + 1) >= (ushort)(GlobalVariables.MAPSIZE - (GlobalVariables.GROUND_LEVEL));
+        }
+        public static bool isOutOfBounds(int x, int y, int z)
+        {
+            return (x <= 0 || y <= 0 || z <= 0 || x >= GlobalVariables.MAPSIZE || y >= GlobalVariables.MAPSIZE || z >= GlobalVariables.MAPSIZE);
+        }
+        public static bool isGround(ushort x, ushort y, ushort z)
+        {
+            return y == (ushort)(GlobalVariables.MAPSIZE - (GlobalVariables.GROUND_LEVEL + 2));
         }
     }
 }
