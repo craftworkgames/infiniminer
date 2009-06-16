@@ -26,11 +26,12 @@ namespace Infiniminer.States
         SpriteFont uiFont;
         bool directConnectIPEnter = false;
         string directConnectIP = "";
-        KeyMap keyMap;
+        //KeyMap keyMap;
 
-        ClickRegion[] clkMenuServer = new ClickRegion[2] {
-	        new ClickRegion(new Rectangle(763,713,243,42), "refresh"),
-            new ClickRegion(new Rectangle(0,713,425,42), "direct")
+        ClickRegion[] clkMenuServer = new ClickRegion[3] {
+            new ClickRegion(new Rectangle(0,713,425,42), "direct"),
+            new ClickRegion(new Rectangle(456,713,262,42),"settings"),
+	        new ClickRegion(new Rectangle(763,713,243,42), "refresh")
         };
 
         public override void OnEnter(string oldState)
@@ -47,7 +48,7 @@ namespace Infiniminer.States
                                      1024);
 
             uiFont = _SM.Content.Load<SpriteFont>("font_04b08");
-            keyMap = new KeyMap();
+            //keyMap = new KeyMap();
             
             serverList = (_SM as InfiniminerGame).EnumerateServers(0.5f);
         }
@@ -81,17 +82,29 @@ namespace Infiniminer.States
                 {
                     int textWidth = (int)(uiFont.MeasureString(server.GetServerDesc()).X);
                     descWidths.Add(textWidth+30);
-                    spriteBatch.DrawString(uiFont, server.GetServerDesc(), new Vector2(_SM.GraphicsDevice.Viewport.Width / 2 - textWidth / 2, drawRect.Y + drawY), Color.White);
+                    spriteBatch.DrawString(uiFont, server.GetServerDesc(), new Vector2(_SM.GraphicsDevice.Viewport.Width / 2 - textWidth / 2, drawRect.Y + drawY), !server.lanServer && server.numPlayers == server.maxPlayers ? new Color(0.7f, 0.7f, 0.7f) : Color.White);
                     drawY += 25;
                 }
             }
 
-            spriteBatch.DrawString(uiFont, InfiniminerGame.INFINIMINER_VERSION, new Vector2(10, _SM.GraphicsDevice.Viewport.Height - 20), Color.White);
+            spriteBatch.DrawString(uiFont, Defines.INFINIMINER_VERSION, new Vector2(10, _SM.GraphicsDevice.Viewport.Height - 20), Color.White);
 
             if (directConnectIPEnter)
                 spriteBatch.DrawString(uiFont, "ENTER IP: " + directConnectIP, new Vector2(drawRect.X + 30, drawRect.Y + 690), Color.White);
 
             spriteBatch.End();
+        }
+
+        public override void OnCharEntered(EventInput.CharacterEventArgs e)
+        {
+            if ((int)e.Character < 32 || (int)e.Character > 126) //From space to tilde
+                return; //Do nothing
+
+            //Only respond if entering an ip and control is not pressed
+            if (directConnectIPEnter && !(Keyboard.GetState().IsKeyDown(Keys.LeftControl) || Keyboard.GetState().IsKeyDown(Keys.RightControl)))
+            {
+                directConnectIP += e.Character;
+            }
         }
 
         public override void OnKeyDown(Keys key)
@@ -135,6 +148,7 @@ namespace Infiniminer.States
                     }
                     if (connectIp != null)                   
                     {
+                        (_SM as InfiniminerGame).propertyBag.serverName = directConnectIP;
                         (_SM as InfiniminerGame).JoinGame(new IPEndPoint(connectIp, 5565));
                         nextState = "Infiniminer.States.LoadingState";
                     }
@@ -147,14 +161,12 @@ namespace Infiniminer.States
                     {
                         directConnectIP += System.Windows.Forms.Clipboard.GetText();
                     }
-                    catch (Exception e)
-                    {
-                    }
+                    catch { }
                 }
-                else if (keyMap.IsKeyMapped(key))
+                /*else if (keyMap.IsKeyMapped(key))
                 {
                     directConnectIP += keyMap.TranslateKey(key, false);
-                }
+                }*/
             }
             else
             {
@@ -180,6 +192,7 @@ namespace Infiniminer.States
                     int distanceFromCenter = Math.Abs(_SM.GraphicsDevice.Viewport.Width / 2 - x);
                     if (distanceFromCenter < descWidths[serverIndex] / 2)
                     {
+                        (_SM as InfiniminerGame).propertyBag.serverName = serverList[serverIndex].serverName;
                         (_SM as InfiniminerGame).JoinGame(serverList[serverIndex].ipEndPoint);
                         nextState = "Infiniminer.States.LoadingState";
                         _P.PlaySound(InfiniminerSound.ClickHigh);
@@ -197,6 +210,10 @@ namespace Infiniminer.States
 
                     case "direct":
                         directConnectIPEnter = true;
+                        _P.PlaySound(InfiniminerSound.ClickHigh);
+                        break;
+                    case "settings":
+                        nextState = "Infiniminer.States.SettingsState";
                         _P.PlaySound(InfiniminerSound.ClickHigh);
                         break;
                 }

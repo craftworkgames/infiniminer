@@ -16,3 +16,30 @@ orefactor = 10
 
 # If this flag is true, all blocks will be free and the game will be unwinnable.
 sandbox = false
+
+# If true, tnt will just disappear instead of exploding
+notnt = false
+
+# If true, tnt explosions will be spherical - currently not implemented
+sphericaltnt = true
+
+# If true, lava will be aggressive - it won't need solid ground to spread!
+insanelava = false
+
+# If true, lava will spread to shock blocks to the side and above - allows for "piping" lava to new areas or flooding places - Fish's idea
+shockspreadslava = true
+
+# If true, road blocks above lava will absorb the lava - Fish's idea
+roadabsorbs = true
+
+# If true, the public server list will be notified immediately when your server goes up - otherwise it will take a couple mintes / you can use announce
+autoannounce = true
+
+# If set, a blank load command will load this level
+levelname = autoBK.lvl
+
+# If true, the above level will be loaded whenever the server is started
+autoload = false
+
+# If set, this message will be sent to newcomers - [name] will be replace with their name
+greeter = Welcome [name] to my server!

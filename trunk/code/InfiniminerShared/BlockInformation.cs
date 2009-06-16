@@ -68,10 +68,23 @@ namespace Infiniminer
         DirtSign,
         Lava,
         Road,
+        RoadTop,
+        RoadBottom,
         BeaconRed,
         BeaconBlue,
         TransRed,   // THESE MUST BE THE LAST TWO TEXTURES
         TransBlue,
+        MAXIMUM
+    }
+
+    public enum BlockFaceDirection : byte
+    {
+        XIncreasing,
+        XDecreasing,
+        YIncreasing,
+        YDecreasing,
+        ZIncreasing,
+        ZDecreasing,
         MAXIMUM
     }
 
@@ -111,6 +124,11 @@ namespace Infiniminer
         }
 
         public static BlockTexture GetTexture(BlockType blockType, BlockFaceDirection faceDir)
+        {
+            return GetTexture(blockType, faceDir, BlockType.None);
+        }
+
+        public static BlockTexture GetTexture(BlockType blockType, BlockFaceDirection faceDir, BlockType blockAbove)
         {
             switch (blockType)
             {
@@ -169,6 +187,10 @@ namespace Infiniminer
                     break;
 
                 case BlockType.Road:
+                    if (faceDir == BlockFaceDirection.YIncreasing)
+                        return BlockTexture.RoadTop;
+                    else if (faceDir == BlockFaceDirection.YDecreasing||blockAbove!=BlockType.None) //Looks better but won't work with current graphics setup...
+                        return BlockTexture.RoadBottom;
                     return BlockTexture.Road;
 
                 case BlockType.Shock:

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Infiniminer;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Lidgren.Network;
@@ -13,8 +14,32 @@ using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Net;
 using Microsoft.Xna.Framework.Storage;
 
-namespace Infiniminer
+namespace Infiniminer1
 {
+    public enum PlayerClass
+    {
+        Prospector,
+        Miner,
+        Engineer,
+        Sapper
+    }
+
+    public enum PlayerTools
+    {
+        Pickaxe,
+        ConstructionGun,
+        DeconstructionGun,
+        ProspectingRadar,
+        Detonator,
+    }
+
+    public enum PlayerTeam
+    {
+        None,
+        Red,
+        Blue
+    }
+
     public class Player
     {
         public bool Kicked = false; // set to true when a player is kicked to let other clients know they were kicked

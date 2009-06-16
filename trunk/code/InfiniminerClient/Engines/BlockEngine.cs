@@ -13,17 +13,6 @@ using Microsoft.Xna.Framework.Storage;
 
 namespace Infiniminer
 {
-    public enum BlockFaceDirection : byte
-    {
-        XIncreasing,
-        XDecreasing,
-        YIncreasing,
-        YDecreasing,
-        ZIncreasing,
-        ZDecreasing,
-        MAXIMUM
-    }
-
     [Serializable]
     public struct VertexPositionTextureShade
     {
@@ -85,7 +74,7 @@ namespace Infiniminer
 
     public class BlockEngine
     {
-        BlockType[,,] blockList = null;
+        public BlockType[,,] blockList = null;
         public BlockType[, ,] downloadList = null;
         Dictionary<uint,bool>[,] faceMap = null;
         BlockTexture[,] blockTextureMap = null;
@@ -179,6 +168,8 @@ namespace Infiniminer
             blockTextures[(byte)BlockTexture.TeleBottom] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_teleporter_bottom"));
             blockTextures[(byte)BlockTexture.Lava] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_lava"));
             blockTextures[(byte)BlockTexture.Road] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_road"));
+            blockTextures[(byte)BlockTexture.RoadTop] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_road_top"));
+            blockTextures[(byte)BlockTexture.RoadBottom] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_road_bottom"));
             blockTextures[(byte)BlockTexture.BeaconRed] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_beacon_top_red"));
             blockTextures[(byte)BlockTexture.BeaconBlue] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_beacon_top_blue"));
             blockTextures[(byte)BlockTexture.TransRed] = new IMTexture(gameInstance.Content.Load<Texture2D>("blocks/tex_block_trans_red"));

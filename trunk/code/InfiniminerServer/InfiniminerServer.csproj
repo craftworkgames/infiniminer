@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{265DD692-3652-4905-BC3E-22AB10783A3D}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -52,13 +52,14 @@
     <Compile Include="CaveGenerator.cs" />
     <Compile Include="InfiniminerNetServer.cs" />
     <Compile Include="InfiniminerServer.cs" />
+    <Compile Include="MapSender.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\InfiniminerClient\InfiniminerClient.csproj">
-      <Project>{F5524591-8592-43F7-B4A8-E6FCC52F2A7B}</Project>
-      <Name>InfiniminerClient</Name>
+    <ProjectReference Include="..\InfiniminerShared\InfiniminerShared.csproj">
+      <Project>{CC122120-E018-43DA-B92D-EC368AA0CFF5}</Project>
+      <Name>InfiniminerShared</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

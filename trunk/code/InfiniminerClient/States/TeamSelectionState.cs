@@ -25,7 +25,8 @@ namespace Infiniminer.States
 
         ClickRegion[] clkTeamMenu = new ClickRegion[2] {
 	        new ClickRegion(new Rectangle(229,156,572,190), "red"), 
-	        new ClickRegion(new Rectangle(135,424,761,181), "blue")
+	        new ClickRegion(new Rectangle(135,424,761,181), "blue")//,
+            //new ClickRegion(new Rectangle(0,0,0,0), "cancel")
         };
 
         public override void OnEnter(string oldState)
@@ -82,8 +83,8 @@ namespace Infiniminer.States
             SpriteBatch spriteBatch = new SpriteBatch(graphicsDevice);
             spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Deferred, SaveStateMode.SaveState);
             spriteBatch.Draw(texMenu, drawRect, Color.White);
-            QuickDrawText(spriteBatch, "" + redTeamCount + " PLAYERS", 360, InfiniminerGame.IM_RED);
-            QuickDrawText(spriteBatch, "" + blueTeamCount + " PLAYERS", 620, InfiniminerGame.IM_BLUE);
+            QuickDrawText(spriteBatch, "" + redTeamCount + " PLAYERS", 360, _P.red);//Defines.IM_RED);
+            QuickDrawText(spriteBatch, "" + blueTeamCount + " PLAYERS", 620, _P.blue);//Defines.IM_BLUE);
             spriteBatch.End();
         }
 
@@ -123,6 +124,13 @@ namespace Infiniminer.States
                         nextState = "Infiniminer.States.ClassSelectionState";
                     }
                     _P.PlaySound(InfiniminerSound.ClickHigh);
+                    break;
+                case "cancel":
+                    if (canCancel)
+                    {
+                        nextState = "Infiniminer.States.MainGameState";
+                        _P.PlaySound(InfiniminerSound.ClickHigh);
+                    }
                     break;
             }
         }

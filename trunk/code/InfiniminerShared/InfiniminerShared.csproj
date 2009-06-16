@@ -1,19 +1,19 @@
 ﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
-    <ProjectGuid>{F5524591-8592-43F7-B4A8-E6FCC52F2A7B}</ProjectGuid>
+    <ProjectGuid>{CC122120-E018-43DA-B92D-EC368AA0CFF5}</ProjectGuid>
     <ProjectTypeGuids>{6D335F3A-9D43-41b4-9D22-F6F17C4BE596};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Infiniminer</RootNamespace>
-    <AssemblyName>Infiniminer</AssemblyName>
+    <RootNamespace>InfiniminerShared</RootNamespace>
+    <AssemblyName>InfiniminerShared</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <XnaFrameworkVersion>v3.0</XnaFrameworkVersion>
     <XnaPlatform>Windows</XnaPlatform>
-    <XnaCrossPlatformGroupID>4bc950fa-53af-4657-abe1-2a90a69c6960</XnaCrossPlatformGroupID>
-    <ApplicationIcon>Game.ico</ApplicationIcon>
-    <Thumbnail>GameThumbnail.png</Thumbnail>
+    <XnaCrossPlatformGroupID>ab66b5e0-6d1e-4c31-96b4-68198862338d</XnaCrossPlatformGroupID>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -34,7 +34,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\bin\</OutputPath>
+    <OutputPath>bin\x86\Debug</OutputPath>
     <DefineConstants>DEBUG;TRACE;WINDOWS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -46,7 +46,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\bin\</OutputPath>
+    <OutputPath>bin\x86\Release</OutputPath>
     <DefineConstants>TRACE;WINDOWS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -79,57 +79,36 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml">
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BloomEffect\BloomComponent.cs" />
-    <Compile Include="BloomEffect\BloomSettings.cs" />
-    <Compile Include="Engines\BlockEngine.cs" />
-    <Compile Include="Camera.cs" />
-    <Compile Include="ClickRegion.cs" />
-    <Compile Include="Engines\ParticleEngine.cs" />
-    <Compile Include="EventInput.cs" />
-    <Compile Include="InfiniminerGame.cs" />
-    <Compile Include="Engines\InterfaceEngine.cs" />
-    <Compile Include="InterfaceItems\InterfaceButtonToggle.cs" />
-    <Compile Include="InterfaceItems\InterfaceElement.cs" />
-    <Compile Include="InterfaceItems\InterfaceLabel.cs" />
-    <Compile Include="InterfaceItems\InterfaceSlider.cs" />
-    <Compile Include="InterfaceItems\InterfaceTextInput.cs" />
-    <Compile Include="KeyBindHandler.cs" />
-    <Compile Include="KeyMap.cs" />
-    <Compile Include="Engines\PlayerEngine.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="BlockInformation.cs" />
+    <Compile Include="DatafileLoader.cs" />
+    <Compile Include="DataFileWriter.cs" />
+    <Compile Include="GeneralEnums.cs" />
+    <Compile Include="HTTPRequest.cs" />
+    <Compile Include="Player.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyBag.cs" />
-    <Compile Include="ServerInformation.cs" />
-    <Compile Include="Engines\SkyboxEngine.cs" />
-    <Compile Include="StateMasher\State.cs" />
-    <Compile Include="StateMasher\StateMachine.cs" />
-    <Compile Include="States\ClassSelectionState.cs" />
-    <Compile Include="States\LoadingState.cs" />
-    <Compile Include="States\MainGameState.cs" />
-    <Compile Include="States\ServerBrowserState.cs" />
-    <Compile Include="States\SettingsState.cs" />
-    <Compile Include="States\TeamSelectionState.cs" />
-    <Compile Include="States\TitleState.cs" />
-    <Compile Include="TestGeometryRenderer.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Game.ico" />
-    <Content Include="GameThumbnail.png" />
+    <Compile Include="SharedConstants.cs" />
+    <Compile Include="SpriteModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <NestedContentProject Include="Content\Content.contentproj">
-      <Project>73b2e7b0-f8ba-4828-a2ff-063cad089d6d</Project>
+      <Project>ff957c83-3097-421b-b2ca-422112d59e21</Project>
       <Visible>False</Visible>
     </NestedContentProject>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
       <Visible>False</Visible>
       <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
@@ -143,6 +122,11 @@
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
@@ -155,12 +139,6 @@
       <ProductName>Microsoft XNA Framework Redistributable 3.0</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\InfiniminerShared\InfiniminerShared.csproj">
-      <Project>{CC122120-E018-43DA-B92D-EC368AA0CFF5}</Project>
-      <Name>InfiniminerShared</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
