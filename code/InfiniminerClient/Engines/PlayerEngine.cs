@@ -76,19 +76,35 @@ namespace Infiniminer
             {
                 if (p.Alive && p.ID != _P.playerMyId)
                 {
-                    // Figure out what text we should draw on the player - only for teammates.
+                    // Figure out what text we should draw on the player - only for teammates and nearby enemies
                     string playerText = "";
+                    bool continueDraw=false;
                     if (p.ID != _P.playerMyId && p.Team == _P.playerTeam)
+                        continueDraw = true;
+                    else
+                    {
+                        Vector3 diff = (p.Position -_P.playerPosition);
+                        float len = diff.Length();
+                        diff.Normalize();
+                        if (len<=15){
+                            Vector3 hit = Vector3.Zero;
+                            Vector3 build = Vector3.Zero;
+                            gameInstance.propertyBag.blockEngine.RayCollision(_P.playerPosition + new Vector3(0f, 0.1f, 0f), diff, len, 25, ref hit, ref build);
+                            if (hit == Vector3.Zero) //Why is this reversed?
+                                continueDraw = true;
+                        }
+                    }
+                    if (continueDraw)//p.ID != _P.playerMyId && p.Team == _P.playerTeam)
                     {
                         playerText = p.Handle;
                         if (p.Ping > 0)
                             playerText = "*** " + playerText + " ***";
-                    }
 
-                    p.SpriteModel.DrawText(_P.playerCamera.ViewMatrix,
-                                           _P.playerCamera.ProjectionMatrix,
-                                           p.Position - Vector3.UnitY * 1.5f,
-                                           playerText);
+                        p.SpriteModel.DrawText(_P.playerCamera.ViewMatrix,
+                                               _P.playerCamera.ProjectionMatrix,
+                                               p.Position - Vector3.UnitY * 1.5f,
+                                               playerText, p.Team == PlayerTeam.Blue ? _P.blue : _P.red);//Defines.IM_BLUE : Defines.IM_RED);
+                    }
                 }
             }
         }

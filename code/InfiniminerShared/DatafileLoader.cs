@@ -38,10 +38,7 @@ namespace Infiniminer
                 sr.Close();
                 file.Close();
             }
-            catch (Exception e)
-            {
-
-            }
+            catch { }
         }
     }
 }

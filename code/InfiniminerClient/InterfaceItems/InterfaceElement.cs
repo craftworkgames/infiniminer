@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 
 using System.Text;
+using System.Diagnostics;
+using StateMasher;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -13,32 +15,26 @@ using Microsoft.Xna.Framework.Net;
 using Microsoft.Xna.Framework.Storage;
 using Infiniminer;
 
-namespace StateMasher
+namespace InterfaceItems
 {
-    public class State
+    class InterfaceElement
     {
-        public StateMachine _SM = null;
-        public Infiniminer.PropertyBag _P = null;
+        public bool visible = false;
+        public bool enabled = false;
+        public string text = "";
+        //public Vector2 position = Vector2.Zero;
+        public Rectangle size = Rectangle.Empty;
+        public SpriteFont uiFont;
+        public Infiniminer.PropertyBag _P;
 
-        public virtual void OnEnter(string oldState)
+        public InterfaceElement()
         {
         }
 
-        public virtual void OnLeave(string newState)
+        public InterfaceElement(Infiniminer.InfiniminerGame gameInstance, Infiniminer.PropertyBag pb)
         {
-        }
-
-        public virtual string OnUpdate(GameTime gameTime, KeyboardState keyState, MouseState mouseState)
-        {
-            return null;
-        }
-
-        public virtual void OnRenderAtEnter(GraphicsDevice graphicsDevice)
-        {
-        }
-
-        public virtual void OnRenderAtUpdate(GraphicsDevice graphicsDevice, GameTime gameTime)
-        {
+            uiFont = gameInstance.Content.Load<SpriteFont>("font_04b08");
+            _P = pb;
         }
 
         public virtual void OnCharEntered(EventInput.CharacterEventArgs e)
@@ -65,12 +61,9 @@ namespace StateMasher
         {
         }
 
-        //public virtual void OnStatusChange(NetConnectionStatus status)
-        //{
-        //}
+        public virtual void Render(GraphicsDevice graphicsDevice)
+        {
 
-        //public virtual void OnPacket(NetBuffer buffer, NetMessageType type)
-        //{
-        //}
+        }
     }
 }

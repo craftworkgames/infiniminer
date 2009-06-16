@@ -19,7 +19,7 @@ namespace Infiniminer
         InfiniminerGame gameInstance;
         PropertyBag _P;
         SpriteBatch spriteBatch;
-        SpriteFont uiFont, radarFont;
+        public SpriteFont uiFont, radarFont;
         Rectangle drawRect;
 
         Texture2D texCrosshairs, texBlank, texHelp;
@@ -113,6 +113,10 @@ namespace Infiniminer
                 msg.timestamp -= (float)gameTime.ElapsedGameTime.TotalSeconds;
             _P.chatBuffer.RemoveAll(MessageExpired);
 
+            int bufferSize = 10;
+            if (_P.chatFullBuffer.Count > bufferSize)
+                _P.chatFullBuffer.RemoveRange(bufferSize, _P.chatFullBuffer.Count - bufferSize);
+
             if (_P.constructionGunAnimation > 0)
             {
                 if (_P.constructionGunAnimation > gameTime.ElapsedGameTime.TotalSeconds)
@@ -156,7 +160,7 @@ namespace Infiniminer
                 if (ping)
                     spriteBatch.Draw(texRadarPlayerPing, new Vector2(10 + 99 + relativePosition.X - texRadarPlayerPing.Width / 2, 30 + 99 + relativePosition.Z - texRadarPlayerPing.Height / 2), color);
             }
-            
+
             // Render text.
             if (text != "")
             {
@@ -238,7 +242,28 @@ namespace Infiniminer
             else if (_P.constructionGunAnimation > 0.001)
                 gunSprite = texToolBuildSmoke;
             spriteBatch.Draw(gunSprite, new Rectangle(drawX, drawY, 120 * 3, 126 * 3), Color.White);
-            spriteBatch.Draw(blockIcons[blockType], new Rectangle(drawX+37*3, drawY+50*3, 117, 63), Color.White);
+            spriteBatch.Draw(blockIcons[blockType], new Rectangle(drawX + 37 * 3, drawY + 50 * 3, 117, 63), Color.White);
+        }
+
+        public void drawChat(List<ChatMessage>messages, GraphicsDevice graphicsDevice)
+        {
+            int newlines = 0;
+            for (int i = 0; i < messages.Count; i++)
+            {
+                Color chatColor = Color.White;
+                if (messages[i].type == ChatMessageType.SayRedTeam)
+                    chatColor = _P.red;// Defines.IM_RED;
+                if (messages[i].type == ChatMessageType.SayBlueTeam)
+                    chatColor = _P.blue;// Defines.IM_BLUE;
+
+                int y = graphicsDevice.Viewport.Height - 114;
+                newlines += messages[i].newlines;
+                y -= 16 * newlines;
+                //y -= 16 * i;
+
+                spriteBatch.DrawString(uiFont, messages[i].message, new Vector2(22, y), Color.Black);
+                spriteBatch.DrawString(uiFont, messages[i].message, new Vector2(20, y-2), chatColor);//graphicsDevice.Viewport.Height - 116 - 16 * i), chatColor);
+            }
         }
 
         public void Render(GraphicsDevice graphicsDevice)
@@ -250,14 +275,14 @@ namespace Infiniminer
 
             // Draw the UI.
             spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Immediate, SaveStateMode.SaveState);
-            
+
             // Draw the crosshair.
             spriteBatch.Draw(texCrosshairs, new Rectangle(graphicsDevice.Viewport.Width / 2 - texCrosshairs.Width / 2,
                                                             graphicsDevice.Viewport.Height / 2 - texCrosshairs.Height / 2,
                                                             texCrosshairs.Width,
                                                             texCrosshairs.Height), Color.White);
 
-            // If equipped, draw the detonator.
+            // If equipped, draw the tool.
             switch (_P.playerTools[_P.playerToolSelected])
             {
                 case PlayerTools.Detonator:
@@ -293,46 +318,49 @@ namespace Infiniminer
                 RenderMessageCenter(spriteBatch, String.Format("FPS: {0:000}", gameInstance.FrameRate), new Vector2(60, graphicsDevice.Viewport.Height - 20), Color.Gray, Color.Black);
 
             // Show the altimeter.
-            int altitude = (int)(_P.playerPosition.Y - 64 + InfiniminerGame.GROUND_LEVEL);
-            RenderMessageCenter(spriteBatch, String.Format("ALTITUDE: {0:00}", altitude), new Vector2(graphicsDevice.Viewport.Width - 90, graphicsDevice.Viewport.Height - 20), altitude >= 0 ? Color.Gray : InfiniminerGame.IM_RED, Color.Black);
+            int altitude = (int)(_P.playerPosition.Y - 64 + Defines.GROUND_LEVEL);
+            RenderMessageCenter(spriteBatch, String.Format("ALTITUDE: {0:00}", altitude), new Vector2(graphicsDevice.Viewport.Width - 90, graphicsDevice.Viewport.Height - 20), altitude >= 0 ? Color.Gray : Defines.IM_RED, Color.Black);
 
             // Draw bank instructions.
             if (_P.AtBankTerminal())
-                RenderMessageCenter(spriteBatch, "1: DEPOSIT 50 ORE  2: WITHDRAW 50 ORE", new Vector2(graphicsDevice.Viewport.Width / 2, graphicsDevice.Viewport.Height / 2 + 60), Color.White, Color.Black);
+                RenderMessageCenter(spriteBatch, "8: DEPOSIT 50 ORE  9: WITHDRAW 50 ORE", new Vector2(graphicsDevice.Viewport.Width / 2, graphicsDevice.Viewport.Height / 2 + 60), Color.White, Color.Black);
 
             // Are they trying to change class when they cannot?
-            if (Keyboard.GetState().IsKeyDown(Keys.M) && _P.playerPosition.Y <= 64 - InfiniminerGame.GROUND_LEVEL && _P.chatMode == ChatMessageType.None)
-                RenderMessageCenter(spriteBatch, "YOU CANNOT CHANGE YOUR CLASS BELOW THE SURFACE", new Vector2(graphicsDevice.Viewport.Width / 2, graphicsDevice.Viewport.Height / 2 + 90), Color.White, Color.Black);
+            //if (Keyboard.GetState().IsKeyDown(Keys.M) && _P.playerPosition.Y <= 64 - Defines.GROUND_LEVEL && _P.chatMode == ChatMessageType.None)
+            //    RenderMessageCenter(spriteBatch, "YOU CANNOT CHANGE YOUR CLASS BELOW THE SURFACE", new Vector2(graphicsDevice.Viewport.Width / 2, graphicsDevice.Viewport.Height / 2 + 90), Color.White, Color.Black);
 
             // Draw the text-based information panel.
-            int textStart = (graphicsDevice.Viewport.Width - 1024)/2;
+            int textStart = (graphicsDevice.Viewport.Width - 1024) / 2;
             spriteBatch.Draw(texBlank, new Rectangle(0, 0, graphicsDevice.Viewport.Width, 20), Color.Black);
-            spriteBatch.DrawString(uiFont, "ORE: " + _P.playerOre + "/" + _P.playerOreMax, new Vector2(textStart+3, 2), Color.White);
+            spriteBatch.DrawString(uiFont, "ORE: " + _P.playerOre + "/" + _P.playerOreMax, new Vector2(textStart + 3, 2), Color.White);
             spriteBatch.DrawString(uiFont, "LOOT: $" + _P.playerCash, new Vector2(textStart + 170, 2), Color.White);
             spriteBatch.DrawString(uiFont, "WEIGHT: " + _P.playerWeight + "/" + _P.playerWeightMax, new Vector2(textStart + 340, 2), Color.White);
             spriteBatch.DrawString(uiFont, "TEAM ORE: " + _P.teamOre, new Vector2(textStart + 515, 2), Color.White);
-            spriteBatch.DrawString(uiFont, "RED: $" + _P.teamRedCash, new Vector2(textStart + 700, 2), InfiniminerGame.IM_RED);
-            spriteBatch.DrawString(uiFont, "BLUE: $" + _P.teamBlueCash, new Vector2(textStart + 860, 2), InfiniminerGame.IM_BLUE);
+            spriteBatch.DrawString(uiFont, _P.redName + ": $" + _P.teamRedCash, new Vector2(textStart + 700, 2), _P.red);// Defines.IM_RED);
+            spriteBatch.DrawString(uiFont, _P.blueName + ": $" + _P.teamBlueCash, new Vector2(textStart + 860, 2), _P.blue);// Defines.IM_BLUE);
 
             // Draw player information.
             if ((Keyboard.GetState().IsKeyDown(Keys.Tab) && _P.screenEffect == ScreenEffect.None) || _P.teamWinners != PlayerTeam.None)
             {
                 spriteBatch.Draw(texBlank, new Rectangle(0, 0, graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height), new Color(Color.Black, 0.7f));
 
+                //Server name
+                RenderMessageCenter(spriteBatch, _P.serverName, new Vector2(graphicsDevice.Viewport.Width / 2, 32), _P.playerTeam == PlayerTeam.Blue ? _P.blue : _P.red, Color.Black);//Defines.IM_BLUE : Defines.IM_RED, Color.Black);
+                
                 if (_P.teamWinners != PlayerTeam.None)
                 {
                     string teamName = _P.teamWinners == PlayerTeam.Red ? "RED" : "BLUE";
-                    Color teamColor = _P.teamWinners == PlayerTeam.Red ? InfiniminerGame.IM_RED : InfiniminerGame.IM_BLUE;
+                    Color teamColor = _P.teamWinners == PlayerTeam.Red ? _P.red : _P.blue;//Defines.IM_RED : Defines.IM_BLUE;
                     string gameOverMessage = "GAME OVER - " + teamName + " TEAM WINS!";
                     RenderMessageCenter(spriteBatch, gameOverMessage, new Vector2(graphicsDevice.Viewport.Width / 2, 150), teamColor, new Color(0, 0, 0, 0));
                 }
-                
+
                 int drawY = 200;
                 foreach (Player p in _P.playerList.Values)
                 {
                     if (p.Team != PlayerTeam.Red)
                         continue;
-                    RenderMessageCenter(spriteBatch, p.Handle + " ( $" + p.Score + " )", new Vector2(graphicsDevice.Viewport.Width/4, drawY), InfiniminerGame.IM_RED, new Color(0, 0, 0, 0));
+                    RenderMessageCenter(spriteBatch, p.Handle + " ( $" + p.Score + " )", new Vector2(graphicsDevice.Viewport.Width / 4, drawY), _P.red, new Color(0, 0, 0, 0));//Defines.IM_RED
                     drawY += 35;
                 }
                 drawY = 200;
@@ -340,7 +368,7 @@ namespace Infiniminer
                 {
                     if (p.Team != PlayerTeam.Blue)
                         continue;
-                    RenderMessageCenter(spriteBatch, p.Handle + " ( $" + p.Score + " )", new Vector2(graphicsDevice.Viewport.Width * 3 / 4, drawY), InfiniminerGame.IM_BLUE, new Color(0, 0, 0, 0));
+                    RenderMessageCenter(spriteBatch, p.Handle + " ( $" + p.Score + " )", new Vector2(graphicsDevice.Viewport.Width * 3 / 4, drawY), _P.blue, new Color(0, 0, 0, 0)); //Defines.IM_BLUE
                     drawY += 35;
                 }
             }
@@ -356,22 +384,28 @@ namespace Infiniminer
                 spriteBatch.DrawString(uiFont, "TEAM> " + _P.chatEntryBuffer, new Vector2(22, graphicsDevice.Viewport.Height - 98), Color.Black);
                 spriteBatch.DrawString(uiFont, "TEAM> " + _P.chatEntryBuffer, new Vector2(20, graphicsDevice.Viewport.Height - 100), Color.White);
             }
-            for (int i = 0; i < _P.chatBuffer.Count; i++)
+            if (_P.chatMode != ChatMessageType.None)
             {
-                Color chatColor = Color.White;
-                if (_P.chatBuffer[i].type == ChatMessageType.SayRedTeam)
-                    chatColor = InfiniminerGame.IM_RED;
-                if (_P.chatBuffer[i].type == ChatMessageType.SayBlueTeam)
-                    chatColor = InfiniminerGame.IM_BLUE;
-                spriteBatch.DrawString(uiFont, _P.chatBuffer[i].message, new Vector2(22, graphicsDevice.Viewport.Height - 114 - 16 * i), Color.Black);
-                spriteBatch.DrawString(uiFont, _P.chatBuffer[i].message, new Vector2(20, graphicsDevice.Viewport.Height - 116 - 16 * i), chatColor);
+                drawChat(_P.chatFullBuffer,graphicsDevice);
+                /*for (int i = 0; i < _P.chatFullBuffer.Count; i++)
+                {
+                    Color chatColor = Color.White;
+                    chatColor = _P.chatFullBuffer[i].type == ChatMessageType.SayAll ? Color.White : _P.chatFullBuffer[i].type == ChatMessageType.SayRedTeam ? InfiniminerGame.IM_RED : InfiniminerGame.IM_BLUE;
+                    
+                    spriteBatch.DrawString(uiFont, _P.chatFullBuffer[i].message, new Vector2(22, graphicsDevice.Viewport.Height - 114 - 16 * i), Color.Black);
+                    spriteBatch.DrawString(uiFont, _P.chatFullBuffer[i].message, new Vector2(20, graphicsDevice.Viewport.Height - 116 - 16 * i), chatColor);
+                }*/
+            }
+            else
+            {
+                drawChat(_P.chatBuffer,graphicsDevice);
             }
 
             // Draw the player radar.
             spriteBatch.Draw(texRadarBackground, new Vector2(10, 30), Color.White);
             foreach (Player p in _P.playerList.Values)
                 if (p.Team == _P.playerTeam && p.Alive)
-                    RenderRadarBlip(spriteBatch, p.ID == _P.playerMyId ? _P.playerPosition : p.Position, p.Team == PlayerTeam.Red ? InfiniminerGame.IM_RED : InfiniminerGame.IM_BLUE, p.Ping > 0, "");
+                    RenderRadarBlip(spriteBatch, p.ID == _P.playerMyId ? _P.playerPosition : p.Position, p.Team == PlayerTeam.Red ? _P.red : _P.blue, p.Ping > 0, ""); //Defines.IM_RED : Defines.IM_BLUE, p.Ping > 0, "");
             foreach (KeyValuePair<Vector3, Beacon> bPair in _P.beaconList)
                 if (bPair.Value.Team == _P.playerTeam)
                     RenderRadarBlip(spriteBatch, bPair.Key, Color.White, false, bPair.Value.ID);
@@ -385,14 +419,14 @@ namespace Infiniminer
                 RenderMessageCenter(spriteBatch, "PRESS Y TO CONFIRM THAT YOU WANT TO QUIT.", new Vector2(graphicsDevice.Viewport.Width / 2, graphicsDevice.Viewport.Height / 2 + 30), Color.White, Color.Black);
                 RenderMessageCenter(spriteBatch, "PRESS K TO COMMIT PIXELCIDE.", new Vector2(graphicsDevice.Viewport.Width / 2, graphicsDevice.Viewport.Height / 2 + 80), Color.White, Color.Black);
             }
-           
+
             // Draw the current screen effect.
             if (_P.screenEffect == ScreenEffect.Death)
             {
                 Color drawColor = new Color(1 - (float)_P.screenEffectCounter * 0.5f, 0f, 0f);
                 spriteBatch.Draw(texBlank, new Rectangle(0, 0, graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height), drawColor);
                 if (_P.screenEffectCounter >= 2)
-                    RenderMessageCenter(spriteBatch, "You have died. Click to respawn.", new Vector2(graphicsDevice.Viewport.Width / 2, graphicsDevice.Viewport.Height/2), Color.White, Color.Black);
+                    RenderMessageCenter(spriteBatch, "You have died. Click to respawn.", new Vector2(graphicsDevice.Viewport.Width / 2, graphicsDevice.Viewport.Height / 2), Color.White, Color.Black);
             }
             if (_P.screenEffect == ScreenEffect.Teleport || _P.screenEffect == ScreenEffect.Explosion)
             {

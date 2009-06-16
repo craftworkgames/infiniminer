@@ -6,7 +6,7 @@ using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace Infiniminer
+namespace Infiniminer1
 {
     public class KeyMap
     {

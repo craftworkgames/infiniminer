@@ -32,7 +32,7 @@ namespace Infiniminer
         public int spriteColumn;
         public float length;
     }
-    
+
     public class SpriteModel
     {
         /* Animation scripts provide a light-weight way to define animations. They consist of a sequence of frames
@@ -71,7 +71,7 @@ namespace Infiniminer
         Effect effect;
         Game gameInstance;
         SpriteFont nameFont = null;
-        
+
         // Constructor for SpriteModel. Loads up the texture referenced by spriteSheetPath to use for drawing. 
         // Each individual sprite should be fit to a 24×32 box with the bottom center of the box corresponding to 
         // the SpriteModel's origin. A sprite sheet is expected to have a column of four sprites for every frame 
@@ -129,12 +129,17 @@ namespace Infiniminer
             graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, vertices.Length / 3);
 
             graphicsDevice.RenderState.AlphaTestEnable = false;
-            
+
             effect.Techniques[0].Passes[0].End();
             effect.End();
         }
 
         public void DrawText(Matrix viewMatrix, Matrix projectionMatrix, Vector3 drawPosition, string hoverText)
+        {
+            DrawText(viewMatrix, projectionMatrix, drawPosition, hoverText, new Color(255, 255, 255, 255));
+        }
+
+        public void DrawText(Matrix viewMatrix, Matrix projectionMatrix, Vector3 drawPosition, string hoverText, Color color)
         {
             // Don't draw text if it's not within our frustum.
             BoundingSphere regionBounds = new BoundingSphere(drawPosition, 0.1f);
@@ -155,7 +160,7 @@ namespace Infiniminer
             spriteBatch.DrawString(nameFont, hoverText, textPosition, Color.Black);
             textPosition.X -= 2;
             textPosition.Y -= 2;
-            spriteBatch.DrawString(nameFont, hoverText, textPosition, Color.White);
+            spriteBatch.DrawString(nameFont, hoverText, textPosition, color);//Color.White);
             spriteBatch.End();
         }
 
@@ -248,7 +253,7 @@ namespace Infiniminer
         //}
 
         // Advance the animation counter by the time-delta in gameTime.
-        
+
         public void Update(GameTime gameTime)
         {
             List<AnimationFrame> currentAnimation = runningActive ? activeAnimation : passiveAnimation;

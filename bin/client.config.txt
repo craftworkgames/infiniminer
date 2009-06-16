@@ -2,7 +2,7 @@
 handle = Player
 
 width = 1024
-height = 768
+height = 780
 fullscreen = false
 
 # If this flag is set to true, pretty mode will be enabled, which turns on bloom lighting!
@@ -13,7 +13,18 @@ showfps = true
 yinvert = false
 
 # This value specifies the override volume multiplier, for people who find the sounds too loud.
-volume = 1.0
+volume = 1
+
+#This value specifies the mouse sensitivity, from 1-50 default 5
+sensitivity = 5
 
 # If this flag is true, all sound for the game will be disabled. This should fix all AllocateFormatAndData crashes.
 nosound = false
+
+#Sets colours and names for teams - SignpostMarv's idea
+#Default red = 222, 24, 24 #240,240,240
+red_name = Red
+red = 222, 24, 24
+#Default blue = 80,150,255 #56, 195, 65
+blue_name = Blue
+blue = 80,150,255
