@@ -1,0 +1,67 @@
+Changelog from V1.5
+
+Featuers:
+	-General
+		-Tool hotkeys - numbers 1 through 5 switch directly to the correct tool (eg. 1 is pickaxe)
+		-New death messages, stored in easy-to-modify variables
+		-Server name is displayed at the top of the scoreboard
+		-Input to the chat buffer now has correct localization and will not drop keys
+		-Change in road graphics to be less dull
+		-Ctrl-S will now save the level under saved_SERVERNAME_TIMESTAMP.lvl. Note that this is not perfect as the client does not have which teams built what - as a result, removing blocks may not work correctly, in particular for forcefields which can then only be removed by the same team colour
+		-I changed the death messages back to the originals but still left the new ones commented
+		-Added an extra help message about banks being indestructible
+		-Made it so that the "damage" effect and landing sound is not played for landing on jump blocks without dying - makes jump courses easier to bear
+		-Map compression is enabled! If a server and a client from this branch connect they will save bandwidth - this does not affect connections with unmodified clients/servers either.
+	-Nametags
+		-Now coloured the team's colour instead of white
+		-The other team's players get nametags too, which will appear when you're close and can see them
+	-Chat
+		-Chat history - when you press y or u to start typing the last 10 chat messages will reappear
+		-Wordwrap, making long messages still be fully readable
+		-Copy, paste, and cut are now supported in chat
+	-Settings
+		-Fully functional settings menu! Provides an easy-to-use interface to edit all the settings available in client.config.txt
+		-New mouse sensitivity option
+		-Clients now have full control over their keyboard + mouse binds - see keymap.txt
+	-Server
+		-New settings of spherical tnt explosions, lava that can spread with only more lava as support (fills holes), lava that absorbs shock blocks (Fish's concept), and road blocks that absorb lava beneath them (also Fish's concept)
+		-Variables such as server name, tnt toggles, max players, etc. can be changed mid-game via the server console - try "listvars" and "<var> = <value"
+		-Public server list updates and map sending are now run in seperate threads, removing lag whenever a player joins
+		-Made server command "players" output how many people are playing and the player capacity
+		-Servers now have "bann <name>" and "kickn <name>" to kick/ban people by name instead of ip
+		-Servers now display (in the server console) the ip of people as soon as they connect
+		-Servers now can chat just by putting y in front of their message - no need for "say "! It's like using the in-game client!
+		-Maps are automatically backed up by server every 5 minutes
+		-Map loading by server auto-disonnects everyone
+		-New auto-load settings - you can specify your server to load a particular map when it starts (immediately, without generating one). This is also loaded if you try executing a blank load command
+		-New greeting feature - a message sent to players on their first spawn. The default is "Welcome [name] to my server!", where [name] is replaced by their name. Comment the option out of the config file to disable it
+		-Removed "reload" command as restart is more thorough
+		-Changed the way ips are outputted by the "players" command - they are now put on the next line, so that people with rediculously long names don't obscure their ip address for kicking/banning
+		-Made the server tell all players that it's changing map so when they disconnect they don't think it crashed
+		-Made server console output whether the level file to load was found or not
+		-Ability to assign admins who can then prefix commands with \ for full server console access!
+	-Other
+		-Help menu updated to reflect new key layout
+		-Server browser dims servers that are full
+		-Joining games now displays "Connecting..." while waiting for the server response
+
+Bugfixes:
+	-Rare crash when 3D sound is played with invalid volume
+	-Spaces are now supported in names
+	-Fixed all of the warnings in source aside from "comparison to integral constant"
+	-Crash when sending a chat message at the end of a game
+	-All network communications now have exceptions caught - should make servers significantly more stable, as well as clients.
+	-Staggered updates to public server list should reduce lag but also reduce the accuracy of server listing player counts
+	-Public server list updates are run in a seperate thread to remove lag on player join
+	-Fixed aforementioned thread which would go into an infinite cycle of stopping and starting
+	-Map sending is threaded to further remove lag on player join
+	-Various crashes related to bad text input
+	-Griefers could make themselves unbannable by obscuring their ip address with a rediculously long name
+
+Buglist:
+	-Every use of "reload" creates a map with more lava blocks - may not be clearing previous map correctly
+	-Clipping through corners allows rapid ascension to surface
+	-Can at various angles see thruogh walls
+	-Death messages do not always display
+	-Players can use tools and block types outside of their class
+	-At various angles building blocks build them in thin air, unattached to any nearby block
