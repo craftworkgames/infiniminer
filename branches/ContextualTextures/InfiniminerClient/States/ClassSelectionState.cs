@@ -26,7 +26,8 @@ namespace Infiniminer.States
 	        new ClickRegion(new Rectangle(54,168,142,190), "miner"), 
 	        new ClickRegion(new Rectangle(300,169,142,190), "prospector"), 
 	        new ClickRegion(new Rectangle(580,170,133,187), "engineer"), 
-	        new ClickRegion(new Rectangle(819,172,133,190), "sapper")
+	        new ClickRegion(new Rectangle(819,172,133,190), "sapper")//,
+            //new ClickRegion(new Rectangle(0,0,0,0), "cancel")
         };
 
         public override void OnEnter(string oldState)
@@ -41,12 +42,12 @@ namespace Infiniminer.States
                                      1024,
                                      1024);
 
-            _P.KillPlayer("");
+            //_P.KillPlayer("");
         }
 
         public override void OnLeave(string newState)
         {
-            _P.RespawnPlayer();
+            //_P.RespawnPlayer();
         }
 
         public override string OnUpdate(GameTime gameTime, KeyboardState keyState, MouseState mouseState)
@@ -108,6 +109,10 @@ namespace Infiniminer.States
                     break;
                 case "sapper":
                     _P.SetPlayerClass(PlayerClass.Sapper);
+                    nextState = "Infiniminer.States.MainGameState";
+                    _P.PlaySound(InfiniminerSound.ClickHigh);
+                    break;
+                case "cancel":
                     nextState = "Infiniminer.States.MainGameState";
                     _P.PlaySound(InfiniminerSound.ClickHigh);
                     break;

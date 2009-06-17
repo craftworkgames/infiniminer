@@ -35,7 +35,7 @@ namespace Infiniminer
         public ParticleEngine(InfiniminerGame gameInstance)
         {
             this.gameInstance = gameInstance;
-            particleEffect = gameInstance.Content.Load<Effect>(GlobalVariables.fx__effect_particle);
+            particleEffect = gameInstance.Content.Load<Effect>("effect_particle");
             randGen = new Random();
             particleList = new List<Particle>();
 

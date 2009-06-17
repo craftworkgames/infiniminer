@@ -40,7 +40,7 @@ namespace Infiniminer
             texNoise.SetData(noiseData);
 
             // Load the effect file.
-            effect = gameInstance.Content.Load<Effect>(GlobalVariables.fx__effect_skyplane);
+            effect = gameInstance.Content.Load<Effect>("effect_skyplane");
 
             // Create our vertices.
             vertexDeclaration = new VertexDeclaration(gameInstance.GraphicsDevice, VertexPositionTexture.VertexElements);
