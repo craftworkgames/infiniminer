@@ -42,13 +42,17 @@ namespace StateMasher
             get { return frameRate; }
         }
 
-        private Dictionary<Keys, bool> keysDown = new Dictionary<Keys, bool>();
+        //private Dictionary<Keys, bool> keysDown = new Dictionary<Keys, bool>();
         private MouseState msOld;
 
         public StateMachine()
         {
             Content.RootDirectory = "Content";
             graphicsDeviceManager = new GraphicsDeviceManager(this);
+            EventInput.EventInput.Initialize(this.Window);
+            EventInput.EventInput.CharEntered += new EventInput.CharEnteredHandler(EventInput_CharEntered);
+            EventInput.EventInput.KeyDown += new EventInput.KeyEventHandler(EventInput_KeyDown);
+            EventInput.EventInput.KeyUp += new EventInput.KeyEventHandler(EventInput_KeyUp);
         }
 
         protected void ChangeState(string newState)
@@ -80,6 +84,25 @@ namespace StateMasher
             base.Initialize();
         }
 
+        //Keyboard input
+        public void EventInput_CharEntered(object sender, EventInput.CharacterEventArgs e)
+        {
+            if (currentState != null)
+                currentState.OnCharEntered(e);
+        }
+
+        public void EventInput_KeyDown(object sender, EventInput.KeyEventArgs e)
+        {
+            if (currentState != null)
+                currentState.OnKeyDown(e.KeyCode);
+        }
+
+        public void EventInput_KeyUp(object sender, EventInput.KeyEventArgs e)
+        {
+            if (currentState != null)
+                currentState.OnKeyUp(e.KeyCode);
+        }
+
         protected override void LoadContent()
         {
             
@@ -100,22 +123,6 @@ namespace StateMasher
                 string newState = currentState.OnUpdate(gameTime, Keyboard.GetState(), Mouse.GetState());
                 if (newState != null)
                     ChangeState(newState);
-
-                // Check for keyboard events.
-                KeyboardState keyState = Keyboard.GetState();
-                Dictionary<Keys, bool> keysDownNow = new Dictionary<Keys, bool>();
-                foreach (Keys k in keyState.GetPressedKeys())
-                    keysDownNow.Add(k, true);
-                if (WindowHasFocus())
-                {
-                    foreach (Keys k in keysDownNow.Keys)
-                        if (!keysDown.ContainsKey(k))
-                            currentState.OnKeyDown(k);
-                    foreach (Keys k in keysDown.Keys)
-                        if (!keysDownNow.ContainsKey(k))
-                            currentState.OnKeyUp(k);
-                }
-                keysDown = keysDownNow;
 
                 // Check for mouse events.
                 MouseState msNew = Mouse.GetState();

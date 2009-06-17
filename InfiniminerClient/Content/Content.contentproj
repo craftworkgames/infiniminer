@@ -35,7 +35,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="effects\effect_basic.fx">
+    <Compile Include="effect_basic.fx">
       <Name>effect_basic</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
@@ -52,6 +52,11 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
+    <Compile Include="blocks\tex_block_silver.png">
+      <Name>tex_block_silver</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="blocks\tex_block_dirt.png">
@@ -61,8 +66,39 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="blocks\tex_block_home_red.png">
+      <Name>tex_block_home_red</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="blocks\tex_block_diamond.png">
       <Name>tex_block_diamond</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="blocks\tex_block_blue.png">
+      <Name>tex_block_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="blocks\tex_block_red.png">
+      <Name>tex_block_red</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="blocks\tex_block_trans_blue.png">
+      <Name>tex_block_trans_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="blocks\tex_block_trans_red.png">
+      <Name>tex_block_trans_red</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
@@ -87,6 +123,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="blocks\tex_block_home_blue.png">
+      <Name>tex_block_home_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="ui\tex_ui_crosshair.png">
       <Name>tex_ui_crosshair</Name>
       <Importer>TextureImporter</Importer>
@@ -94,8 +137,27 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="04b08.spritefont">
+      <Name>font_04b08</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="blocks\tex_block_explosive.png">
       <Name>tex_block_explosive</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="menus\tex_menu_class_blue.png">
+      <Name>tex_menu_class_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="menus\tex_menu_class_red.png">
+      <Name>tex_menu_class_red</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
@@ -115,21 +177,63 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="effects\effect_skyplane.fx">
+    <Compile Include="effect_skyplane.fx">
       <Name>effect_skyplane</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="effects\effect_spritemodel.fx">
+    <Compile Include="effect_spritemodel.fx">
       <Name>effect_spritemodel</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="effects\effect_particle.fx">
+    <Compile Include="sprites\tex_sprite_blue_construction.png">
+      <Name>tex_sprite_blue_construction</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="sprites\tex_sprite_blue_detonator.png">
+      <Name>tex_sprite_blue_detonator</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="sprites\tex_sprite_blue_pickaxe.png">
+      <Name>tex_sprite_blue_pickaxe</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="sprites\tex_sprite_blue_radar.png">
+      <Name>tex_sprite_blue_radar</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="sprites\tex_sprite_red_construction.png">
+      <Name>tex_sprite_red_construction</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="sprites\tex_sprite_red_detonator.png">
+      <Name>tex_sprite_red_detonator</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="sprites\tex_sprite_red_pickaxe.png">
+      <Name>tex_sprite_red_pickaxe</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="sprites\tex_sprite_red_radar.png">
+      <Name>tex_sprite_red_radar</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="effect_particle.fx">
       <Name>effect_particle</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
@@ -263,6 +367,18 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="sprites\tex_sprite_blue_drill.png">
+      <Name>tex_sprite_blue_drill</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="sprites\tex_sprite_red_drill.png">
+      <Name>tex_sprite_red_drill</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="menus\tex_menu_help.png">
       <Name>tex_menu_help</Name>
       <Importer>TextureImporter</Importer>
@@ -277,6 +393,31 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="tools\tex_tool_detonator_down_blue.png">
+      <Name>tex_tool_detonator_down_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="tools\tex_tool_detonator_down_red.png">
+      <Name>tex_tool_detonator_down_red</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="tools\tex_tool_detonator_up_blue.png">
+      <Name>tex_tool_detonator_up_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="tools\tex_tool_detonator_up_red.png">
+      <Name>tex_tool_detonator_up_red</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="tools\tex_tool_radar_blue.png">
+      <Name>tex_tool_radar_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
     <Compile Include="tools\tex_tool_radar_led.png">
       <Name>tex_tool_radar_led</Name>
       <Importer>TextureImporter</Importer>
@@ -284,6 +425,11 @@
     </Compile>
     <Compile Include="tools\tex_tool_radar_pointer.png">
       <Name>tex_tool_radar_pointer</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="tools\tex_tool_radar_red.png">
+      <Name>tex_tool_radar_red</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
@@ -306,6 +452,75 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="song_title.mp3">
+      <Name>song_title</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SongProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="blocks\tex_block_bank_back_blue.png">
+      <Name>tex_block_bank_back_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="blocks\tex_block_bank_back_red.png">
+      <Name>tex_block_bank_back_red</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="blocks\tex_block_bank_front_blue.png">
+      <Name>tex_block_bank_front_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="blocks\tex_block_bank_front_red.png">
+      <Name>tex_block_bank_front_red</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="blocks\tex_block_bank_left_blue.png">
+      <Name>tex_block_bank_left_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="blocks\tex_block_bank_left_red.png">
+      <Name>tex_block_bank_left_red</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="blocks\tex_block_bank_right_blue.png">
+      <Name>tex_block_bank_right_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="blocks\tex_block_bank_right_red.png">
+      <Name>tex_block_bank_right_red</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="blocks\tex_block_bank_top_blue.png">
+      <Name>tex_block_bank_top_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="blocks\tex_block_bank_top_red.png">
+      <Name>tex_block_bank_top_red</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="icons\tex_icon_bank_blue.png">
+      <Name>tex_icon_bank_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="icons\tex_icon_bank_red.png">
+      <Name>tex_icon_bank_red</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
     <Compile Include="icons\tex_icon_explosive.png">
       <Name>tex_icon_explosive</Name>
       <Importer>TextureImporter</Importer>
@@ -321,6 +536,16 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
+    <Compile Include="icons\tex_icon_solid_blue.png">
+      <Name>tex_icon_solid_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="icons\tex_icon_solid_red.png">
+      <Name>tex_icon_solid_red</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
     <Compile Include="icons\tex_icon_spikes.png">
       <Name>tex_icon_spikes</Name>
       <Importer>TextureImporter</Importer>
@@ -328,6 +553,16 @@
     </Compile>
     <Compile Include="icons\tex_icon_teleporter.png">
       <Name>tex_icon_teleporter</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="icons\tex_icon_translucent_blue.png">
+      <Name>tex_icon_translucent_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="icons\tex_icon_translucent_red.png">
+      <Name>tex_icon_translucent_red</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
@@ -362,6 +597,16 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="blocks\tex_block_teleporter_a.png">
+      <Name>tex_block_teleporter_a</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="blocks\tex_block_teleporter_b.png">
+      <Name>tex_block_teleporter_b</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
     <Compile Include="blocks\tex_block_teleporter_bottom.png">
       <Name>tex_block_teleporter_bottom</Name>
       <Importer>TextureImporter</Importer>
@@ -422,6 +667,18 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="blocks\tex_block_beacon_top_blue.png">
+      <Name>tex_block_beacon_top_blue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="blocks\tex_block_beacon_top_red.png">
+      <Name>tex_block_beacon_top_red</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="icons\tex_icon_beacon.png">
       <Name>tex_icon_beacon</Name>
       <Importer>TextureImporter</Importer>
@@ -434,6 +691,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="04b03b.spritefont">
+      <Name>font_04b03b</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="ui\tex_radar_north.png">
       <Name>tex_radar_north</Name>
       <Importer>TextureImporter</Importer>
@@ -441,312 +705,39 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="effects\BloomCombine.fx">
+    <Compile Include="BloomCombine.fx">
       <Name>BloomCombine</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
-    <Compile Include="effects\BloomExtract.fx">
+    <Compile Include="BloomExtract.fx">
       <Name>BloomExtract</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
-    <Compile Include="effects\GaussianBlur.fx">
+    <Compile Include="GaussianBlur.fx">
       <Name>GaussianBlur</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="blocks\tex_block_gold.png">
-      <Name>tex_block_gold</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\tex_block_home_top.png">
-      <Name>tex_block_home_top</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\tex_block_mechanism.png">
-      <Name>tex_block_mechanism</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\tex_block_teleporter_sideA.png">
-      <Name>tex_block_teleporter_sideA</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\tex_block_teleporter_sideB.png">
-      <Name>tex_block_teleporter_sideB</Name>
+    <Compile Include="menus\tex_menu_settings.png">
+      <Name>tex_menu_settings</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="blocks\A\tex_block.png">
-      <Name>tex_block</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\A\tex_block_bank.png">
-      <Name>tex_block_bank</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\A\tex_block_bank_back.png">
-      <Name>tex_block_bank_back</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\A\tex_block_bank_front.png">
-      <Name>tex_block_bank_front</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\A\tex_block_bank_left.png">
-      <Name>tex_block_bank_left</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\A\tex_block_bank_right.png">
-      <Name>tex_block_bank_right</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\A\tex_block_bank_top.png">
-      <Name>tex_block_bank_top</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\A\tex_block_beacon_top.png">
-      <Name>tex_block_beacon_top</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\A\tex_block_home.png">
-      <Name>tex_block_home</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\A\tex_block_trans.png">
-      <Name>tex_block_trans</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\B\tex_block.png">
-      <Name>tex_block</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\B\tex_block_bank.png">
-      <Name>tex_block_bank</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\B\tex_block_bank_back.png">
-      <Name>tex_block_bank_back</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\B\tex_block_bank_front.png">
-      <Name>tex_block_bank_front</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\B\tex_block_bank_left.png">
-      <Name>tex_block_bank_left</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\B\tex_block_bank_right.png">
-      <Name>tex_block_bank_right</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\B\tex_block_bank_top.png">
-      <Name>tex_block_bank_top</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\B\tex_block_beacon_top.png">
-      <Name>tex_block_beacon_top</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\B\tex_block_home.png">
-      <Name>tex_block_home</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="blocks\B\tex_block_trans.png">
-      <Name>tex_block_trans</Name>
+    <Compile Include="blocks\tex_block_road_top.png">
+      <Name>tex_block_road_top</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="icons\A\tex_icon_bank.png">
-      <Name>tex_icon_bank</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="icons\A\tex_icon_solid.png">
-      <Name>tex_icon_solid</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="icons\A\tex_icon_translucent.png">
-      <Name>tex_icon_translucent</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="menus\tex_menu_class_A.png">
-      <Name>tex_menu_class_A</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="menus\tex_menu_class_B.png">
-      <Name>tex_menu_class_B</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="sprites\A\construction.png">
-      <Name>construction</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="sprites\A\detonator.png">
-      <Name>detonator</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="sprites\A\drill.png">
-      <Name>drill</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="sprites\A\pickaxe.png">
-      <Name>pickaxe</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="sprites\A\radar.png">
-      <Name>radar</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="sprites\B\construction.png">
-      <Name>construction</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="sprites\B\detonator.png">
-      <Name>detonator</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="sprites\B\drill.png">
-      <Name>drill</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="sprites\B\pickaxe.png">
-      <Name>pickaxe</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="sprites\B\radar.png">
-      <Name>radar</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="tools\A\tex_tool_detonator_down.png">
-      <Name>tex_tool_detonator_down</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="tools\A\tex_tool_detonator_up.png">
-      <Name>tex_tool_detonator_up</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="tools\A\tex_tool_radar.png">
-      <Name>tex_tool_radar</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="tools\B\tex_tool_detonator_down.png">
-      <Name>tex_tool_detonator_down</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="tools\B\tex_tool_detonator_up.png">
-      <Name>tex_tool_detonator_up</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="tools\B\tex_tool_radar.png">
-      <Name>tex_tool_radar</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="icons\B\tex_icon_bank.png">
-      <Name>tex_icon_bank</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="icons\B\tex_icon_solid.png">
-      <Name>tex_icon_solid</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="icons\B\tex_icon_translucent.png">
-      <Name>tex_icon_translucent</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="song_title.mp3">
-      <Name>song_title</Name>
-      <Importer>Mp3Importer</Importer>
-      <Processor>SongProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="fonts\04b03b.spritefont">
-      <Name>04b03b</Name>
-      <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
-    </Compile>
-    <Compile Include="fonts\04b08.spritefont">
-      <Name>04b08</Name>
-      <Importer>FontDescriptionImporter</Importer>
-      <Processor>FontDescriptionProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="blocks\tex_grass.png">
-      <Name>tex_grass</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="blocks\dirt-grass.png">
-      <Name>dirt-grass</Name>
+    <Compile Include="blocks\tex_block_road_bottom.png">
+      <Name>tex_block_road_bottom</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

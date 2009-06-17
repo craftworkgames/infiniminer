@@ -24,7 +24,7 @@ namespace Infiniminer
 
         public ServerInformation(IPAddress ip, string name, string extra, string numPlayers, string maxPlayers)
         {
-            ipEndPoint = new IPEndPoint(ip, SessionVariables.connectionPort);
+            ipEndPoint = new IPEndPoint(ip, 5565);
             serverName = name;
             serverExtra = extra;
             this.numPlayers = numPlayers;
@@ -65,9 +65,11 @@ namespace Infiniminer
 
             return true;
         }
+
         public override int GetHashCode()
         {
-            return ToString().GetHashCode();
+            return base.GetHashCode();
         }
+
     }
 }

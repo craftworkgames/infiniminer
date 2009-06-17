@@ -24,8 +24,9 @@ namespace Infiniminer.States
         bool canCancel = false;
 
         ClickRegion[] clkTeamMenu = new ClickRegion[2] {
-	        new ClickRegion(new Rectangle(229,156,572,190), "A"), 
-	        new ClickRegion(new Rectangle(135,424,761,181), "B")
+	        new ClickRegion(new Rectangle(229,156,572,190), "red"), 
+	        new ClickRegion(new Rectangle(135,424,761,181), "blue")//,
+            //new ClickRegion(new Rectangle(0,0,0,0), "cancel")
         };
 
         public override void OnEnter(string oldState)
@@ -123,6 +124,13 @@ namespace Infiniminer.States
                         nextState = "Infiniminer.States.ClassSelectionState";
                     }
                     _P.PlaySound(InfiniminerSound.ClickHigh);
+                    break;
+                case "cancel":
+                    if (canCancel)
+                    {
+                        nextState = "Infiniminer.States.MainGameState";
+                        _P.PlaySound(InfiniminerSound.ClickHigh);
+                    }
                     break;
             }
         }

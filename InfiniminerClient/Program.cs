@@ -1,6 +1,6 @@
 using System;
 
-namespace Infiniminer.Client
+namespace Infiniminer
 {
     static class Program
     {
@@ -12,18 +12,14 @@ namespace Infiniminer.Client
         {
             using (InfiniminerGame game = new InfiniminerGame(args))
             {
-#if !DEBUG
                 try
                 {
-#endif
                     game.Run();
-#if !DEBUG
                 }
                 catch (Exception e)
                 {
                     System.Windows.Forms.MessageBox.Show(e.Message + "\r\n\r\n" + e.StackTrace);
                 }
-#endif
             }
         }
     }
