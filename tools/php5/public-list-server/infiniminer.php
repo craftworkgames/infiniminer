@@ -284,18 +284,21 @@ class InfiniminerPublicServerList_SQLite extends InfiniminerPublicServerList
 	extra CHAR( 255 ) NOT NULL ,
 	PRIMARY KEY ( game , ip , port )
 )";
-	const sql_addGame =
-'REPLACE INTO infiniminer_games (game,ip,port,player_count,player_capacity,name,extra)
+const sql_addGame =
+"INSERT INTO infiniminer_games (game, ip, port, player_count, player_capacity, name, extra)
 VALUES
 (
-	:gameType,
-	:ip,
-	:port,
-	:player_count,
-	:player_capacity,
-	:name,
-	:extra
-)';
+    :gameType,
+    :ip,
+    :port,
+    :player_count,
+    :player_capacity,
+    :name,
+    :extra
+)
+ON CONFLICT(ip, port, name) DO UPDATE SET
+    player_count = :player_count
+";
 	
 }
 header('Content-Type:text/plain');
@@ -327,14 +330,16 @@ try
 					$extra = explode(',',$game->extra());
 					$extra[] = ' port=' . $game->port();
 					$extra = implode(',',$extra);
-					echo implode(';',array(
-						$game->name(),
-						$game->ip(),
-						$game->gameType(),
-						$game->playerCount(),
-						$game->playerCapacity(),
-						$game->extra(),
-					));
+					$data = array(
+  						'name' => $game->name(),
+  						'ip' => $game->ip(),
+  						'gameType' => $game->gameType(),
+  						'playerCount' => $game->playerCount(),
+  						'playerCapacity' => $game->playerCapacity(),
+  						'extra' => $game->extra()
+					);
+					$jsonData = json_encode($data);
+					echo $jsonData;
 				}
 			}
 		break;
