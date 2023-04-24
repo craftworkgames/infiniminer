@@ -171,8 +171,10 @@ abstract class InfiniminerPublicServerList
 			$sth->bindValue(':extra', $game->extra(), PDO::PARAM_STR);
 		
 			if (!$sth->execute()) {
-				echo RuntimeException.getMessage();
-				throw new RuntimeException('Could not add game to list!');
+				$errorInfo = $sth->errorInfo(); // Get error information from the query execution
+				$errorMessage = isset($errorInfo[2]) ? $errorInfo[2] : 'Unknown error'; // Extract error message, or use a default message if not available
+				$exceptionMessage = 'Could not add game to list! Error: ' . $errorMessage; // Append error message to the exception's message
+				throw new \RuntimeException($exceptionMessage); // Fully qualify the RuntimeException class
 			}
 		} catch (PDOException $e) {
 			throw new RuntimeException('Error with PDO: ' . $e->getCode());
