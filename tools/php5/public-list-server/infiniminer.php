@@ -283,10 +283,10 @@ class InfiniminerPublicServerList_SQLite extends InfiniminerPublicServerList
 	player_capacity TINYINT UNSIGNED NOT NULL DEFAULT '1',
 	name CHAR( 255 ) NOT NULL ,
 	extra CHAR( 255 ) NOT NULL ,
-	PRIMARY KEY ( game , ip , port )
+	PRIMARY KEY ( name , ip , port )
 )";
 const sql_addGame =
-"INSERT INTO infiniminer_games (game, ip, port, player_count, player_capacity, name, extra)
+"INSERT INTO infiniminer_games (game, ip, port, player_count, player_capacity, name)
 VALUES
 (
     :gameType,
@@ -294,10 +294,9 @@ VALUES
     :port,
     :player_count,
     :player_capacity,
-    :name,
-    :extra
+    :name
 )
-ON CONFLICT(ip, port, name) DO UPDATE SET
+ON CONFLICT(name, ip, port) DO UPDATE SET
     player_count = :player_count
 ";
 	
