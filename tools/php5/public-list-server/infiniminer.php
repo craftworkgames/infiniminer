@@ -158,7 +158,8 @@ abstract class InfiniminerPublicServerList
 			if ($sth === null) {
 				$sth = $this->PDO->prepare($this->sql_addGame());
 				if (!$sth) {
-					throw new RuntimeException('Could not prepare add statement!');
+					$errorInfo = $this->PDO->errorInfo();
+					throw new RuntimeException('Could not prepare add statement! Error: ' . $errorInfo[2]);
 				}
 			}
 		
