@@ -272,16 +272,16 @@ ON DUPLICATE KEY UPDATE
 class InfiniminerPublicServerList_SQLite extends InfiniminerPublicServerList
 {
 	const sql_createTables =
-'CREATE TABLE IF NOT EXISTS infiniminer_games (
-game CHAR( 255 ) NOT NULL DEFAULT \'INFINIMINER\',
-ip CHAR( 39 ) NOT NULL ,
-port SMALLINT UNSIGNED NOT NULL DEFAULT \'5565\',
-player_count TINYINT UNSIGNED NOT NULL DEFAULT \'0\',
-player_capacity TINYINT UNSIGNED NOT NULL DEFAULT \'1\',
-name CHAR( 255 ) NOT NULL ,
-extra CHAR( 255 ) NOT NULL ,
-PRIMARY KEY ( game , ip , port )
-)';
+"CREATE TABLE IF NOT EXISTS infiniminer_games (
+	game CHAR( 255 ) NOT NULL DEFAULT 'INFINIMINER',
+	ip CHAR( 39 ) NOT NULL ,
+	port SMALLINT UNSIGNED NOT NULL DEFAULT '5565',
+	player_count TINYINT UNSIGNED NOT NULL DEFAULT '0',
+	player_capacity TINYINT UNSIGNED NOT NULL DEFAULT '1',
+	name CHAR( 255 ) NOT NULL ,
+	extra CHAR( 255 ) NOT NULL ,
+	PRIMARY KEY ( game , ip , port )
+)";
 	const sql_addGame =
 'REPLACE INTO infiniminer_games (game,ip,port,player_count,player_capacity,name,extra)
 VALUES
