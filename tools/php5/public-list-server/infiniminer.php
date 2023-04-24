@@ -154,30 +154,26 @@ abstract class InfiniminerPublicServerList
 	public function addOrUpdate(InfiniminerPublicServerGame $game)
 	{
 		static $sth;
-		try
-		{
-			if(isset($sth) === false)
-			{
+		try {
+			if ($sth === null) {
 				$sth = $this->PDO->prepare($this->sql_addGame());
-				if(($sth instanceof PDOStatement) === false)
-				{
+				if (!$sth) {
 					throw new RuntimeException('Could not prepare add statement!');
 				}
 			}
-			$sth->bindValue(':gameType',$game->gameType(),PDO::PARAM_STR);
-			$sth->bindValue(':ip',$game->ip(),PDO::PARAM_STR);
-			$sth->bindValue(':port',$game->port(),PDO::PARAM_INT);
-			$sth->bindValue(':player_count',$game->playerCount(),PDO::PARAM_INT);
-			$sth->bindValue(':player_capacity',$game->playerCapacity(),PDO::PARAM_INT);
-			$sth->bindValue(':name',$game->name(),PDO::PARAM_STR);
-			$sth->bindValue(':extra',$game->extra(),PDO::PARAM_STR);
-			if($sth->execute() === false)
-			{
+		
+			$sth->bindValue(':gameType', $game->gameType(), PDO::PARAM_STR);
+			$sth->bindValue(':ip', $game->ip(), PDO::PARAM_STR);
+			$sth->bindValue(':port', $game->port(), PDO::PARAM_INT);
+			$sth->bindValue(':player_count', $game->playerCount(), PDO::PARAM_INT);
+			$sth->bindValue(':player_capacity', $game->playerCapacity(), PDO::PARAM_INT);
+			$sth->bindValue(':name', $game->name(), PDO::PARAM_STR);
+			$sth->bindValue(':extra', $game->extra(), PDO::PARAM_STR);
+		
+			if (!$sth->execute()) {
 				throw new RuntimeException('Could not add game to list!');
 			}
-		}
-		catch(PDOException $e)
-		{
+		} catch (PDOException $e) {
 			throw new RuntimeException('Error with PDO: ' . $e->getCode());
 		}
 	}
