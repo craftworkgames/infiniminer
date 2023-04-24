@@ -20,17 +20,16 @@ class InfiniminerPublicServerGame
 
 	public function __construct($ip=null,$name='Unamed Server',$gameType='INFINIMINER',$player_count=0,$player_capacity=1,$port=5565,$extra='')
 	{
-		$ip              = isset($this->ip) ? $this->ip : $_SERVER['REMOTE_ADDR'];
-		$name            = isset($this->name) ? $this->name : $name;
-		$gameType        = isset($this->gameType) ? $this->gameType : $gameType;
-		$player_count    = isset($this->player_count) ? $this->player_count : $player_count;
-		$player_capacity = isset($this->player_capacity) ? $this->player_capacity : $player_capacity;
-		$port            = isset($this->port) ? $this->port : $port;
-		$extra           = isset($this->extra) ? $this->extra : $extra;
-		if(long2ip(ip2long($ip)) !== $ip)
-		{
-			throw new InvalidArgumentException('Invalid/Unsupported IP Address');
-		}
+    		$ip              = isset($this->ip) ? $this->ip : $_SERVER['REMOTE_ADDR'];
+    		$name            = isset($this->name) ? $this->name : $name;
+    		$gameType        = isset($this->gameType) ? $this->gameType : $gameType;
+    		$player_count    = isset($this->player_count) ? $this->player_count : $player_count;
+    		$player_capacity = isset($this->player_capacity) ? $this->player_capacity : $player_capacity;
+    		$port            = isset($this->port) ? $this->port : $port;
+    		$extra           = isset($this->extra) ? $this->extra : $extra;
+    		if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6)) {
+        		throw new InvalidArgumentException('Invalid/Unsupported IP Address');
+    		}
 		else if(preg_match(self::regex_gameName,$name) !== 1)
 		{
 			throw new InvalidArgumentException('Invalid game name \'' . (string)$name . '\'' );
