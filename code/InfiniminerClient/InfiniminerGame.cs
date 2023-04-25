@@ -20,9 +20,10 @@ namespace Infiniminer
     public class ServerData
     {
         public string name { get; set; }
-        public IPEndPoint ip { get; set; }
+        public string ip { get; set; }
         public string playerCount { get; set; }
         public string playerCapacity { get; set; }
+        public string extra { get; set; }
     }
     public class InfiniminerGame : StateMasher.StateMachine
     {
@@ -114,6 +115,7 @@ namespace Infiniminer
             }
 
             // Discover remote servers.
+            // Discover remote servers.
             try
             {
                 string publicList = HttpRequest.Get("http://infiniminer.abhidjt.com/post.php", null);
@@ -124,14 +126,12 @@ namespace Infiniminer
                     ServerData serverData = JsonConvert.DeserializeObject<ServerData>(jsonObject);
 
                     // Create a new ServerInformation object from the deserialized ServerData object
-                    ServerInformation serverInfo = new ServerInformation(msgBuffer)
-                    {
-                        serverName = serverData.name,
-                        ipEndPoint = serverData.ip,
-                        numPlayers = serverData.playerCount,
-                        maxPlayers = serverData.playerCapacity,
-                        lanServer = false
-                    };
+                    ServerInformation serverInfo = new ServerInformation(
+                        IPAddress.Parse(serverData.ip),
+                        serverData.name,
+                        serverData.extra,
+                        serverData.playerCount,
+                        serverData.playerCapacity);
 
                     // Add serverInfo to serverList or process it as desired
                     serverList.Add(serverInfo);
@@ -143,7 +143,6 @@ namespace Infiniminer
 
             return serverList;
         }
-
         public void UpdateNetwork(GameTime gameTime)
         {
             // Update the server with our status.
