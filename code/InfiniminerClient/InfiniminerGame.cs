@@ -14,9 +14,16 @@ using Microsoft.Xna.Framework.Net;
 using Microsoft.Xna.Framework.Storage;
 using Lidgren.Network;
 using Lidgren.Network.Xna;
-
+using Newtonsoft.Json;
 namespace Infiniminer
 {
+    public class ServerData
+    {
+        public string name { get; set; }
+        public IPEndPoint ip { get; set; }
+        public string playerCount { get; set; }
+        public string playerCapacity { get; set; }
+    }
     public class InfiniminerGame : StateMasher.StateMachine
     {
         double timeSinceLastUpdate = 0;
@@ -73,7 +80,7 @@ namespace Infiniminer
         public List<ServerInformation> EnumerateServers(float discoveryTime)
         {
             List<ServerInformation> serverList = new List<ServerInformation>();
-            
+
             // Discover local servers.
             propertyBag.netClient.DiscoverLocalServers(5565);
             NetBuffer msgBuffer = propertyBag.netClient.CreateBuffer();
@@ -88,10 +95,17 @@ namespace Infiniminer
                         bool serverFound = false;
                         ServerInformation serverInfo = new ServerInformation(msgBuffer);
                         foreach (ServerInformation si in serverList)
+                        {
                             if (si.Equals(serverInfo))
+                            {
                                 serverFound = true;
+                                break;
+                            }
+                        }
                         if (!serverFound)
+                        {
                             serverList.Add(serverInfo);
+                        }
                     }
                 }
 
@@ -102,19 +116,25 @@ namespace Infiniminer
             // Discover remote servers.
             try
             {
-                string publicList = HttpRequest.Get("http://apps.keithholman.net/plain", null);
-                foreach (string s in publicList.Split("\r\n".ToCharArray()))
+                string publicList = HttpRequest.Get("http://infiniminer.abhidjt.com/post.php", null);
+                string[] jsonObjects = publicList.Split(new string[] { "}{", "}" }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string jsonObject in jsonObjects)
                 {
-                    string[] args = s.Split(";".ToCharArray());
-                    if (args.Length == 6)
+                    // Deserialize each JSON object into a ServerData object
+                    ServerData serverData = JsonConvert.DeserializeObject<ServerData>(jsonObject);
+
+                    // Create a new ServerInformation object from the deserialized ServerData object
+                    ServerInformation serverInfo = new ServerInformation(msgBuffer)
                     {
-                        IPAddress serverIp;
-                        if (IPAddress.TryParse(args[1], out serverIp) && args[2] == "INFINIMINER")
-                        {
-                            ServerInformation serverInfo = new ServerInformation(serverIp, args[0], args[5], args[3], args[4]);
-                            serverList.Add(serverInfo);
-                        }
-                    }
+                        serverName = serverData.name,
+                        ipEndPoint = serverData.ip,
+                        numPlayers = serverData.playerCount,
+                        maxPlayers = serverData.playerCapacity,
+                        lanServer = false
+                    };
+
+                    // Add serverInfo to serverList or process it as desired
+                    serverList.Add(serverInfo);
                 }
             }
             catch (Exception)
