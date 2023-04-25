@@ -326,22 +326,31 @@ try
                         $games = $InfiniminerPublicServerList->get();
                         if(empty($games) === false)
                         {
-                                foreach($games as $game)
-                                {
-                                        $extra = explode(',',$game->extra());
-                                        $extra[] = ' port=' . $game->port();
-                                        $extra = implode(',',$extra);
-                                        $data = array(
-                                                'name' => $game->name(),
-                                                'ip' => $game->ip(),
-                                                'gameType' => $game->gameType(),
-                                                'playerCount' => $game->playerCount(),
-                                                'playerCapacity' => $game->playerCapacity(),
-                                                'extra' => $game->extra()
-                                        );
-                                        $jsonData = json_encode($data);
-                                        echo $jsonData;
-                                }
+						// Create an empty array to store the JSON data for each game
+							$jsonArray = array();
+
+							foreach($games as $game)
+								{
+    								$extra = explode(',',$game->extra());
+    								$extra[] = ' port=' . $game->port();
+    								$extra = implode(',',$extra);
+    								$data = array(
+        								'name' => $game->name(),
+        								'ip' => $game->ip(),
+        								'gameType' => $game->gameType(),
+        								'playerCount' => $game->playerCount(),
+        								'playerCapacity' => $game->playerCapacity(),
+        								'extra' => $extra
+    );
+    // Add the data for the current game to the JSON array
+    $jsonArray[] = $data;
+}
+
+// Encode the entire JSON array into a JSON string
+$jsonData = json_encode($jsonArray, JSON_PRETTY_PRINT);
+
+// Output the JSON data
+echo $jsonData;
                         }
                 break;
                 default:
