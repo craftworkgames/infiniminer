@@ -15,15 +15,16 @@ using Microsoft.Xna.Framework.Storage;
 using Lidgren.Network;
 using Lidgren.Network.Xna;
 using Newtonsoft.Json;
+using System.Diagnostics;
 namespace Infiniminer
 {
     public class ServerData
     {
-        public string name { get; set; }
         public string ip { get; set; }
-        public string playerCount { get; set; }
-        public string playerCapacity { get; set; }
+        public string name { get; set; }
         public string extra { get; set; }
+        public int playerCount { get; set; }
+        public int playerCapacity { get; set; }
     }
     public class InfiniminerGame : StateMasher.StateMachine
     {
@@ -118,12 +119,16 @@ namespace Infiniminer
             // Discover remote servers.
             try
             {
-                string publicList = HttpRequest.Get("http://infiniminer.abhidjt.com/post.php", null);
-                string[] jsonObjects = publicList.Split(new string[] { "}{", "}" }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string jsonObject in jsonObjects)
+                
+                WebRequest publicList = WebRequest.Create("http://infiniminer.abhidjt.com/post.php");
+                WebResponse thing = publicList.GetResponse();
+                StreamReader sr = new StreamReader(thing.GetResponseStream());
+                string publicListahh = sr.ReadToEnd().Trim();
+                // Split the JSON objects from the string
+                ServerData[] serverDataArray = JsonConvert.DeserializeObject<ServerData[]>(publicListahh);
+                foreach (ServerData serverData in serverDataArray)
                 {
                     // Deserialize each JSON object into a ServerData object
-                    ServerData serverData = JsonConvert.DeserializeObject<ServerData>(jsonObject);
 
                     // Create a new ServerInformation object from the deserialized ServerData object
                     ServerInformation serverInfo = new ServerInformation(
@@ -137,8 +142,11 @@ namespace Infiniminer
                     serverList.Add(serverInfo);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                string errorMessage = "Error occurred: " + ex.Message + "\n\n" + "Stack trace: " + ex.StackTrace;
+                File.WriteAllText("error.vbs", @"MsgBox """ + errorMessage + @""" ,48, ""Error""");
+                Process.Start("cscript", "//B //Nologo error.vbs");
             }
 
             return serverList;
