@@ -11,8 +11,8 @@ namespace Infiniminer
         public IPEndPoint IpEndPoint { get; private set; }
         public string ServerName { get; private set; }
         public string ServerExtra { get; private set; }
-        public string NumPlayers { get; private set; }
-        public string MaxPlayers { get; private set; }
+        public int NumPlayers { get; private set; }
+        public int MaxPlayers { get; private set; }
         public bool LanServer { get; private set; }
 
         public ServerInformation(NetBuffer netBuffer)
@@ -28,7 +28,7 @@ namespace Infiniminer
             }
         }
 
-        public ServerInformation(IPAddress ip, string name, string extra, string numPlayers, string maxPlayers)
+        public ServerInformation(IPAddress ip, string name, string extra, int numPlayers, int maxPlayers)
         {
             IpEndPoint = new IPEndPoint(ip, 5565);
             ServerName = name;
