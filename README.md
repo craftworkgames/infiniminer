@@ -21,11 +21,11 @@ To build Infiniminer, you'll need the following tools and resources:
 
 Follow these steps to build Infiniminer:
 
-1. Download and install Visual Studio 2008 if you don't have it.
+1. Download and install Visual Studio 2008 (or Visual C# Express 2008) if you don't have it.
 2. Install XNA Game Studio 3.0.
 3. Download the required fonts from the provided [website](http://www.dsg4.com/04/extra/bitmap/).
 4. Clone or download the Infiniminer source code from its GitHub repository: [Infiniminer GitHub](http://github.com/Leontking2/Infiniminer)
-5. Open the solution in Visual Studio 2008.
+5. Open the solution in Visual Studio 2008 (or Visual C# Express 2008).
 6. Build the solution, and you're ready to play!
 
 ## Patching and Issue Tracking
