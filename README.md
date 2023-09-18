@@ -59,7 +59,7 @@ Let's work together to make Infiniminer even better!
 
 ## Licensing
 
-Infiniminer is distributed under [insert license here]. Please review the license file in the repository for specific terms and conditions.
+Infiniminer is distributed under The MIT License. Please review the license file in the repository for specific terms and conditions.
 
 ## Contact
 
