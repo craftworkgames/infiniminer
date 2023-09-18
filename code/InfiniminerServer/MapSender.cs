@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Lidgren.Network;
@@ -12,7 +12,7 @@ namespace Infiniminer
         Thread conn;
         Infiniminer.InfiniminerServer infs;
         Infiniminer.InfiniminerNetServer infsN;
-        int MAPSIZE = 64;
+        int MAPSIZE = 128;
         bool compression = false;
         //bool finished = false;
         public bool finished
