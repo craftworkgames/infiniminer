@@ -27,8 +27,8 @@ namespace Infiniminer
             BlockType[, ,] caveData = CaveGenerator.GenerateConstant(size, BlockType.Dirt);
 
             // Add ore.
-            float[, ,] oreNoise = CaveGenerator.GeneratePerlinNoise(32);
-            oreNoise = InterpolateData(ref oreNoise, 32, size);
+            float[, ,] oreNoise = CaveGenerator.GeneratePerlinNoise(64);
+            oreNoise = InterpolateData(ref oreNoise, 64, size);
             for (int i = 0; i < oreFactor; i++)
                 CaveGenerator.PaintWithRandomWalk(ref caveData, ref oreNoise, size, 1, BlockType.Ore, false);
 
@@ -37,8 +37,8 @@ namespace Infiniminer
             AddDiamond(ref caveData, size);
 
             // Level off everything above ground level, replacing it with mountains.
-            float[, ,] mountainNoise = CaveGenerator.GeneratePerlinNoise(32);
-            mountainNoise = InterpolateData(ref mountainNoise, 32, size);
+            float[, ,] mountainNoise = CaveGenerator.GeneratePerlinNoise(64);
+            mountainNoise = InterpolateData(ref mountainNoise, 64, size);
             for (int x = 0; x < size; x++)
                 for (int y = 0; y < size; y++)
                     for (int z = 0; z <= Defines.GROUND_LEVEL * 2; z++)
@@ -453,12 +453,12 @@ namespace Infiniminer
             return dataOut;
         }
 
-        // Renders a specific z-level of a 256x256x256 data array to a texture.
-        private static uint[] pixelData = new uint[256 * 256];
+        // Renders a specific z-level of a 512x512x512 data array to a texture.
+        private static uint[] pixelData = new uint[512 * 512];
         public static void RenderSlice(ref BlockType[, ,] data, int z, Texture2D renderTexture)
         {
-            for (int x = 0; x < 256; x++)
-                for (int y = 0; y < 256; y++)
+            for (int x = 0; x < 512; x++)
+                for (int y = 0; y < 512; y++)
                 {
                     uint c = 0xFF000000;
                     if (data[x,y,z] == BlockType.Dirt)
@@ -469,7 +469,7 @@ namespace Infiniminer
                         c = 0xFFFF0000;
                     if (data[x, y, z] == BlockType.Rock)
                         c = 0xFF0000FF;
-                    pixelData[y * 256 + x] = c;
+                    pixelData[y * 512 + x] = c;
                 }
             renderTexture.GraphicsDevice.Textures[0] = null;
             renderTexture.SetData(pixelData);
