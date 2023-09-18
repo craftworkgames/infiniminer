@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -6,6 +6,7 @@ using System.Threading;
 using Lidgren.Network;
 using Lidgren.Network.Xna;
 using Microsoft.Xna.Framework;
+using System.Net;
 
 namespace Infiniminer
 {
@@ -14,7 +15,7 @@ namespace Infiniminer
         InfiniminerNetServer netServer = null;
         public BlockType[, ,] blockList = null;    // In game coordinates, where Y points up.
         PlayerTeam[, ,] blockCreatorTeam = null;
-        const int MAPSIZE = 64;
+        const int MAPSIZE = 128;
         Dictionary<NetConnection, Player> playerList = new Dictionary<NetConnection, Player>();
         int lavaBlockCount = 0;
         uint oreFactor = 10;
@@ -1179,9 +1180,9 @@ namespace Infiniminer
         {
             FileStream fs = new FileStream(filename, FileMode.Create);
             StreamWriter sw = new StreamWriter(fs);
-            for (int x = 0; x < 64; x++)
-                for (int y = 0; y < 64; y++)
-                    for (int z = 0; z < 64; z++)
+            for (int x = 0; x < 128; x++)
+                for (int y = 0; y < 128; y++)
+                    for (int z = 0; z < 128; z++)
                         sw.WriteLine((byte)blockList[x, y, z] + "," + (byte)blockCreatorTeam[x, y, z]);
             sw.Close();
             fs.Close();
@@ -1201,9 +1202,9 @@ namespace Infiniminer
                 
                 FileStream fs = new FileStream(filename, FileMode.Open);
                 StreamReader sr = new StreamReader(fs);
-                for (int x = 0; x < 64; x++)
-                    for (int y = 0; y < 64; y++)
-                        for (int z = 0; z < 64; z++)
+                for (int x = 0; x < 128; x++)
+                    for (int y = 0; y < 128; y++)
+                        for (int z = 0; z < 128; z++)
                         {
                             string line = sr.ReadLine();
                             string[] fileArgs = line.Split(",".ToCharArray());
@@ -1860,7 +1861,7 @@ namespace Infiniminer
         {
             foreach (Player p in playerList.Values)
             {
-                if (p.Position.Y > 64 - Defines.GROUND_LEVEL)
+                if (p.Position.Y > 128 - Defines.GROUND_LEVEL)
                     DepositCash(p);
             }
 
@@ -2741,16 +2742,23 @@ namespace Infiniminer
                 postDict["player_count"] = "" + playerList.Keys.Count;
                 postDict["player_capacity"] = "" + varGetI("maxplayers");
                 postDict["extra"] = GetExtraInfo();
+                HttpClient httpClient = new HttpClient();
+                string response = await(httpClient.GetStringAsync("https://httpbin.org/ip"));
+                dynamic jsonData = Newtonsoft.Json.JsonConvert.DeserializeObject(response);
+                string publicIPv4 = jsonData.origin;
+                
+
 
                 lastServerListUpdate = DateTime.Now;
 
                 try
                 {
-                    HttpRequest.Post("http://apps.keithholman.net/post", postDict);
+                    HttpRequest.Post("https://infiniminer.abhidjt.com/post.php", postDict);
                     ConsoleWrite("PUBLICLIST: UPDATING SERVER LISTING");
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    ConsoleWrite("Exception: " + ex.Message);
                     ConsoleWrite("PUBLICLIST: ERROR CONTACTING SERVER");
                 }
 
