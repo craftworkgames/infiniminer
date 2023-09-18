@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -160,9 +160,9 @@ namespace Infiniminer
             string filename = "saved_" + serverName.Replace(" ","") + "_" + (UInt64)DateTime.Now.ToBinary() + ".lvl";
             FileStream fs = new FileStream(filename, FileMode.Create);
             StreamWriter sw = new StreamWriter(fs);
-            for (int x = 0; x < 64; x++)
-                for (int y = 0; y < 64; y++)
-                    for (int z = 0; z < 64; z++)
+            for (int x = 0; x < 128; x++)
+                for (int y = 0; y < 128; y++)
+                    for (int z = 0; z < 128; z++)
                         sw.WriteLine((byte)blockEngine.blockList[x, y, z] + "," + (byte)TeamFromBlock(blockEngine.blockList[x, y, z]));//(byte)blockEngine.blockCreatorTeam[x, y, z]);
             sw.Close();
             fs.Close();
@@ -201,10 +201,10 @@ namespace Infiniminer
             for (int i = 0; i < 20; i++)
             {
                 // Pick a random starting point.
-                Vector3 startPos = new Vector3(randGen.Next(2, 62), 63, randGen.Next(2, 62));
+                Vector3 startPos = new Vector3(randGen.Next(2, 126), 127, randGen.Next(2, 126));
 
                 // See if this is a safe place to drop.
-                for (startPos.Y = 63; startPos.Y >= 54; startPos.Y--)
+                for (startPos.Y = 127; startPos.Y >= 54; startPos.Y--)
                 {
                     BlockType blockType = blockEngine.BlockAtPoint(startPos);
                     if (blockType == BlockType.Lava)
@@ -225,7 +225,7 @@ namespace Infiniminer
 
             // If we failed to find a spawn point, drop randomly.
             if (!positionFound)
-                playerPosition = new Vector3(randGen.Next(2, 62), 66, randGen.Next(2, 62));
+                playerPosition = new Vector3(randGen.Next(2, 126), 130, randGen.Next(2, 126));
 
             // Drop the player on the middle of the block, not at the corner.
             playerPosition += new Vector3(0.5f, 0, 0.5f);
