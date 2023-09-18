@@ -56,8 +56,8 @@ namespace Infiniminer
                             caveData[x, y, z] = BlockType.None;
             
             // Carve some caves into the ground.
-            float[, ,] caveNoise = CaveGenerator.GeneratePerlinNoise(32);
-            caveNoise = InterpolateData(ref caveNoise, 32, size);
+            float[, ,] caveNoise = CaveGenerator.GeneratePerlinNoise(64);
+            caveNoise = InterpolateData(ref caveNoise, 64, size);
             gradient = CaveGenerator.GenerateGradient(size);
             CaveGenerator.AddDataTo(ref caveNoise, ref gradient, size, 1 - gradientStrength, gradientStrength);
             int cavesToCarve = randGen.Next(size / 8, size / 2);
@@ -257,7 +257,7 @@ namespace Infiniminer
             float[,,] data = new float[size, size, size];
 
             float[,,] noise = null;
-            for (int f = 4; f < 32; f *= 2)
+            for (int f = 4; f < 64; f *= 2)
             {
                 noise = GenerateNoise(f, 2f / f);
                 noise = InterpolateData(ref noise, f, size);
