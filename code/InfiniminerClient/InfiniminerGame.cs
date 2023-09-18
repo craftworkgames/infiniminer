@@ -62,9 +62,9 @@ namespace Infiniminer
         {
             anyPacketsReceived = false;
             // Clear out the map load progress indicator.
-            propertyBag.mapLoadProgress = new bool[64,64];
-            for (int i = 0; i < 64; i++)
-                for (int j=0; j<64; j++)
+            propertyBag.mapLoadProgress = new bool[128,128];
+            for (int i = 0; i < 128; i++)
+                for (int j=0; j<128; j++)
                     propertyBag.mapLoadProgress[i,j] = false;
 
             // Create our connect message.
@@ -120,7 +120,7 @@ namespace Infiniminer
             try
             {
                 
-                WebRequest publicList = WebRequest.Create("http://infiniminer.abhidjt.com/post.php");
+                WebRequest publicList = WebRequest.Create("https://infiniminer.abhidjt.com/post.php");
                 WebResponse thing = publicList.GetResponse();
                 StreamReader sr = new StreamReader(thing.GetResponseStream());
                 string publicListahh = sr.ReadToEnd().Trim();
@@ -222,7 +222,7 @@ namespace Infiniminer
                                                     y = (byte)decompresser.ReadByte();
                                                     propertyBag.mapLoadProgress[x, y] = true;
                                                     for (byte dy = 0; dy < 16; dy++)
-                                                        for (byte z = 0; z < 64; z++)
+                                                        for (byte z = 0; z < 128; z++)
                                                         {
                                                             BlockType blockType = (BlockType)decompresser.ReadByte();
                                                             if (blockType != BlockType.None)
@@ -235,7 +235,7 @@ namespace Infiniminer
                                                     y = msgBuffer.ReadByte();
                                                     propertyBag.mapLoadProgress[x, y] = true;
                                                     for (byte dy = 0; dy < 16; dy++)
-                                                        for (byte z = 0; z < 64; z++)
+                                                        for (byte z = 0; z < 128; z++)
                                                         {
                                                             BlockType blockType = (BlockType)msgBuffer.ReadByte();
                                                             if (blockType != BlockType.None)
@@ -243,8 +243,8 @@ namespace Infiniminer
                                                         }
                                                 }
                                                 bool downloadComplete = true;
-                                                for (x = 0; x < 64; x++)
-                                                    for (y = 0; y < 64; y += 16)
+                                                for (x = 0; x < 128; x += 16)
+                                                    for (y = 0; y < 128; y += 16)
                                                         if (propertyBag.mapLoadProgress[x, y] == false)
                                                         {
                                                             downloadComplete = false;
