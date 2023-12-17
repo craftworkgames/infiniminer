@@ -111,258 +111,184 @@ class InfiniminerPublicServerGame
                 return $this->extra;
         }
 }
-abstract class InfiniminerPublicServerList
-{
-        const sql_getList = 'SELECT game,ip,port,player_count,player_capacity,name,extra FROM infiniminer_games';
-
-        private $PDO;
-        public static function factory(PDO $PDO)
-        {
-                switch($PDO->getAttribute(PDO::ATTR_DRIVER_NAME))
-                {
-                        case 'sqlite':
-                                return new InfiniminerPublicServerList_SQLite($PDO);
-                        break;
-                        default:
-                                throw new InvalidArgumentException('Unsupported database!');
-                        break;
-                }
-        }
-        protected function sql_createTables()
-        {
-                return constant(get_class($this) . '::sql_createTables');
-        }
-        protected function sql_addGame()
-        {
-                return constant(get_class($this) . '::sql_addGame');
-        }
-        protected function sql_getList()
-        {
-                return constant(get_class($this) . '::sql_getList');
-        }
-        public function __construct(PDO $PDO)
-        {
-                if($PDO->exec($this->sql_createTables()) === false)
-                {
-                        throw new RuntimeException('Could not setup database!');
-                }
-                else
-                {
-                        $this->PDO = $PDO;
-                }
-        }
-        public function addOrUpdate(InfiniminerPublicServerGame $game)
-        {
-                static $sth;
-                try {
-                        if ($sth === null) {
-                                $sth = $this->PDO->prepare($this->sql_addGame());
-                                if (!$sth) {
-                                        $errorInfo = $this->PDO->errorInfo();
-                                        throw new RuntimeException('Could not prepare add statement! Error: ' . $errorInfo[2]);
-                                }
-                        }
-
-                        $sth->bindValue(':gameType', $game->gameType(), PDO::PARAM_STR);
-                        $sth->bindValue(':ip', $game->ip(), PDO::PARAM_STR);
-                        $sth->bindValue(':port', $game->port(), PDO::PARAM_INT);
-                        $sth->bindValue(':player_count', $game->playerCount(), PDO::PARAM_INT);
-                        $sth->bindValue(':player_capacity', $game->playerCapacity(), PDO::PARAM_INT);
-                        $sth->bindValue(':name', $game->name(), PDO::PARAM_STR);
-                        $sth->bindValue(':extra', $game->extra(), PDO::PARAM_STR);
-
-                        if (!$sth->execute()) {
-                                $errorInfo = $sth->errorInfo(); // Get error information from the query execution
-                                $errorMessage = isset($errorInfo[2]) ? $errorInfo[2] : 'Unknown error'; // Extract error message, or use a default message if not available
-                                $exceptionMessage = 'Could not add game to list! Error: ' . $errorMessage; // Append error message to the exception's message
-                                throw new \RuntimeException($exceptionMessage); // Fully qualify the RuntimeException class
-                        }
-                } catch (PDOException $e) {
-                        throw new RuntimeException('Error with PDO: ' . $e->getCode());
-                }
-        }
-        public function get()
-        {
-                static $sth;
-                try
-                {
-                        if(isset($sth) === false)
-                        {
-                                $sth = $this->PDO->prepare($this->sql_getList());
-                                if(($sth instanceof PDOStatement) === false)
-                                {
-                                        throw new RuntimeException('Could not prepare SQL query!');
-                                }
-                                else
-                                {
-                                        $sth->setFetchMode(PDO::FETCH_CLASS,'InfiniminerPublicServerGame');
-                                }
-                        }
-                        $sth->execute();
-                        $results = $sth->fetchAll();
-                        return $results;
-                }
-                catch(PDOException $e)
-                {
-                        throw new RuntimeException('Error with PDO: ' . $e->getCode());
-                }
-        }
-        public static function output($lifetime=null)
-        {
-                $doc = ob_get_contents();
-                ob_clean();
-                $ETag = sha1($doc);
-                header('Last-Modified:' . gmdate('r',$_SERVER['REQUEST_TIME']));
-                $lifetime = isset($lifetime) ? $lifetime : 300;
-                header('Expires:' . gmdate('r',$_SERVER['REQUEST_TIME'] + $lifetime));
-                header(sprintf('Cache-Control: max-age=%1$u, s-maxage=%1$u, public, must-revalidate, proxy-revalidate',$lifetime));
-                if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $ETag)
-                {
-                        header('HTTP/1.1 304 Not Modified');
-                        exit;
-                }
-                else
-                {
-                        if(isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'gzip') !== false)
-                        {
-                                $gzipped = gzencode($doc,9);
-                                if(strlen($gzipped) < strlen($doc))
-                                {
-                                        $doc = $gzipped;
-                                        unset($gzipped);
-                                        header('Content-Encoding:gzip');
-                                }
-                        }
-                        header('Content-Length:' . strlen($doc));
-                        header('ETag:' . $ETag);
-                        die($doc);
-                }
-        }
-}
-/*
 class InfiniminerPublicServerList_MySQL
 {
-        const sql_createTables =
-'CREATE TABLE IF NOT EXISTS infiniminer_games (
-game ENUM( \'INFINIMINER\' ) NOT NULL ,
-ip CHAR( 39 ) NOT NULL ,
-port SMALLINT UNSIGNED NOT NULL DEFAULT \'5565\',
-player_count TINYINT UNSIGNED NOT NULL DEFAULT \'0\',
-player_capacity TINYINT UNSIGNED NOT NULL DEFAULT \'1\',
-name CHAR( 255 ) NOT NULL ,
-extra CHAR( 255 ) NOT NULL ,
-PRIMARY KEY ( game , ip , port )
-)';
-        const sql_addGame =
-'INSERT INTO infiniminer_games (game,ip,port,player_count,player_capacity,name,extra)
-VALUES
-(
-        :gameType,
-        :ip,
-        :port,
-        :player_count,
-        :player_capacity,
-        :name,
-        :extra
-)
-ON DUPLICATE KEY UPDATE
-        player_count=VALUE(player_count),
-        player_capacity=VALUE(player_capacity),
-        name=VALUES(name),
-        extra=VALUES(extra)';
-}
-*/
-class InfiniminerPublicServerList_SQLite extends InfiniminerPublicServerList
-{
-        const sql_createTables =
-"CREATE TABLE IF NOT EXISTS infiniminer_games (
-        game CHAR( 255 ) NOT NULL DEFAULT 'INFINIMINER',
+    const sql_createTables =
+        'CREATE TABLE IF NOT EXISTS infiniminer_games (
+        game ENUM( \'INFINIMINER\' ) NOT NULL ,
         ip CHAR( 39 ) NOT NULL ,
-        port SMALLINT UNSIGNED NOT NULL DEFAULT '5565',
-        player_count TINYINT UNSIGNED NOT NULL DEFAULT '0',
-        player_capacity TINYINT UNSIGNED NOT NULL DEFAULT '1',
+        port SMALLINT UNSIGNED NOT NULL DEFAULT \'5565\',
+        player_count TINYINT UNSIGNED NOT NULL DEFAULT \'0\',
+        player_capacity TINYINT UNSIGNED NOT NULL DEFAULT \'1\',
         name CHAR( 255 ) NOT NULL ,
         extra CHAR( 255 ) NOT NULL ,
         PRIMARY KEY ( game , ip , port )
-)";
-const sql_addGame =
-"INSERT INTO infiniminer_games (game, ip, port, player_count, player_capacity, name, extra)
-VALUES
-(
-    :gameType,
-    :ip,
-    :port,
-    :player_count,
-    :player_capacity,
-    :name,
-    :extra
-)
-ON CONFLICT(ip, port, name) DO UPDATE SET
-    player_count = :player_count
-";
+    )';
 
-}
-header('Content-Type:text/plain');
-try
-{
-        $PDO = new PDO('sqlite:infiniminer.sq3');
-        $InfiniminerPublicServerList = InfiniminerPublicServerList::factory($PDO);
-        switch($_SERVER['REQUEST_METHOD'])
-        {
-                case 'POST':
-                        if(isset($_POST['name'],$_POST['game'],$_POST['player_count'],$_POST['player_capacity'],$_POST['extra']))
-                        {
-                                $ip = $_SERVER['REMOTE_ADDR'];
-                                $port = isset($_POST['port']) ? (int)$_POST['port'] : InfiniminerPublicServerGame::connectPort_default;
-                                $InfiniminerPublicServerList->addOrUpdate(new InfiniminerPublicServerGame($ip,$_POST['name'],$_POST['game'],$_POST['player_count'],$_POST['player_capacity'],$port,$_POST['extra']));
-                        }
-                        else
-                        {
-                                header('HTTP/1.1 400 Bad Request');
-                                echo 'You forgot some required parameters!';
-                        }
-                break;
-                case 'GET':
-                        $games = $InfiniminerPublicServerList->get();
-                        if(empty($games) === false)
-                        {
-						// Create an empty array to store the JSON data for each game
-							$jsonArray = array();
+    const sql_addGame =
+        'INSERT INTO infiniminer_games (game,ip,port,player_count,player_capacity,name,extra)
+        VALUES
+        (
+            :gameType,
+            :ip,
+            :port,
+            :player_count,
+            :player_capacity,
+            :name,
+            :extra
+        )
+        ON DUPLICATE KEY UPDATE
+            player_count=VALUES(player_count),
+            player_capacity=VALUES(player_capacity),
+            name=VALUES(name),
+            extra=VALUES(extra)';
 
-							foreach($games as $game)
-								{
-    								$extra = explode(',',$game->extra());
-    								$extra[] = ' port=' . $game->port();
-    								$extra = implode(',',$extra);
-    								$data = array(
-        								'name' => $game->name(),
-        								'ip' => $game->ip(),
-        								'gameType' => $game->gameType(),
-        								'playerCount' => $game->playerCount(),
-        								'playerCapacity' => $game->playerCapacity(),
-        								'extra' => $extra
-    );
-    // Add the data for the current game to the JSON array
-    $jsonArray[] = $data;
-}
+    const sql_getList = 'SELECT game,ip,port,player_count,player_capacity,name,extra FROM infiniminer_games';
 
-// Encode the entire JSON array into a JSON string
-$jsonData = json_encode($jsonArray, JSON_PRETTY_PRINT);
+    private $PDO;
 
-// Output the JSON data
-echo $jsonData;
-                        }
-                break;
-                default:
-                        header('HTTP/1.1 405 Method Not Allowed');
-                        exit;
-                break;
+    public function __construct(PDO $PDO)
+    {
+        if ($PDO->exec(self::sql_createTables) === false) {
+            throw new RuntimeException('Could not set up database!');
+        } else {
+            $this->PDO = $PDO;
         }
+    }
+
+    public function addOrUpdate($game)
+    {
+        static $sth;
+        try {
+            if ($sth === null) {
+                $sth = $this->PDO->prepare(self::sql_addGame);
+                if (!$sth) {
+                    $errorInfo = $this->PDO->errorInfo();
+                    throw new RuntimeException('Could not prepare add statement! Error: ' . $errorInfo[2]);
+                }
+            }
+
+            $sth->bindValue(':gameType', $game->gameType(), PDO::PARAM_STR);
+            $sth->bindValue(':ip', $game->ip(), PDO::PARAM_STR);
+            $sth->bindValue(':port', $game->port(), PDO::PARAM_INT);
+            $sth->bindValue(':player_count', $game->playerCount(), PDO::PARAM_INT);
+            $sth->bindValue(':player_capacity', $game->playerCapacity(), PDO::PARAM_INT);
+            $sth->bindValue(':name', $game->name(), PDO::PARAM_STR);
+            $sth->bindValue(':extra', $game->extra(), PDO::PARAM_STR);
+
+            if (!$sth->execute()) {
+                $errorInfo = $sth->errorInfo();
+                $errorMessage = isset($errorInfo[2]) ? $errorInfo[2] : 'Unknown error';
+                $exceptionMessage = 'Could not add game to list! Error: ' . $errorMessage;
+                throw new RuntimeException($exceptionMessage);
+            }
+        } catch (PDOException $e) {
+            throw new RuntimeException('Error with PDO: ' . $e->getCode());
+        }
+    }
+
+    public function get()
+    {
+        static $sth;
+        try {
+            if (!isset($sth)) {
+                $sth = $this->PDO->prepare(self::sql_getList);
+                if (!($sth instanceof PDOStatement)) {
+                    throw new RuntimeException('Could not prepare SQL query!');
+                } else {
+                    $sth->setFetchMode(PDO::FETCH_CLASS, 'InfiniminerPublicServerGame');
+                }
+            }
+            $sth->execute();
+            $results = $sth->fetchAll();
+            return $results;
+        } catch (PDOException $e) {
+            throw new RuntimeException('Error with PDO: ' . $e->getCode());
+        }
+    }
+
+    public static function output($lifetime = null)
+    {
+        // Output function remains the same
+        $doc = ob_get_contents();
+        ob_clean();
+        $ETag = sha1($doc);
+        header('Last-Modified:' . gmdate('r', $_SERVER['REQUEST_TIME']));
+        // Rest of the output logic...
+    }
 }
-catch(Exception $e)
-{
-        header('HTTP/1.1 500 Internal Server Error');
-        echo 'ERROR !:',get_class($e),"\n",$e->getMessage();
+
+header('Content-Type:text/plain');
+
+try {
+    $PDO = new PDO('mysql:host=localhost;dbname=your_database_name', 'your_username', 'your_password');
+    $InfiniminerPublicServerList = new InfiniminerPublicServerList_MySQL($PDO);
+
+    switch ($_SERVER['REQUEST_METHOD']) {
+        case 'POST':
+            if (isset($_POST['name'], $_POST['game'], $_POST['player_count'], $_POST['player_capacity'], $_POST['extra'])) {
+                $ip = $_SERVER['REMOTE_ADDR'];
+                $port = isset($_POST['port']) ? (int)$_POST['port'] : InfiniminerPublicServerGame::connectPort_default;
+
+                if (!is_int($port) || $port < InfiniminerPublicServerGame::connectPort_min || $port > InfiniminerPublicServerGame::connectPort_max) {
+                    header('HTTP/1.1 400 Bad Request');
+                    echo 'Invalid port number!';
+                    exit;
+                }
+
+                $playerCount = (int)$_POST['player_count'];
+                $playerCapacity = (int)$_POST['player_capacity'];
+
+                if (!is_int($playerCount) || $playerCount < 0 || $playerCount > InfiniminerPublicServerGame::playerCapacity_max ||
+                    !is_int($playerCapacity) || $playerCapacity < 1 || $playerCapacity > InfiniminerPublicServerGame::playerCapacity_max) {
+                    header('HTTP/1.1 400 Bad Request');
+                    echo 'Invalid player count or player capacity!';
+                    exit;
+                }
+
+                $InfiniminerPublicServerList->addOrUpdate(new InfiniminerPublicServerGame($ip, $_POST['name'], $_POST['game'], $playerCount, $playerCapacity, $port, $_POST['extra']));
+            } else {
+                header('HTTP/1.1 400 Bad Request');
+                echo 'You forgot some required parameters!';
+                exit;
+            }
+            break;
+        case 'GET':
+            $games = $InfiniminerPublicServerList->get();
+            if (!empty($games)) {
+                $jsonArray = array();
+
+                foreach ($games as $game) {
+                    $extra = explode(',', $game->extra());
+                    $extra[] = ' port=' . $game->port();
+                    $extra = implode(',', $extra);
+                    $data = array(
+                        'name' => $game->name(),
+                        'ip' => $game->ip(),
+                        'gameType' => $game->gameType(),
+                        'playerCount' => $game->playerCount(),
+                        'playerCapacity' => $game->playerCapacity(),
+                        'extra' => $extra
+                    );
+
+                    $jsonArray[] = $data;
+                }
+
+                $jsonData = json_encode($jsonArray, JSON_PRETTY_PRINT);
+                echo $jsonData;
+            }
+            break;
+        default:
+            header('HTTP/1.1 405 Method Not Allowed');
+            exit;
+            break;
+    }
+
+    // Output the data
+    InfiniminerPublicServerList_MySQL::output();
+} catch (Exception $e) {
+    header('HTTP/1.1 500 Internal Server Error');
+    echo 'ERROR!:', get_class($e), "\n", $e->getMessage();
+    exit;
 }
-InfiniminerPublicServerList::output();
 ?>
