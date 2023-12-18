@@ -119,6 +119,7 @@ namespace Infiniminer
             // Discover remote servers.
             try
             {
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
                 WebRequest publicList = WebRequest.Create("https://infiniminer.abhidjt.com/post.php");
                 WebResponse thing = publicList.GetResponse();
                 StreamReader sr = new StreamReader(thing.GetResponseStream());

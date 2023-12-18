@@ -2744,6 +2744,7 @@ namespace Infiniminer
                 postDict["extra"] = GetExtraInfo();
 
                 // Use WebRequest to make the HTTP request
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
                 WebRequest request = WebRequest.Create("https://httpbin.org/ip");
                 WebResponse response = request.GetResponse();
                 Stream dataStream = response.GetResponseStream();
