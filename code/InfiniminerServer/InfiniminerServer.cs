@@ -7,7 +7,7 @@ using Lidgren.Network;
 using Lidgren.Network.Xna;
 using Microsoft.Xna.Framework;
 using System.Net;
-
+using Newtonsoft.Json;
 namespace Infiniminer
 {
     public class InfiniminerServer
@@ -2742,17 +2742,23 @@ namespace Infiniminer
                 postDict["player_count"] = "" + playerList.Keys.Count;
                 postDict["player_capacity"] = "" + varGetI("maxplayers");
                 postDict["extra"] = GetExtraInfo();
-                HttpClient httpClient = new HttpClient();
-                string response = await(httpClient.GetStringAsync("https://httpbin.org/ip"));
-                dynamic jsonData = Newtonsoft.Json.JsonConvert.DeserializeObject(response);
-                string publicIPv4 = jsonData.origin;
-                
 
+                // Use WebRequest to make the HTTP request
+                WebRequest request = WebRequest.Create("https://httpbin.org/ip");
+                WebResponse response = request.GetResponse();
+                Stream dataStream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(dataStream);
+                string responseFromServer = reader.ReadToEnd();
+
+                // Parse the response using JsonConvert.DeserializeObject
+                object jsonData = Newtonsoft.Json.JsonConvert.DeserializeObject(responseFromServer);
+                string publicIPv4 = (string)((Newtonsoft.Json.Linq.JObject)jsonData)["origin"];
 
                 lastServerListUpdate = DateTime.Now;
 
                 try
                 {
+                    // Use HttpRequest.Post method or your preferred method for posting data
                     HttpRequest.Post("https://infiniminer.abhidjt.com/post.php", postDict);
                     ConsoleWrite("PUBLICLIST: UPDATING SERVER LISTING");
                 }
@@ -2765,5 +2771,6 @@ namespace Infiniminer
                 updated = true;
             }
         }
+
     }
 }

@@ -6,15 +6,15 @@
       <TargetPlatform>Windows</TargetPlatform>
       <BuildConfiguration>Debug</BuildConfiguration>
       <CompressContent>false</CompressContent>
-      <RootDirectory>D:\Testing Items\infiniminer\source3\Infiniminer\code\InfiniminerShared\Content\</RootDirectory>
-      <LoggerRootDirectory>D:\Testing Items\infiniminer\source3\Infiniminer\code\InfiniminerShared\</LoggerRootDirectory>
-      <IntermediateDirectory>D:\Testing Items\infiniminer\source3\Infiniminer\code\InfiniminerShared\Content\obj\x86\Debug\</IntermediateDirectory>
-      <OutputDirectory>D:\Testing Items\infiniminer\source3\Infiniminer\code\InfiniminerShared\bin\x86\Debug\Content\</OutputDirectory>
+      <RootDirectory>C:\infiniminer_src\infiniminer\code\InfiniminerShared\Content\</RootDirectory>
+      <LoggerRootDirectory>C:\infiniminer_src\infiniminer\code\InfiniminerShared\</LoggerRootDirectory>
+      <IntermediateDirectory>C:\infiniminer_src\infiniminer\code\InfiniminerShared\Content\obj\x86\Debug\</IntermediateDirectory>
+      <OutputDirectory>C:\infiniminer_src\infiniminer\code\InfiniminerShared\bin\x86\Debug\Content\</OutputDirectory>
     </Settings>
     <Assemblies>
       <Assembly>
-        <Key>C:\Windows\assembly\GAC_32\Microsoft.Xna.Framework.Content.Pipeline\3.0.0.0__6d5c3888ef60e27d\Microsoft.Xna.Framework.Content.Pipeline.dll</Key>
-        <Value>2009-05-24T14:19:46.3292435-04:00</Value>
+        <Key>C:\WINDOWS\assembly\GAC_32\Microsoft.Xna.Framework.Content.Pipeline\3.0.0.0__6d5c3888ef60e27d\Microsoft.Xna.Framework.Content.Pipeline.dll</Key>
+        <Value>2023-12-06T23:16:36.9006411+05:30</Value>
       </Assembly>
     </Assemblies>
   </Asset>
