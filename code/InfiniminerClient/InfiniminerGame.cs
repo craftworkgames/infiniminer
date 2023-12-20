@@ -119,13 +119,14 @@ namespace Infiniminer
             // Discover remote servers.
             try
             {
-                
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
                 WebRequest publicList = WebRequest.Create("https://infiniminer.abhidjt.com/post.php");
                 WebResponse thing = publicList.GetResponse();
                 StreamReader sr = new StreamReader(thing.GetResponseStream());
                 string publicListahh = sr.ReadToEnd().Trim();
+
                 // Split the JSON objects from the string
-                ServerData[] serverDataArray = JsonConvert.DeserializeObject<ServerData[]>(publicListahh);
+                ServerData[] serverDataArray = Newtonsoft.Json.JsonConvert.DeserializeObject<ServerData[]>(publicListahh);
                 foreach (ServerData serverData in serverDataArray)
                 {
                     // Deserialize each JSON object into a ServerData object

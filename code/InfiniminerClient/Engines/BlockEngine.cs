@@ -98,9 +98,9 @@ namespace Infiniminer
 
         public void DownloadComplete()
         {
-            for (ushort i = 0; i < MAPSIZE; i++)
-                for (ushort j = 0; j < MAPSIZE; j++)
-                    for (ushort k = 0; k < MAPSIZE; k++)
+            for (uint i = 0; i < MAPSIZE; i++)
+                for (uint j = 0; j < MAPSIZE; j++)
+                    for (uint k = 0; k < MAPSIZE; k++)
                         if (downloadList[i, j, k] != BlockType.None)
                             AddBlock(i, j, k, downloadList[i, j, k]);
         }
@@ -112,9 +112,9 @@ namespace Infiniminer
             // Initialize the block list.
             downloadList = new BlockType[MAPSIZE, MAPSIZE, MAPSIZE];
             blockList = new BlockType[MAPSIZE, MAPSIZE, MAPSIZE];
-            for (ushort i = 0; i < MAPSIZE; i++)
-                for (ushort j = 0; j < MAPSIZE; j++)
-                    for (ushort k = 0; k < MAPSIZE; k++)
+            for (uint i = 0; i < MAPSIZE; i++)
+                for (uint j = 0; j < MAPSIZE; j++)
+                    for (uint k = 0; k < MAPSIZE; k++)
                     {
                         downloadList[i, j, k] = BlockType.None;
                         blockList[i, j, k] = BlockType.None;
@@ -222,9 +222,9 @@ namespace Infiniminer
 
         public BlockType BlockAtPoint(Vector3 point)
         {
-            ushort x = (ushort)point.X;
-            ushort y = (ushort)point.Y;
-            ushort z = (ushort)point.Z;
+            uint x = (uint)point.X;
+            uint y = (uint)point.Y;
+            uint z = (uint)point.Z;
             if (x < 0 || y < 0 || z < 0 || x >= MAPSIZE || y >= MAPSIZE || z >= MAPSIZE)
                 return BlockType.None;
             return blockList[x, y, z]; 
@@ -395,7 +395,7 @@ namespace Infiniminer
         private void BuildFaceVertices(ref VertexPositionTextureShade[] vertexList, ulong vertexPointer, uint faceInfo, bool isShockBlock)
         {
             // Decode the face information.
-            ushort x = 0, y = 0, z = 0;
+            uint x = 0, y = 0, z = 0;
             BlockFaceDirection faceDir = BlockFaceDirection.MAXIMUM;
             DecodeBlockFace(faceInfo, ref x, ref y, ref z, ref faceDir);
 
@@ -471,16 +471,16 @@ namespace Infiniminer
             }
         }
 
-        private void _AddBlock(ushort x, ushort y, ushort z, BlockFaceDirection dir, BlockType type, int x2, int y2, int z2, BlockFaceDirection dir2)
+        private void _AddBlock(uint x, uint y, uint z, BlockFaceDirection dir, BlockType type, uint x2, uint y2, uint z2, BlockFaceDirection dir2)
         {
             BlockType type2 = blockList[x2, y2, z2];
             if (type2 != BlockType.None && type != BlockType.TransRed && type != BlockType.TransBlue && type2 != BlockType.TransRed && type2 != BlockType.TransBlue)
-                HideQuad((ushort)x2, (ushort)y2, (ushort)z2, dir2, type2);
+                HideQuad((uint)x2, (uint)y2, (uint)z2, dir2, type2);
             else
                 ShowQuad(x, y, z, dir, type);
         }
 
-        public void AddBlock(ushort x, ushort y, ushort z, BlockType blockType)
+        public void AddBlock(uint x, uint y, uint z, BlockType blockType)
         {
             if (x <= 0 || y <= 0 || z <= 0 || x >= MAPSIZE - 1 || y >= MAPSIZE - 1 || z >= MAPSIZE - 1)
                 return;
@@ -495,17 +495,17 @@ namespace Infiniminer
             _AddBlock(x, y, z, BlockFaceDirection.ZDecreasing, blockType, x, y, z - 1, BlockFaceDirection.ZIncreasing);
         }
 
-        private void _RemoveBlock(ushort x, ushort y, ushort z, BlockFaceDirection dir, int x2, int y2, int z2, BlockFaceDirection dir2)
+        private void _RemoveBlock(uint x, uint y, uint z, BlockFaceDirection dir, uint x2, uint y2, uint z2, BlockFaceDirection dir2)
         {
             BlockType type = blockList[x, y, z];
             BlockType type2 = blockList[x2, y2, z2];
             if (type2 != BlockType.None && type != BlockType.TransRed && type != BlockType.TransBlue && type2 != BlockType.TransRed && type2 != BlockType.TransBlue)
-                ShowQuad((ushort)x2, (ushort)y2, (ushort)z2, dir2, type2);
+                ShowQuad((uint)x2, (uint)y2, (uint)z2, dir2, type2);
             else
                 HideQuad(x, y, z, dir, type);
         }
 
-        public void RemoveBlock(ushort x, ushort y, ushort z)
+        public void RemoveBlock(uint x, uint y, uint z)
         {
             if (x <= 0 || y <= 0 || z <= 0 || x >= MAPSIZE - 1 || y >= MAPSIZE - 1 || z >= MAPSIZE - 1)
                 return;
@@ -520,25 +520,25 @@ namespace Infiniminer
             blockList[x, y, z] = BlockType.None;
         }
 
-        private uint EncodeBlockFace(ushort x, ushort y, ushort z, BlockFaceDirection faceDir)
+        private uint EncodeBlockFace(uint x, uint y, uint z, BlockFaceDirection faceDir)
         {
             //TODO: OPTIMIZE BY HARD CODING VALUES IN
             return (uint)(x + y * MAPSIZE + z * MAPSIZE * MAPSIZE + (byte)faceDir * MAPSIZE * MAPSIZE * MAPSIZE);
         }
 
-        private void DecodeBlockFace(uint faceCode, ref ushort x, ref ushort y, ref ushort z, ref BlockFaceDirection faceDir)
+        private void DecodeBlockFace(uint faceCode, ref uint x, ref uint y, ref uint z, ref BlockFaceDirection faceDir)
         {
-            x = (ushort)(faceCode % MAPSIZE);
+            x = (uint)(faceCode % MAPSIZE);
             faceCode = (faceCode - x) / MAPSIZE;
-            y = (ushort)(faceCode % MAPSIZE);
+            y = (uint)(faceCode % MAPSIZE);
             faceCode = (faceCode - y) / MAPSIZE;
-            z = (ushort)(faceCode % MAPSIZE);
+            z = (uint)(faceCode % MAPSIZE);
             faceCode = (faceCode - z) / MAPSIZE;
             faceDir = (BlockFaceDirection)faceCode;
         }
 
         // Returns the region that a block at (x,y,z) should belong in.
-        private uint GetRegion(ushort x, ushort y, ushort z)
+        private uint GetRegion(uint x, uint y, uint z)
         {
             return (uint)(x / REGIONSIZE + (y / REGIONSIZE) * REGIONRATIO + (z / REGIONSIZE) * REGIONRATIO * REGIONRATIO);
         }
@@ -554,7 +554,7 @@ namespace Infiniminer
             return new Vector3(x * REGIONSIZE + REGIONSIZE / 2, y * REGIONSIZE + REGIONSIZE / 2, z * REGIONSIZE + REGIONSIZE / 2);            
         }
 
-        private void ShowQuad(ushort x, ushort y, ushort z, BlockFaceDirection faceDir, BlockType blockType)
+        private void ShowQuad(uint x, uint y, uint z, BlockFaceDirection faceDir, BlockType blockType)
         {
             BlockTexture blockTexture = blockTextureMap[(byte)blockType, (byte)faceDir];
             uint blockFace = EncodeBlockFace(x, y, z, faceDir);
@@ -564,7 +564,7 @@ namespace Infiniminer
             vertexListDirty[(byte)blockTexture, region] = true;
         }
 
-        private void HideQuad(ushort x, ushort y, ushort z, BlockFaceDirection faceDir, BlockType blockType)
+        private void HideQuad(uint x, uint y, uint z, BlockFaceDirection faceDir, BlockType blockType)
         {
             BlockTexture blockTexture = blockTextureMap[(byte)blockType, (byte)faceDir];
             uint blockFace = EncodeBlockFace(x, y, z, faceDir);

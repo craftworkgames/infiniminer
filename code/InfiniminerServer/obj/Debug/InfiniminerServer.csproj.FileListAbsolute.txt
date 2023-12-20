@@ -1,0 +1,9 @@
+C:\infiniminer_src\infiniminer\code\InfiniminerServer\obj\Debug\ResolveAssemblyReference.cache
+C:\infiniminer_src\infiniminer\bin\InfiniminerServer.exe
+C:\infiniminer_src\infiniminer\bin\InfiniminerServer.pdb
+C:\infiniminer_src\infiniminer\code\InfiniminerServer\obj\Debug\InfiniminerServer.exe
+C:\infiniminer_src\infiniminer\code\InfiniminerServer\obj\Debug\InfiniminerServer.pdb
+C:\infiniminer_src\infiniminer\bin\InfiniminerServer.exe.manifest
+C:\infiniminer_src\infiniminer\bin\InfiniminerServer.application
+C:\infiniminer_src\infiniminer\code\InfiniminerServer\obj\Debug\InfiniminerServer.exe.manifest
+C:\infiniminer_src\infiniminer\code\InfiniminerServer\obj\Debug\InfiniminerServer.application

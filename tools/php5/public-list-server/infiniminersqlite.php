@@ -365,4 +365,4 @@ catch(Exception $e)
         echo 'ERROR !:',get_class($e),"\n",$e->getMessage();
 }
 InfiniminerPublicServerList::output();
-?>
+

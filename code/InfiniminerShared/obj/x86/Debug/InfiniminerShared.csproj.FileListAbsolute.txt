@@ -1,0 +1,12 @@
+C:\infiniminer_src\infiniminer\code\InfiniminerShared\bin\x86\Debug\InfiniminerShared.dll.config
+C:\infiniminer_src\infiniminer\code\InfiniminerShared\bin\x86\Debug\InfiniminerShared.dll
+C:\infiniminer_src\infiniminer\code\InfiniminerShared\bin\x86\Debug\InfiniminerShared.pdb
+C:\infiniminer_src\infiniminer\code\InfiniminerShared\bin\x86\Debug\Lidgren.Network.dll
+C:\infiniminer_src\infiniminer\code\InfiniminerShared\bin\x86\Debug\Lidgren.Network.Xna.dll
+C:\infiniminer_src\infiniminer\code\InfiniminerShared\bin\x86\Debug\Lidgren.Network.Xna.pdb
+C:\infiniminer_src\infiniminer\code\InfiniminerShared\bin\x86\Debug\Lidgren.Network.pdb
+C:\infiniminer_src\infiniminer\code\InfiniminerShared\bin\x86\Debug\Lidgren.Network.xml
+C:\infiniminer_src\infiniminer\code\InfiniminerShared\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\infiniminer_src\infiniminer\code\InfiniminerShared\obj\x86\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
+C:\infiniminer_src\infiniminer\code\InfiniminerShared\obj\x86\Debug\InfiniminerShared.dll
+C:\infiniminer_src\infiniminer\code\InfiniminerShared\obj\x86\Debug\InfiniminerShared.pdb
