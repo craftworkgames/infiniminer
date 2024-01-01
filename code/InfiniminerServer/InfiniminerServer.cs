@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -6,7 +6,9 @@ using System.Threading;
 using Lidgren.Network;
 using Lidgren.Network.Xna;
 using Microsoft.Xna.Framework;
-
+using System.Net;
+using Newtonsoft.Json;
+using System.Text;
 namespace Infiniminer
 {
     public class InfiniminerServer
@@ -14,7 +16,7 @@ namespace Infiniminer
         InfiniminerNetServer netServer = null;
         public BlockType[, ,] blockList = null;    // In game coordinates, where Y points up.
         PlayerTeam[, ,] blockCreatorTeam = null;
-        const int MAPSIZE = 64;
+        const int MAPSIZE = 128;
         Dictionary<NetConnection, Player> playerList = new Dictionary<NetConnection, Player>();
         int lavaBlockCount = 0;
         uint oreFactor = 10;
@@ -1179,9 +1181,9 @@ namespace Infiniminer
         {
             FileStream fs = new FileStream(filename, FileMode.Create);
             StreamWriter sw = new StreamWriter(fs);
-            for (int x = 0; x < 64; x++)
-                for (int y = 0; y < 64; y++)
-                    for (int z = 0; z < 64; z++)
+            for (int x = 0; x < 128; x++)
+                for (int y = 0; y < 128; y++)
+                    for (int z = 0; z < 128; z++)
                         sw.WriteLine((byte)blockList[x, y, z] + "," + (byte)blockCreatorTeam[x, y, z]);
             sw.Close();
             fs.Close();
@@ -1201,9 +1203,9 @@ namespace Infiniminer
                 
                 FileStream fs = new FileStream(filename, FileMode.Open);
                 StreamReader sr = new StreamReader(fs);
-                for (int x = 0; x < 64; x++)
-                    for (int y = 0; y < 64; y++)
-                        for (int z = 0; z < 64; z++)
+                for (int x = 0; x < 128; x++)
+                    for (int y = 0; y < 128; y++)
+                        for (int z = 0; z < 128; z++)
                         {
                             string line = sr.ReadLine();
                             string[] fileArgs = line.Split(",".ToCharArray());
@@ -1278,7 +1280,7 @@ namespace Infiniminer
             return newId;
         }
 
-        public void SetBlock(ushort x, ushort y, ushort z, BlockType blockType, PlayerTeam team)
+        public void SetBlock(uint x, uint y, uint z, BlockType blockType, PlayerTeam team)
         {
             if (x <= 0 || y <= 0 || z <= 0 || (int)x >= MAPSIZE - 1 || (int)y >= MAPSIZE - 1 || (int)z >= MAPSIZE - 1)
                 return;
@@ -1325,11 +1327,11 @@ namespace Infiniminer
             BlockType[, ,] worldData = CaveGenerator.GenerateCaveSystem(MAPSIZE, includeLava, oreFactor);
             blockList = new BlockType[MAPSIZE, MAPSIZE, MAPSIZE];
             blockCreatorTeam = new PlayerTeam[MAPSIZE, MAPSIZE, MAPSIZE];
-            for (ushort i = 0; i < MAPSIZE; i++)
-                for (ushort j = 0; j < MAPSIZE; j++)
-                    for (ushort k = 0; k < MAPSIZE; k++)
+            for (uint i = 0; i < MAPSIZE; i++)
+                for (uint j = 0; j < MAPSIZE; j++)
+                    for (uint k = 0; k < MAPSIZE; k++)
                     {
-                        blockList[i, (ushort)(MAPSIZE - 1 - k), j] = worldData[i, j, k];
+                        blockList[i, (uint)(MAPSIZE - 1 - k), j] = worldData[i, j, k];
                         blockCreatorTeam[i, j, k] = PlayerTeam.None;
                     }
             for (int i = 0; i < MAPSIZE * 2; i++)
@@ -1860,7 +1862,7 @@ namespace Infiniminer
         {
             foreach (Player p in playerList.Values)
             {
-                if (p.Position.Y > 64 - Defines.GROUND_LEVEL)
+                if (p.Position.Y > 128 - Defines.GROUND_LEVEL)
                     DepositCash(p);
             }
 
@@ -1876,14 +1878,14 @@ namespace Infiniminer
         {
             bool[, ,] flowSleep = new bool[MAPSIZE, MAPSIZE, MAPSIZE]; //if true, do not calculate this turn
 
-            for (ushort i = 0; i < MAPSIZE; i++)
-                for (ushort j = 0; j < MAPSIZE; j++)
-                    for (ushort k = 0; k < MAPSIZE; k++)
+            for (uint i = 0; i < MAPSIZE; i++)
+                for (uint j = 0; j < MAPSIZE; j++)
+                    for (uint k = 0; k < MAPSIZE; k++)
                         flowSleep[i, j, k] = false;
 
-            for (ushort i = 0; i < MAPSIZE; i++)
-                for (ushort j = 0; j < MAPSIZE; j++)
-                    for (ushort k = 0; k < MAPSIZE; k++)
+            for (uint i = 0; i < MAPSIZE; i++)
+                for (uint j = 0; j < MAPSIZE; j++)
+                    for (uint k = 0; k < MAPSIZE; k++)
                         if (blockList[i, j, k] == BlockType.Lava && !flowSleep[i, j, k])
                         {
                             // RULES FOR LAVA EXPANSION:
@@ -1897,27 +1899,27 @@ namespace Infiniminer
                                 BlockType typeAbove = ((int)j == MAPSIZE - 1) ? BlockType.None : blockList[i, j + 1, k];
                                 if (i > 0 && blockList[i - 1, j, k] == BlockType.Shock)
                                 {
-                                    SetBlock((ushort)(i - 1), j, k, BlockType.Lava, PlayerTeam.None);
+                                    SetBlock((uint)(i - 1), j, k, BlockType.Lava, PlayerTeam.None);
                                     flowSleep[i - 1, j, k] = true;
                                 }
                                 if (k > 0 && blockList[i, j, k - 1] == BlockType.Shock)
                                 {
-                                    SetBlock(i, j, (ushort)(k - 1), BlockType.Lava, PlayerTeam.None);
+                                    SetBlock(i, j, (uint)(k - 1), BlockType.Lava, PlayerTeam.None);
                                     flowSleep[i, j, k - 1] = true;
                                 }
                                 if ((int)i < MAPSIZE - 1 && blockList[i + 1, j, k] == BlockType.Shock)
                                 {
-                                    SetBlock((ushort)(i + 1), j, k, BlockType.Lava, PlayerTeam.None);
+                                    SetBlock((uint)(i + 1), j, k, BlockType.Lava, PlayerTeam.None);
                                     flowSleep[i + 1, j, k] = true;
                                 }
                                 if ((int)k < MAPSIZE - 1 && blockList[i, j, k + 1] == BlockType.Shock)
                                 {
-                                    SetBlock(i, j, (ushort)(k + 1), BlockType.Lava, PlayerTeam.None);
+                                    SetBlock(i, j, (uint)(k + 1), BlockType.Lava, PlayerTeam.None);
                                     flowSleep[i, j, k + 1] = true;
                                 }
                                 if (typeAbove == BlockType.Shock) //Spread up
                                 {
-                                    SetBlock(i, (ushort)(j + 1), k, BlockType.Lava, PlayerTeam.None);
+                                    SetBlock(i, (uint)(j + 1), k, BlockType.Lava, PlayerTeam.None);
                                     flowSleep[i, j + 1, k] = true;
                                 }
                                 //Don't spread down...
@@ -1936,7 +1938,7 @@ namespace Infiniminer
                             {
                                 if (j > 0)
                                 {
-                                    SetBlock(i, (ushort)(j - 1), k, BlockType.Lava, PlayerTeam.None);
+                                    SetBlock(i, (uint)(j - 1), k, BlockType.Lava, PlayerTeam.None);
                                     flowSleep[i, j - 1, k] = true;
                                 }
                             }
@@ -1944,22 +1946,22 @@ namespace Infiniminer
                             {
                                 if (i > 0 && blockList[i-1, j, k] == BlockType.None)
                                 {
-                                    SetBlock((ushort)(i - 1), j, k, BlockType.Lava, PlayerTeam.None);
+                                    SetBlock((uint)(i - 1), j, k, BlockType.Lava, PlayerTeam.None);
                                     flowSleep[i - 1, j, k] = true;
                                 }
                                 if (k > 0 && blockList[i, j, k-1] == BlockType.None)
                                 {
-                                    SetBlock(i, j, (ushort)(k - 1), BlockType.Lava, PlayerTeam.None);
+                                    SetBlock(i, j, (uint)(k - 1), BlockType.Lava, PlayerTeam.None);
                                     flowSleep[i, j, k - 1] = true;
                                 }
                                 if ((int)i < MAPSIZE - 1 && blockList[i + 1, j, k] == BlockType.None)
                                 {
-                                    SetBlock((ushort)(i + 1), j, k, BlockType.Lava, PlayerTeam.None);
+                                    SetBlock((uint)(i + 1), j, k, BlockType.Lava, PlayerTeam.None);
                                     flowSleep[i + 1, j, k] = true;
                                 }
                                 if ((int)k < MAPSIZE - 1 && blockList[i, j, k + 1] == BlockType.None)
                                 {
-                                    SetBlock(i, j, (ushort)(k + 1), BlockType.Lava, PlayerTeam.None);
+                                    SetBlock(i, j, (uint)(k + 1), BlockType.Lava, PlayerTeam.None);
                                     flowSleep[i, j, k + 1] = true;
                                 }
                             }
@@ -1968,9 +1970,9 @@ namespace Infiniminer
 
         public BlockType BlockAtPoint(Vector3 point)
         {
-            ushort x = (ushort)point.X;
-            ushort y = (ushort)point.Y;
-            ushort z = (ushort)point.Z;
+            uint x = (uint)point.X;
+            uint y = (uint)point.Y;
+            uint z = (uint)point.Z;
             if (x <= 0 || y <= 0 || z <= 0 || (int)x >= MAPSIZE - 1 || (int)y >= MAPSIZE - 1 || (int)z >= MAPSIZE - 1)
                 return BlockType.None;
             return blockList[x, y, z];
@@ -2004,9 +2006,9 @@ namespace Infiniminer
             Vector3 buildPoint = Vector3.Zero;
             if (!RayCollision(playerPosition, playerHeading, 2, 10, ref hitPoint, ref buildPoint))
                 return;
-            ushort x = (ushort)hitPoint.X;
-            ushort y = (ushort)hitPoint.Y;
-            ushort z = (ushort)hitPoint.Z;
+            uint x = (uint)hitPoint.X;
+            uint y = (uint)hitPoint.Y;
+            uint z = (uint)hitPoint.Z;
 
             // Figure out what the result is.
             bool removeBlock = false;
@@ -2079,7 +2081,7 @@ namespace Infiniminer
             }
         }
 
-        //private bool LocationNearBase(ushort x, ushort y, ushort z)
+        //private bool LocationNearBase(uint x, uint y, uint z)
         //{
         //    for (int i=0; i<MAPSIZE; i++)
         //        for (int j=0; j<MAPSIZE; j++)
@@ -2111,9 +2113,9 @@ namespace Infiniminer
                 actionFailed = true;
 
             // If there's someone there currently, bail.
-            ushort x = (ushort)buildPoint.X;
-            ushort y = (ushort)buildPoint.Y;
-            ushort z = (ushort)buildPoint.Z;
+            uint x = (uint)buildPoint.X;
+            uint y = (uint)buildPoint.Y;
+            uint z = (uint)buildPoint.Z;
             foreach (Player p in playerList.Values)
             {
                 if ((int)p.Position.X == x && (int)p.Position.Z == z && ((int)p.Position.Y == y || (int)p.Position.Y - 1 == y))
@@ -2129,7 +2131,7 @@ namespace Infiniminer
             //    actionFailed = true;
 
             // If it's lava, don't let them build off of lava.
-            if (blockList[(ushort)hitPoint.X, (ushort)hitPoint.Y, (ushort)hitPoint.Z] == BlockType.Lava)
+            if (blockList[(uint)hitPoint.X, (uint)hitPoint.Y, (uint)hitPoint.Z] == BlockType.Lava)
                 actionFailed = true;
 
             if (actionFailed)
@@ -2165,9 +2167,9 @@ namespace Infiniminer
             Vector3 buildPoint = Vector3.Zero;
             if (!RayCollision(playerPosition, playerHeading, 6, 25, ref hitPoint, ref buildPoint))
                 actionFailed = true;
-            ushort x = (ushort)hitPoint.X;
-            ushort y = (ushort)hitPoint.Y;
-            ushort z = (ushort)hitPoint.Z;
+            uint x = (uint)hitPoint.X;
+            uint y = (uint)hitPoint.Y;
+            uint z = (uint)hitPoint.Z;
 
             // If this is another team's block, bail.
             if (blockCreatorTeam[x, y, z] != player.Team)
@@ -2223,9 +2225,9 @@ namespace Infiniminer
             Vector3 buildPoint = Vector3.Zero;
             if (!RayCollision(playerPosition, playerHeading, 4, 25, ref hitPoint, ref buildPoint))
                 return;
-            ushort x = (ushort)hitPoint.X;
-            ushort y = (ushort)hitPoint.Y;
-            ushort z = (ushort)hitPoint.Z;
+            uint x = (uint)hitPoint.X;
+            uint y = (uint)hitPoint.Y;
+            uint z = (uint)hitPoint.Z;
 
             if (blockList[x, y, z] == BlockType.Dirt)
             {
@@ -2239,7 +2241,7 @@ namespace Infiniminer
             }
         }
 
-        public void ExplosionEffectAtPoint(int x, int y, int z)
+        public void ExplosionEffectAtPoint(uint x, uint y, uint z)
         {
             // Send off the explosion to clients.
             NetBuffer msgBuffer = netServer.CreateBuffer();
@@ -2251,10 +2253,10 @@ namespace Infiniminer
             //Or not, there's no dedicated function for this effect >:(
         }
 
-        public void DetonateAtPoint(int x, int y, int z)
+        public void DetonateAtPoint(uint x, uint y, uint z)
         {
             // Remove the block that is detonating.
-            SetBlock((ushort)(x), (ushort)(y), (ushort)(z), BlockType.None, PlayerTeam.None);
+            SetBlock((uint)(x), (uint)(y), (uint)(z), BlockType.None, PlayerTeam.None);
 
             // Remove this from any explosive lists it may be in.
             foreach (Player p in playerList.Values)
@@ -2273,7 +2275,7 @@ namespace Infiniminer
 
                             // Chain reactions!
                             if (blockList[x + dx, y + dy, z + dz] == BlockType.Explosive)
-                                DetonateAtPoint(x + dx, y + dy, z + dz);
+                                DetonateAtPoint((uint)x + (uint)dx, (uint)y + (uint)dy, (uint)z + (uint)dz);
 
                             // Detonation of normal blocks.
                             bool destroyBlock = false;
@@ -2297,7 +2299,7 @@ namespace Infiniminer
                                     break;
                             }
                             if (destroyBlock)
-                                SetBlock((ushort)(x + dx), (ushort)(y + dy), (ushort)(z + dz), BlockType.None, PlayerTeam.None);
+                                SetBlock((uint)(x + dx), (uint)(y + dy), (uint)(z + dz), BlockType.None, PlayerTeam.None);
                         }
             }
             else
@@ -2318,8 +2320,11 @@ namespace Infiniminer
 
                                 // Chain reactions!
                                 if (blockList[x + dx, y + dy, z + dz] == BlockType.Explosive)
-                                    DetonateAtPoint(x + dx, y + dy, z + dz);
+                                {
 
+
+                                    DetonateAtPoint(x + (uint)dx, y + (uint)dy, z + (uint)dz);
+                                }
                                 // Detonation of normal blocks.
                                 bool destroyBlock = false;
                                 switch (blockList[x + dx, y + dy, z + dz])
@@ -2342,7 +2347,7 @@ namespace Infiniminer
                                         break;
                                 }
                                 if (destroyBlock)
-                                    SetBlock((ushort)(x + dx), (ushort)(y + dy), (ushort)(z + dz), BlockType.None, PlayerTeam.None);
+                                    SetBlock((uint)(x + dx), (uint)(y + dy), (uint)(z + dz), BlockType.None, PlayerTeam.None);
                             }
                         }
             }
@@ -2354,9 +2359,9 @@ namespace Infiniminer
             while (player.ExplosiveList.Count > 0)
             {
                 Vector3 blockPos = player.ExplosiveList[0];
-                ushort x = (ushort)blockPos.X;
-                ushort y = (ushort)blockPos.Y;
-                ushort z = (ushort)blockPos.Z;
+                uint x = (uint)blockPos.X;
+                uint y = (uint)blockPos.Y;
+                uint z = (uint)blockPos.Z;
 
                 if (blockList[x, y, z] != BlockType.Explosive)
                     player.ExplosiveList.RemoveAt(0);
@@ -2554,7 +2559,7 @@ namespace Infiniminer
             else
                 msgBuffer.Write(player.UsingTool);
 
-            msgBuffer.Write((ushort)player.Score / 100);
+            msgBuffer.Write((uint)player.Score / 100);
 
             foreach (NetConnection netConn in playerList.Keys)
                 if (netConn.Status == NetConnectionStatus.Connected)
@@ -2732,30 +2737,94 @@ namespace Infiniminer
         }
 
         public void RunUpdateThread()
+{
+    if (!updated)
+    {
+        Dictionary<string, string> postDict = new Dictionary<string, string>();
+        postDict["name"] = varGetS("name");
+        postDict["game"] = "INFINIMINER";
+        postDict["player_count"] = "" + playerList.Keys.Count;
+        postDict["player_capacity"] = "" + varGetI("maxplayers");
+        postDict["extra"] = GetExtraInfo();
+
+        try
         {
-            if (!updated)
+            // Use WebRequest to make the GET request
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+            WebRequest getRequest = WebRequest.Create("https://httpbin.org/ip");
+            getRequest.Method = "GET";
+            
+            // Get the response and read the data
+            using (WebResponse getResponse = getRequest.GetResponse())
+            using (Stream dataStream = getResponse.GetResponseStream())
+            using (StreamReader reader = new StreamReader(dataStream))
             {
-                Dictionary<string, string> postDict = new Dictionary<string, string>();
-                postDict["name"] = varGetS("name");
-                postDict["game"] = "INFINIMINER";
-                postDict["player_count"] = "" + playerList.Keys.Count;
-                postDict["player_capacity"] = "" + varGetI("maxplayers");
-                postDict["extra"] = GetExtraInfo();
+                string responseFromServer = reader.ReadToEnd();
 
-                lastServerListUpdate = DateTime.Now;
-
-                try
-                {
-                    HttpRequest.Post("http://apps.keithholman.net/post", postDict);
-                    ConsoleWrite("PUBLICLIST: UPDATING SERVER LISTING");
-                }
-                catch (Exception)
-                {
-                    ConsoleWrite("PUBLICLIST: ERROR CONTACTING SERVER");
-                }
-
-                updated = true;
+                // Parse the response using JsonConvert.DeserializeObject
+                object jsonData = Newtonsoft.Json.JsonConvert.DeserializeObject(responseFromServer);
+                string publicIPv4 = (string)((Newtonsoft.Json.Linq.JObject)jsonData)["origin"];
+                Console.WriteLine("Public IPv4: " + publicIPv4);
             }
+
+            lastServerListUpdate = DateTime.Now;
+
+            try
+            {
+                // Use WebRequest to make the POST request
+                WebRequest postRequest = WebRequest.Create("https://infiniminer.abhidjt.com/post.php");
+                postRequest.Method = "POST";
+                postRequest.ContentType = "application/x-www-form-urlencoded";
+
+                // Convert post data to byte array
+                StringBuilder postDataBuilder = new StringBuilder();
+
+                foreach (var kvp in postDict)
+                {
+                    if (postDataBuilder.Length > 0)
+                        postDataBuilder.Append("&");
+
+                    postDataBuilder.Append(Uri.EscapeDataString(kvp.Key));
+                    postDataBuilder.Append("=");
+                    postDataBuilder.Append(Uri.EscapeDataString(kvp.Value));
+                }
+
+                string postData = postDataBuilder.ToString();
+                byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(postData);
+                
+                // Set content length
+                postRequest.ContentLength = byteArray.Length;
+
+                // Write data to the request stream
+                using (Stream dataStream = postRequest.GetRequestStream())
+                {
+                    dataStream.Write(byteArray, 0, byteArray.Length);
+                }
+
+                // Get the response
+                using (WebResponse postResponse = postRequest.GetResponse())
+                using (Stream postDataStream = postResponse.GetResponseStream())
+                using (StreamReader postReader = new StreamReader(postDataStream))
+                {
+                    string responseFromServer = postReader.ReadToEnd();
+                    Console.WriteLine("Server Response: " + responseFromServer);
+                }
+
+                Console.WriteLine("PUBLICLIST: UPDATING SERVER LISTING");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception: " + ex.Message);
+                Console.WriteLine("PUBLICLIST: ERROR CONTACTING SERVER");
+            }
+
+            updated = true;
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Exception: " + ex.Message);
+        }
+    }
+}
     }
 }

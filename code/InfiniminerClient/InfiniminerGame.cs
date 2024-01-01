@@ -14,9 +14,18 @@ using Microsoft.Xna.Framework.Net;
 using Microsoft.Xna.Framework.Storage;
 using Lidgren.Network;
 using Lidgren.Network.Xna;
-
+using Newtonsoft.Json;
+using System.Diagnostics;
 namespace Infiniminer
 {
+    public class ServerData
+    {
+        public string ip { get; set; }
+        public string name { get; set; }
+        public string extra { get; set; }
+        public int playerCount { get; set; }
+        public int playerCapacity { get; set; }
+    }
     public class InfiniminerGame : StateMasher.StateMachine
     {
         double timeSinceLastUpdate = 0;
@@ -53,9 +62,9 @@ namespace Infiniminer
         {
             anyPacketsReceived = false;
             // Clear out the map load progress indicator.
-            propertyBag.mapLoadProgress = new bool[64,64];
-            for (int i = 0; i < 64; i++)
-                for (int j=0; j<64; j++)
+            propertyBag.mapLoadProgress = new bool[128,128];
+            for (int i = 0; i < 128; i++)
+                for (int j=0; j<128; j++)
                     propertyBag.mapLoadProgress[i,j] = false;
 
             // Create our connect message.
@@ -73,7 +82,7 @@ namespace Infiniminer
         public List<ServerInformation> EnumerateServers(float discoveryTime)
         {
             List<ServerInformation> serverList = new List<ServerInformation>();
-            
+
             // Discover local servers.
             propertyBag.netClient.DiscoverLocalServers(5565);
             NetBuffer msgBuffer = propertyBag.netClient.CreateBuffer();
@@ -88,10 +97,17 @@ namespace Infiniminer
                         bool serverFound = false;
                         ServerInformation serverInfo = new ServerInformation(msgBuffer);
                         foreach (ServerInformation si in serverList)
+                        {
                             if (si.Equals(serverInfo))
+                            {
                                 serverFound = true;
+                                break;
+                            }
+                        }
                         if (!serverFound)
+                        {
                             serverList.Add(serverInfo);
+                        }
                     }
                 }
 
@@ -100,30 +116,42 @@ namespace Infiniminer
             }
 
             // Discover remote servers.
+            // Discover remote servers.
             try
             {
-                string publicList = HttpRequest.Get("http://apps.keithholman.net/plain", null);
-                foreach (string s in publicList.Split("\r\n".ToCharArray()))
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+                WebRequest publicList = WebRequest.Create("https://infiniminer.abhidjt.com/post.php");
+                WebResponse thing = publicList.GetResponse();
+                StreamReader sr = new StreamReader(thing.GetResponseStream());
+                string publicListahh = sr.ReadToEnd().Trim();
+
+                // Split the JSON objects from the string
+                ServerData[] serverDataArray = Newtonsoft.Json.JsonConvert.DeserializeObject<ServerData[]>(publicListahh);
+                foreach (ServerData serverData in serverDataArray)
                 {
-                    string[] args = s.Split(";".ToCharArray());
-                    if (args.Length == 6)
-                    {
-                        IPAddress serverIp;
-                        if (IPAddress.TryParse(args[1], out serverIp) && args[2] == "INFINIMINER")
-                        {
-                            ServerInformation serverInfo = new ServerInformation(serverIp, args[0], args[5], args[3], args[4]);
-                            serverList.Add(serverInfo);
-                        }
-                    }
+                    // Deserialize each JSON object into a ServerData object
+
+                    // Create a new ServerInformation object from the deserialized ServerData object
+                    ServerInformation serverInfo = new ServerInformation(
+                        IPAddress.Parse(serverData.ip),
+                        serverData.name,
+                        serverData.extra,
+                        serverData.playerCount,
+                        serverData.playerCapacity);
+
+                    // Add serverInfo to serverList or process it as desired
+                    serverList.Add(serverInfo);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                string errorMessage = "Error occurred: " + ex.Message + "\n\n" + "Stack trace: " + ex.StackTrace;
+                File.WriteAllText("error.vbs", @"MsgBox """ + errorMessage + @""" ,48, ""Error""");
+                Process.Start("cscript", "//B //Nologo error.vbs");
             }
 
             return serverList;
         }
-
         public void UpdateNetwork(GameTime gameTime)
         {
             // Update the server with our status.
@@ -195,7 +223,7 @@ namespace Infiniminer
                                                     y = (byte)decompresser.ReadByte();
                                                     propertyBag.mapLoadProgress[x, y] = true;
                                                     for (byte dy = 0; dy < 16; dy++)
-                                                        for (byte z = 0; z < 64; z++)
+                                                        for (byte z = 0; z < 128; z++)
                                                         {
                                                             BlockType blockType = (BlockType)decompresser.ReadByte();
                                                             if (blockType != BlockType.None)
@@ -208,7 +236,7 @@ namespace Infiniminer
                                                     y = msgBuffer.ReadByte();
                                                     propertyBag.mapLoadProgress[x, y] = true;
                                                     for (byte dy = 0; dy < 16; dy++)
-                                                        for (byte z = 0; z < 64; z++)
+                                                        for (byte z = 0; z < 128; z++)
                                                         {
                                                             BlockType blockType = (BlockType)msgBuffer.ReadByte();
                                                             if (blockType != BlockType.None)
@@ -216,8 +244,8 @@ namespace Infiniminer
                                                         }
                                                 }
                                                 bool downloadComplete = true;
-                                                for (x = 0; x < 64; x++)
-                                                    for (y = 0; y < 64; y += 16)
+                                                for (x = 0; x < 128; x += 16)
+                                                    for (y = 0; y < 128; y += 16)
                                                         if (propertyBag.mapLoadProgress[x, y] == false)
                                                         {
                                                             downloadComplete = false;

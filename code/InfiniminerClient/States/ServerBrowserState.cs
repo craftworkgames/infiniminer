@@ -82,7 +82,7 @@ namespace Infiniminer.States
                 {
                     int textWidth = (int)(uiFont.MeasureString(server.GetServerDesc()).X);
                     descWidths.Add(textWidth+30);
-                    spriteBatch.DrawString(uiFont, server.GetServerDesc(), new Vector2(_SM.GraphicsDevice.Viewport.Width / 2 - textWidth / 2, drawRect.Y + drawY), !server.lanServer && server.numPlayers == server.maxPlayers ? new Color(0.7f, 0.7f, 0.7f) : Color.White);
+                    spriteBatch.DrawString(uiFont, server.GetServerDesc(), new Vector2(_SM.GraphicsDevice.Viewport.Width / 2 - textWidth / 2, drawRect.Y + drawY), !server.LanServer && server.NumPlayers == server.MaxPlayers ? new Color(0.7f, 0.7f, 0.7f) : Color.White);
                     drawY += 25;
                 }
             }
@@ -192,8 +192,8 @@ namespace Infiniminer.States
                     int distanceFromCenter = Math.Abs(_SM.GraphicsDevice.Viewport.Width / 2 - x);
                     if (distanceFromCenter < descWidths[serverIndex] / 2)
                     {
-                        (_SM as InfiniminerGame).propertyBag.serverName = serverList[serverIndex].serverName;
-                        (_SM as InfiniminerGame).JoinGame(serverList[serverIndex].ipEndPoint);
+                        (_SM as InfiniminerGame).propertyBag.serverName = serverList[serverIndex].ServerName;
+                        (_SM as InfiniminerGame).JoinGame(serverList[serverIndex].IpEndPoint);
                         nextState = "Infiniminer.States.LoadingState";
                         _P.PlaySound(InfiniminerSound.ClickHigh);
                     }

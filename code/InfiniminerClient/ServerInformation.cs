@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Net;
@@ -8,45 +8,52 @@ namespace Infiniminer
 {
     public class ServerInformation
     {
-        public IPEndPoint ipEndPoint;
-        public string serverName;
-        public string serverExtra;
-        public string numPlayers;
-        public string maxPlayers;
-        public bool lanServer;
+        public IPEndPoint IpEndPoint { get; private set; }
+        public string ServerName { get; private set; }
+        public string ServerExtra { get; private set; }
+        public int NumPlayers { get; private set; }
+        public int MaxPlayers { get; private set; }
+        public bool LanServer { get; private set; }
 
         public ServerInformation(NetBuffer netBuffer)
         {
-            ipEndPoint = netBuffer.ReadIPEndPoint();
-            serverName = ipEndPoint.Address.ToString();
-            lanServer = true;
+            if (netBuffer != null)
+            {
+                IpEndPoint = netBuffer.ReadIPEndPoint();
+                if (IpEndPoint != null)
+                {
+                    ServerName = IpEndPoint.Address.ToString();
+                    LanServer = true;
+                }
+            }
         }
 
-        public ServerInformation(IPAddress ip, string name, string extra, string numPlayers, string maxPlayers)
+        public ServerInformation(IPAddress ip, string name, string extra, int numPlayers, int maxPlayers)
         {
-            ipEndPoint = new IPEndPoint(ip, 5565);
-            serverName = name;
-            serverExtra = extra;
-            this.numPlayers = numPlayers;
-            this.maxPlayers = maxPlayers;
-            lanServer = false;
+            IpEndPoint = new IPEndPoint(ip, 5565);
+            ServerName = name;
+            ServerExtra = extra;
+            NumPlayers = numPlayers;
+            MaxPlayers = maxPlayers;
+            LanServer = false;
         }
+
 
         public string GetServerDesc()
         {
             string serverDesc = "";
 
-            if (lanServer)
+            if (LanServer)
             {
-                serverDesc = serverName.Trim() + " ( LAN SERVER )";
+                serverDesc = ServerName.Trim() + " ( LAN SERVER )";
             }
             else
             {
-                serverDesc = serverName.Trim() + " ( " + numPlayers.Trim() + " / " + maxPlayers.Trim() + " )";
-                if (serverExtra.Trim() != "")
-                    serverDesc += " - " + serverExtra.Trim();
+                serverDesc = ServerName.Trim() + " ( " + NumPlayers + " / " + MaxPlayers + " )";
+                if (ServerExtra.Trim() != "")
+                    serverDesc += " - " + ServerExtra.Trim();
             }
-            
+
             return serverDesc;
         }
 
@@ -60,7 +67,7 @@ namespace Infiniminer
 
             ServerInformation serverInfo = obj as ServerInformation;
 
-            if (!ipEndPoint.Equals(serverInfo.ipEndPoint))
+            if (!IpEndPoint.Equals(serverInfo.IpEndPoint))
                 return false;
 
             return true;

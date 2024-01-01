@@ -1,0 +1,1 @@
+C:\infiniminer_src\infiniminer\code\InfiniminerClient\Content\obj\x86\Debug\ResolveAssemblyReference.cache
